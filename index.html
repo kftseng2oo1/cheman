@@ -835,17 +835,19 @@ function drawCompass(){
   //        再 -deviceHeading 反向追蹤。
   // 但實測結果差了 +90°，故補正為 -deviceHeading + 0（不加 baseRot），
   // 即底盤旋轉 = -deviceHeading * π/180，Canvas 的 0°(東) 不需再修正。
-  // 使用校準後的方位角驅動底盤旋轉
+  // 底盤旋轉邏輯：
+  // Canvas 預設 0°=右方（東/震），需要 -π/2 讓 0°=上方（北/坎）
+  // 再加 -calHeading 讓底盤隨裝置反向旋轉，保持北方朝上
   const calHeading = getCalibratedHeading();
   const headingRot = calHeading !== null ? (-calHeading * Math.PI / 180) : 0;
-  const rot = headingRot; // 直接用，不加 baseRot
+  const rot = -Math.PI / 2 + headingRot;
 
   ctx.save();
   ctx.translate(CX,CY);
   ctx.rotate(rot);
 
   // ── 五行色扇形（deg 為地理角度，北=0°順時針）
-  // 底盤 rot 無 baseRot，所以元素角度需 -90° 讓北=畫面上
+  // rot 已含 -π/2，子元素直接用 deg*π/180 即可
   const wxSectors=[
     {name:'火',deg:180,span:72,color:'rgba(232,80,48,0.18)'},
     {name:'木',deg:90, span:72,color:'rgba(56,184,72,0.18)'},
@@ -857,8 +859,8 @@ function drawCompass(){
     {name:'土',deg:315,span:36,color:'rgba(200,152,32,0.14)'},
   ];
   for(const s of wxSectors){
-    const a1 = (s.deg - s.span/2 - 90) * Math.PI / 180;
-    const a2 = (s.deg + s.span/2 - 90) * Math.PI / 180;
+    const a1 = s.deg * Math.PI/180 - s.span/2 * Math.PI/180;
+    const a2 = s.deg * Math.PI/180 + s.span/2 * Math.PI/180;
     ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,R*0.88,a1,a2);ctx.closePath();
     ctx.fillStyle=s.color;ctx.fill();
   }
@@ -866,8 +868,8 @@ function drawCompass(){
   // ── 吉門扇形弧帶（外環）
   for(const ji of jiFangList){
     if(ji.jiRank<0) continue;
-    const a1 = (ji.deg - 18 - 90) * Math.PI / 180;
-    const a2 = (ji.deg + 18 - 90) * Math.PI / 180;
+    const a1 = ji.deg * Math.PI/180 - 18*Math.PI/180;
+    const a2 = ji.deg * Math.PI/180 + 18*Math.PI/180;
     ctx.beginPath();ctx.arc(0,0,R*0.86,a1,a2);ctx.arc(0,0,R*0.72,a2,a1,true);ctx.closePath();
     ctx.globalAlpha=ji.isKong?0.2:0.5-ji.jiRank*0.08;
     ctx.fillStyle=ji.color;ctx.fill();
@@ -876,8 +878,8 @@ function drawCompass(){
 
   // ── 刻度環（每5度一格）
   for(let deg=0;deg<360;deg+=5){
-    const a = (deg - 90) * Math.PI / 180;
-    const isMajor=deg%45===0;const isMinor=deg%15===0;
+    const a = deg * Math.PI/180;
+    const isMajor=deg%45===0; const isMinor=deg%15===0;
     const inner=isMajor?R*0.88:isMinor?R*0.90:R*0.92;
     const outer=R*0.96;
     ctx.save();
@@ -895,7 +897,7 @@ function drawCompass(){
   ctx.beginPath();ctx.arc(0,0,R*0.70,0,Math.PI*2);
   ctx.strokeStyle='rgba(200,168,74,0.3)';ctx.lineWidth=1;ctx.stroke();
 
-  // ── 八卦方位文字
+  // ── 八卦方位文字（直接用地理角度，rot已含-π/2偏移）
   const dirs=[
     {t:'離',deg:180,color:'#e87050'},
     {t:'坎',deg:0,  color:'#5080e8'},
@@ -907,12 +909,12 @@ function drawCompass(){
     {t:'乾',deg:315,color:'#80a8d0'},
   ];
   for(const d of dirs){
-    const a = (d.deg - 90) * Math.PI / 180;
+    const a = d.deg * Math.PI/180;
     const tr=R*0.80;
     ctx.save();
     ctx.rotate(a);
     ctx.translate(0,-tr);
-    ctx.rotate(-a - rot); // 抵消底盤旋轉讓文字保持正立
+    ctx.rotate(-a - rot); // 抵消底盤旋轉，讓文字正立
     ctx.font=`bold ${R*0.075}px 'Noto Serif TC',serif`;
     ctx.fillStyle=d.color;
     ctx.textAlign='center';ctx.textBaseline='middle';
@@ -922,12 +924,12 @@ function drawCompass(){
 
   // ── 宮位門標籤（中環）
   for(const ji of jiFangList){
-    const a = (ji.deg - 90) * Math.PI / 180;
+    const a = ji.deg * Math.PI/180;
     const tr=R*0.57;
     ctx.save();
     ctx.rotate(a);
     ctx.translate(0,-tr);
-    ctx.rotate(-a - rot); // 文字保持正立
+    ctx.rotate(-a - rot); // 抵消底盤旋轉
     ctx.font=`600 ${R*0.062}px 'Noto Serif TC',serif`;
     ctx.fillStyle=ji.isKong?'rgba(160,80,80,0.7)':ji.color;
     ctx.textAlign='center';ctx.textBaseline='middle';
@@ -951,6 +953,14 @@ function drawCompass(){
   //   = -deviceHeading*π/180 + (targetDeg-90)*π/180
   //   = (targetDeg - deviceHeading - 90)*π/180
   // 箭頭繪製方向：moveTo(0,-arrowLen) 朝上（螢幕-Y），rotate(0)=指向上方
+  // ── 指針（螢幕坐標，不隨底盤旋轉）
+  // rot = -π/2 + (-calHeading * π/180)
+  // 指針螢幕角度 = rot + targetDeg*π/180
+  //              = -π/2 - calHeading*π/180 + targetDeg*π/180
+  //              = (targetDeg - calHeading)*π/180 - π/2
+  // 箭頭 moveTo(0,-arrowLen) 朝上，rotate(0)=指向畫面上方（北），
+  // 所以最終再加 -π/2 讓計算角度從右方基準轉為上方基準。
+  // 合併：rotate((targetDeg - calHeading - 90) * π/180)
   const arrowAngle = calHeading !== null
     ? (targetDeg - calHeading - 90) * Math.PI / 180
     : -Math.PI / 2;
