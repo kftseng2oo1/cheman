@@ -8,89 +8,71 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=Ma+Shan+Zheng&display=swap');
 
 :root {
-  --bg:      #09090f;
-  --surface: #0f0f1a;
-  --panel:   #131320;
-  --panel2:  #17172a;
-  --border:  #222238;
-  --border2: #2e2e50;
-  --gold:    #c8a84a;
-  --gold2:   #e8d080;
-  --gold-dim:#7a6420;
-  --red:     #b83030;
-  --teal:    #18b090;
-  --teal2:   #25d4ac;
-  --blue:    #4a8cc8;
-  --purple:  #8870c8;
-  --text:    #e0d8c8;
-  --text2:   #a0987c;
-  --muted:   #505068;
-  --yang:    #d88040;
-  --yin:     #6090c0;
-  --qi-clr:  #e8b830;
-  --yi-clr:  #7aaccf;
-  --kong-clr:#b03030;
-  --ai-user: #141c2a;
-  --ai-bot:  #0d1520;
+  --bg:#09090f;--surface:#0f0f1a;--panel:#131320;--panel2:#17172a;
+  --border:#222238;--border2:#2e2e50;
+  --gold:#c8a84a;--gold2:#e8d080;--gold-dim:#7a6420;
+  --red:#b83030;--teal:#18b090;--teal2:#25d4ac;
+  --blue:#4a8cc8;--purple:#8870c8;
+  --text:#e0d8c8;--text2:#a0987c;--muted:#505068;
+  --yang:#d88040;--yin:#6090c0;
+  --qi-clr:#e8b830;--yi-clr:#7aaccf;--kong-clr:#b03030;
+  --ai-user:#141c2a;--ai-bot:#0d1520;
+  /* 五行色 */
+  --wood:#38b848;--fire:#e85030;--earth:#c89820;
+  --metal:#90c0e0;--water:#3060e0;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{scroll-behavior:smooth;}
-body{
-  background:var(--bg);color:var(--text);
-  font-family:'Noto Serif TC',serif;min-height:100vh;
-  background-image:
-    radial-gradient(ellipse 70% 50% at 10% 5%,#141428 0%,transparent 60%),
-    radial-gradient(ellipse 60% 40% at 90% 95%,#0a1520 0%,transparent 60%);
-}
+body{background:var(--bg);color:var(--text);font-family:'Noto Serif TC',serif;min-height:100vh;
+  background-image:radial-gradient(ellipse 70% 50% at 10% 5%,#141428 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 95%,#0a1520 0%,transparent 60%);}
 
 /* ── Header ── */
-header{text-align:center;padding:26px 16px 16px;border-bottom:1px solid var(--border);position:relative;}
+header{text-align:center;padding:22px 16px 14px;border-bottom:1px solid var(--border);position:relative;}
 .hd{position:absolute;top:0;left:50%;transform:translateX(-50%);width:200px;height:2px;
   background:linear-gradient(90deg,transparent,var(--gold),transparent);}
-h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(22px,5.5vw,36px);color:var(--gold);
+h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--gold);
   letter-spacing:.28em;text-shadow:0 0 30px rgba(200,168,74,.35),0 2px 4px rgba(0,0,0,.8);}
-.hsub{font-size:11px;color:var(--muted);letter-spacing:.18em;margin-top:5px;}
+.hsub{font-size:11px;color:var(--muted);letter-spacing:.16em;margin-top:4px;}
 
 /* ── Layout ── */
-.wrap{max-width:1060px;margin:0 auto;padding:18px 14px 40px;display:grid;grid-template-columns:1fr;gap:16px;}
-@media(min-width:740px){
+.wrap{max-width:1060px;margin:0 auto;padding:16px 14px 40px;
+  display:grid;grid-template-columns:1fr;gap:14px;}
+@media(min-width:760px){
   .wrap{grid-template-columns:400px 1fr;align-items:start;}
   .col-r{grid-column:2;}
 }
 
 /* ── Card ── */
 .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-.ch{display:flex;align-items:center;gap:8px;padding:11px 15px;border-bottom:1px solid var(--border);background:var(--panel2);}
+.ch{display:flex;align-items:center;gap:8px;padding:10px 15px;
+  border-bottom:1px solid var(--border);background:var(--panel2);}
 .ch-icon{font-size:14px;}
 .ch-title{font-size:11px;letter-spacing:.12em;color:var(--text2);text-transform:uppercase;font-weight:600;}
 .ch-tag{margin-left:auto;font-size:9px;color:var(--muted);}
-.cb{padding:14px 16px;}
+.cb{padding:13px 15px;}
 
 /* ── Form ── */
-.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:9px;margin-bottom:11px;}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-bottom:10px;}
 .field label{display:block;font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;text-transform:uppercase;}
-.field select,.field input[type=number]{
-  width:100%;background:var(--panel2);border:1px solid var(--border2);color:var(--text);
-  padding:7px 9px;border-radius:7px;font-family:'Noto Serif TC',serif;font-size:13px;
-  outline:none;transition:border-color .2s,box-shadow .2s;appearance:none;
-}
+.field select,.field input[type=number]{width:100%;background:var(--panel2);border:1px solid var(--border2);
+  color:var(--text);padding:7px 9px;border-radius:7px;font-family:'Noto Serif TC',serif;font-size:13px;
+  outline:none;transition:border-color .2s,box-shadow .2s;appearance:none;}
 .field select:focus,.field input:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(200,168,74,.12);}
-.qwrap{margin-bottom:11px;}
+.qwrap{margin-bottom:10px;}
 .qwrap label{display:block;font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:5px;text-transform:uppercase;}
-.qwrap textarea{
-  width:100%;background:var(--panel2);border:1px solid var(--border2);color:var(--text);
-  padding:10px 12px;border-radius:8px;font-family:'Noto Serif TC',serif;font-size:14px;
-  resize:vertical;min-height:68px;max-height:140px;outline:none;line-height:1.65;
-  transition:border-color .2s,box-shadow .2s;
-}
+.qwrap textarea{width:100%;background:var(--panel2);border:1px solid var(--border2);color:var(--text);
+  padding:9px 12px;border-radius:8px;font-family:'Noto Serif TC',serif;font-size:14px;
+  resize:vertical;min-height:64px;max-height:130px;outline:none;line-height:1.6;
+  transition:border-color .2s,box-shadow .2s;}
 .qwrap textarea::placeholder{color:var(--muted);font-size:13px;}
 .qwrap textarea:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(200,168,74,.12);}
-.qtags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:11px;}
-.qtag{font-size:11px;padding:4px 10px;border:1px solid var(--border2);border-radius:20px;
+.qtags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+.qtag{font-size:11px;padding:3px 9px;border:1px solid var(--border2);border-radius:20px;
   color:var(--text2);cursor:pointer;background:transparent;transition:all .18s;font-family:'Noto Serif TC',serif;}
 .qtag:hover{border-color:var(--gold);color:var(--gold);background:rgba(200,168,74,.08);}
 .brow{display:flex;gap:8px;flex-wrap:wrap;}
-.btn{padding:9px 20px;border:1px solid currentColor;background:transparent;font-family:'Noto Serif TC',serif;
+.btn{padding:8px 18px;border:1px solid currentColor;background:transparent;font-family:'Noto Serif TC',serif;
   font-size:13px;letter-spacing:.08em;border-radius:7px;cursor:pointer;transition:all .2s;
   color:var(--gold);display:flex;align-items:center;gap:5px;}
 .btn:hover{background:var(--gold);color:var(--bg);}
@@ -99,22 +81,24 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(22px,5.5vw,36px);color:var(
 .btn.primary{background:var(--gold);color:var(--bg);font-weight:600;}
 .btn.primary:hover{background:var(--gold2);}
 .btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn.compass-btn{color:#90c0e0;border-color:#90c0e0;}
+.btn.compass-btn:hover{background:#90c0e0;color:var(--bg);}
 
 /* ── Info chips ── */
-.igrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:7px;}
+.igrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;}
 .ichip{background:var(--panel2);border:1px solid var(--border);border-radius:7px;padding:7px 10px;}
 .ichip-l{font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
 .ichip-v{font-size:13px;color:var(--gold);font-weight:600;margin-top:2px;}
 .cv-yang{color:var(--yang);}.cv-yin{color:var(--yin);}.cv-kong{color:var(--kong-clr);}
 
 /* ── Board ── */
-.bwrap{padding:13px;}
+.bwrap{padding:12px;}
 .board{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
   aspect-ratio:1/1;gap:3px;background:var(--border);
   border:1.5px solid var(--gold-dim);border-radius:9px;overflow:hidden;
   box-shadow:0 0 40px rgba(200,168,74,.1),inset 0 0 40px rgba(0,0,0,.5);}
 .cell{background:var(--surface);display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:1px;padding:4px 3px 16px;position:relative;overflow:hidden;transition:background .2s;}
+  justify-content:center;gap:1px;padding:3px 3px 15px;position:relative;overflow:hidden;transition:background .2s;}
 .cell:hover{background:#131320;}
 .cell[data-p="5"]{background:#0b0b15;}
 .cell.zf{background:#161408;border:1px solid rgba(200,168,74,.25);}
@@ -123,150 +107,163 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(22px,5.5vw,36px);color:var(
 .cell.kong{background:#140808;border:1px solid rgba(176,48,48,.2);}
 .pn{position:absolute;top:3px;left:5px;font-size:8px;color:var(--muted);}
 .pd{position:absolute;top:3px;right:4px;font-size:7px;color:var(--muted);letter-spacing:0;}
-.cg{font-size:clamp(9px,2vw,12px);color:var(--purple);font-weight:600;}
-.cs{font-size:clamp(10px,2.2vw,13px);color:#e8b840;font-weight:700;}
-.cd{font-size:clamp(9px,2vw,12px);color:#50c888;font-weight:600;}
-.ce{font-size:clamp(9px,2vw,12px);font-weight:700;}
+.cg{font-size:clamp(8px,1.9vw,12px);color:var(--purple);font-weight:600;}
+.cs{font-size:clamp(9px,2.1vw,13px);color:#e8b840;font-weight:700;}
+.cd{font-size:clamp(8px,1.9vw,12px);color:#50c888;font-weight:600;}
+.ce{font-size:clamp(8px,1.9vw,12px);font-weight:700;}
 .eq{color:var(--qi-clr);}.ey{color:var(--yi-clr);}
-.dv{width:52%;height:1px;background:var(--border2);margin:1px 0;flex-shrink:0;}
+.dv{width:50%;height:1px;background:var(--border2);margin:1px 0;flex-shrink:0;}
 .bc{position:absolute;bottom:2px;font-size:7px;border-radius:3px;padding:0 3px;font-weight:700;}
 .bc-zf{right:3px;color:var(--gold);background:rgba(200,168,74,.18);}
 .bc-zs{left:3px;color:var(--teal2);background:rgba(24,176,144,.15);}
-.bc-ko{right:3px;bottom:12px;color:var(--kong-clr);background:rgba(176,48,48,.15);}
+.bc-ko{right:3px;bottom:11px;color:var(--kong-clr);background:rgba(176,48,48,.15);}
 .cn{font-size:7px;color:var(--muted);letter-spacing:0;}
-.lgrow{display:flex;flex-wrap:wrap;gap:7px;padding:10px 14px;border-top:1px solid var(--border);justify-content:center;}
+.lgrow{display:flex;flex-wrap:wrap;gap:6px;padding:9px 13px;border-top:1px solid var(--border);justify-content:center;}
 .leg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);}
 .ld{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 
 /* ── 指引卡 ── */
-.guide-card{
-  margin:0 16px 16px;
-  border:1px solid var(--border2);border-radius:10px;overflow:hidden;
-  animation:fadeUp .4s ease;
-}
+.guide-card{margin:0 15px 15px;border:1px solid var(--border2);border-radius:10px;overflow:hidden;animation:fadeUp .4s ease;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-.gc-header{
-  padding:14px 16px 12px;
-  display:flex;align-items:flex-start;gap:12px;
-  background:linear-gradient(135deg,#1a1a0e 0%,#12120a 100%);
-  border-bottom:1px solid var(--border2);
-}
+.gc-header{padding:13px 15px 11px;display:flex;align-items:flex-start;gap:11px;
+  background:linear-gradient(135deg,#1a1a0e 0%,#12120a 100%);border-bottom:1px solid var(--border2);}
 .gc-header.yin-header{background:linear-gradient(135deg,#0a121e 0%,#080e18 100%);}
-.gc-badge{
-  font-size:24px;flex-shrink:0;margin-top:2px;
-  filter:drop-shadow(0 0 8px rgba(200,168,74,.5));
-}
-.gc-tone{font-size:16px;color:var(--gold2);font-weight:700;letter-spacing:.05em;line-height:1.4;}
-.gc-format{font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:.08em;}
+.gc-badge{font-size:22px;flex-shrink:0;margin-top:2px;filter:drop-shadow(0 0 8px rgba(200,168,74,.5));}
+.gc-tone{font-size:15px;color:var(--gold2);font-weight:700;letter-spacing:.05em;line-height:1.4;}
+.gc-format{font-size:11px;color:var(--muted);margin-top:2px;letter-spacing:.08em;}
 .gc-body{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);}
-.gc-item{
-  background:var(--panel);padding:12px 14px;
-  display:flex;flex-direction:column;gap:5px;
-}
+.gc-item{background:var(--panel);padding:11px 13px;display:flex;flex-direction:column;gap:4px;}
 .gc-item:last-child:nth-child(odd){grid-column:1/-1;}
-.gc-label{
-  font-size:9px;letter-spacing:.15em;text-transform:uppercase;
-  color:var(--muted);display:flex;align-items:center;gap:5px;
-}
-.gc-label-icon{font-size:13px;}
-.gc-val{font-size:13px;color:var(--text);line-height:1.65;}
+.gc-label{font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:5px;}
+.gc-label-icon{font-size:12px;}
+.gc-val{font-size:13px;color:var(--text);line-height:1.6;}
 .gc-val strong{color:var(--gold);}
-.gc-quote{
-  padding:13px 16px;
-  background:var(--panel2);
-  font-size:13px;color:var(--teal2);
-  font-style:italic;letter-spacing:.05em;line-height:1.7;
-  border-top:1px solid var(--border2);
-  text-align:center;
-}
-
-/* 格局標籤 */
-.gj-tag{
-  display:inline-block;font-size:10px;padding:2px 8px;border-radius:12px;
-  font-weight:700;letter-spacing:.08em;margin-bottom:4px;
-}
+.gc-quote{padding:12px 15px;background:var(--panel2);font-size:13px;color:var(--teal2);
+  font-style:italic;letter-spacing:.05em;line-height:1.7;border-top:1px solid var(--border2);text-align:center;}
+.gj-tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:12px;
+  font-weight:700;letter-spacing:.08em;margin-bottom:4px;}
 .gj-ji{background:rgba(200,168,74,.2);color:var(--gold2);}
 .gj-xiong{background:rgba(176,48,48,.2);color:#e06060;}
 .gj-ping{background:rgba(80,80,120,.3);color:#a0a0d0;}
 
-/* ── 對話區 ── */
-.chat-area{
-  display:flex;flex-direction:column;
-  max-height:360px;min-height:120px;overflow-y:auto;
-  padding:14px 16px;gap:13px;scroll-behavior:smooth;
+/* ── 指南針卡 ── */
+.compass-card{
+  margin:0 15px 15px;
+  border:1px solid var(--border2);
+  border-radius:10px;overflow:hidden;
+  animation:fadeUp .5s ease;
 }
+.compass-card .ch{background:linear-gradient(135deg,#0a1220 0%,#080e18 100%);}
+.compass-body{
+  display:flex;flex-direction:column;align-items:center;
+  padding:16px;gap:14px;
+}
+/* Canvas 包裝 */
+.compass-canvas-wrap{
+  position:relative;
+  width:min(260px,80vw);
+  height:min(260px,80vw);
+}
+#compassCanvas{
+  width:100%;height:100%;
+  border-radius:50%;
+  box-shadow:0 0 30px rgba(144,192,224,.2),0 0 60px rgba(0,0,0,.6);
+}
+
+/* 吉方列表 */
+.ji-list{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+  gap:7px;
+}
+.ji-item{
+  display:flex;align-items:center;gap:9px;
+  background:var(--panel2);border:1px solid var(--border2);
+  border-radius:8px;padding:8px 11px;cursor:pointer;
+  transition:all .2s;
+}
+.ji-item:hover{border-color:var(--gold);background:rgba(200,168,74,.06);}
+.ji-item.active{border-color:var(--gold);box-shadow:0 0 10px rgba(200,168,74,.2);}
+.ji-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;box-shadow:0 0 6px currentColor;}
+.ji-info{flex:1;}
+.ji-dir{font-size:13px;font-weight:700;color:var(--text);}
+.ji-door{font-size:10px;color:var(--muted);margin-top:1px;}
+
+/* 羅盤狀態 */
+.compass-status{
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;color:var(--muted);letter-spacing:.08em;
+}
+.status-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--muted);
+  transition:background .3s;
+}
+.status-dot.active{background:var(--teal2);box-shadow:0 0 6px var(--teal2);animation:pulse 2s infinite;}
+.status-dot.error{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+/* 偏差顯示 */
+.bearing-info{
+  font-size:12px;color:var(--muted);text-align:center;
+  display:flex;gap:14px;justify-content:center;
+}
+.bearing-val{color:var(--gold);font-weight:600;font-size:14px;}
+
+/* ── 對話區 ── */
+.chat-area{display:flex;flex-direction:column;max-height:320px;min-height:100px;overflow-y:auto;
+  padding:13px 15px;gap:12px;scroll-behavior:smooth;}
 .chat-area::-webkit-scrollbar{width:4px;}
 .chat-area::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
-.msg{display:flex;gap:9px;align-items:flex-start;animation:msgIn .3s ease;}
+.msg{display:flex;gap:8px;align-items:flex-start;animation:msgIn .3s ease;}
 @keyframes msgIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
 .msg.user{flex-direction:row-reverse;}
-.av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-size:13px;flex-shrink:0;border:1px solid var(--border2);}
+.av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:12px;flex-shrink:0;border:1px solid var(--border2);}
 .msg.user .av{background:var(--ai-user);}
 .msg.bot  .av{background:var(--panel2);}
-.bubble{max-width:88%;padding:9px 13px;border-radius:11px;font-size:13px;
-  line-height:1.75;border:1px solid var(--border);}
+.bubble{max-width:88%;padding:8px 12px;border-radius:11px;font-size:13px;line-height:1.75;border:1px solid var(--border);}
 .msg.user .bubble{background:var(--ai-user);border-color:var(--border2);border-top-right-radius:3px;}
 .msg.bot  .bubble{background:var(--ai-bot);border-top-left-radius:3px;}
 .bubble strong{color:var(--gold);}
 .bubble em{color:var(--teal2);font-style:normal;}
 .typing-dots{display:flex;gap:4px;align-items:center;padding:4px 0;}
-.typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--muted);
-  animation:db .9s ease-in-out infinite;}
+.typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:db .9s ease-in-out infinite;}
 .typing-dots span:nth-child(2){animation-delay:.15s;}
 .typing-dots span:nth-child(3){animation-delay:.3s;}
 @keyframes db{0%,80%,100%{transform:translateY(0);opacity:.4;}40%{transform:translateY(-5px);opacity:1;}}
 .chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:28px;color:var(--muted);text-align:center;gap:8px;}
-.ce-icon{font-size:32px;opacity:.35;}
+  padding:24px;color:var(--muted);text-align:center;gap:8px;}
+.ce-icon{font-size:30px;opacity:.35;}
 .ce-text{font-size:12px;line-height:1.8;letter-spacing:.05em;}
-
-/* ── 追問 ── */
-.frow{padding:10px 16px 13px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:7px;}
+.frow{padding:10px 15px 12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:7px;}
 .fchips{display:flex;flex-wrap:wrap;gap:5px;}
 .fc{font-size:11px;padding:4px 10px;border:1px solid var(--border2);border-radius:20px;
-  color:var(--text2);cursor:pointer;background:transparent;
-  transition:all .18s;font-family:'Noto Serif TC',serif;}
+  color:var(--text2);cursor:pointer;background:transparent;transition:all .18s;font-family:'Noto Serif TC',serif;}
 .fc:hover{border-color:var(--teal2);color:var(--teal2);background:rgba(24,176,144,.08);}
 .cinrow{display:flex;gap:7px;}
 .cin{flex:1;background:var(--panel2);border:1px solid var(--border2);color:var(--text);
-  padding:8px 12px;border-radius:8px;font-family:'Noto Serif TC',serif;font-size:13px;outline:none;
-  transition:border-color .2s;}
+  padding:8px 12px;border-radius:8px;font-family:'Noto Serif TC',serif;font-size:13px;outline:none;transition:border-color .2s;}
 .cin:focus{border-color:var(--gold);}
 .cin::placeholder{color:var(--muted);}
-.sbtn{padding:8px 13px;background:var(--gold);border:none;border-radius:8px;
+.sbtn{padding:8px 12px;background:var(--gold);border:none;border-radius:8px;
   color:var(--bg);font-size:14px;cursor:pointer;transition:background .2s;display:flex;align-items:center;}
 .sbtn:hover{background:var(--gold2);}
 .sbtn:disabled{opacity:.4;cursor:not-allowed;}
-
 .hidden{display:none!important;}
 </style>
-
-<!-- PWA Meta — auto-injected by PWA 打包神器 -->
-<meta name="application-name" content="奇門遁甲大師">
-<meta name="description" content="">
-<meta name="theme-color" content="#1a73e8">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="奇門遁甲大師">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon.svg">
-<script>if('serviceWorker'in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(r){console.log('[SW] registered:',r.scope)}).catch(function(e){console.warn('[SW] failed:',e)});});}</script>
 </head>
 <body>
 <header>
   <div class="hd"></div>
   <h1>奇門遁甲</h1>
-  <p class="hsub">行動指引 · 問卦諮詢 · AI 戰略解盤</p>
+  <p class="hsub">行動指引 · 問卦諮詢 · 吉方指南針</p>
 </header>
 
 <div class="wrap">
-
   <!-- ═══ 左欄 ═══ -->
   <div>
-
-    <!-- 起盤輸入 -->
+    <!-- 起盤 -->
     <div class="card">
       <div class="ch"><span class="ch-icon">🗓</span><span class="ch-title">起盤設定</span></div>
       <div class="cb">
@@ -310,13 +307,13 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(22px,5.5vw,36px);color:var(
     </div>
 
     <!-- 盤局資訊 -->
-    <div class="card hidden" id="cardInfo" style="margin-top:14px;">
+    <div class="card hidden" id="cardInfo" style="margin-top:13px;">
       <div class="ch"><span class="ch-icon">📊</span><span class="ch-title">盤局資訊</span></div>
       <div class="cb"><div class="igrid" id="igrid"></div></div>
     </div>
 
     <!-- 九宮盤面 -->
-    <div class="card hidden" id="cardBoard" style="margin-top:14px;">
+    <div class="card hidden" id="cardBoard" style="margin-top:13px;">
       <div class="ch"><span class="ch-icon">⬡</span><span class="ch-title">九宮盤面</span></div>
       <div class="bwrap"><div class="board" id="board"></div></div>
       <div class="lgrow">
@@ -334,25 +331,21 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(22px,5.5vw,36px);color:var(
 
   <!-- ═══ 右欄 ═══ -->
   <div class="col-r">
+
+    <!-- AI 指引卡 -->
     <div class="card" style="display:flex;flex-direction:column;">
       <div class="ch">
         <span class="ch-icon">🔮</span>
         <span class="ch-title">行動指引卡</span>
         <span class="ch-tag" id="modelTag"></span>
       </div>
-
-      <!-- 指引卡佔位 -->
       <div id="guideSlot">
         <div class="chat-empty">
           <div class="ce-icon">☯</div>
           <div class="ce-text">輸入你的問題<br>按下「起盤解析」<br>AI 將為你生成專屬行動指引</div>
         </div>
       </div>
-
-      <!-- 對話區（指引卡下方） -->
       <div class="chat-area hidden" id="chatArea"></div>
-
-      <!-- 追問 -->
       <div class="frow hidden" id="frow">
         <div class="fchips" id="fchips"></div>
         <div class="cinrow">
@@ -361,22 +354,68 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(22px,5.5vw,36px);color:var(
         </div>
       </div>
     </div>
-  </div>
 
+    <!-- 吉方指南針 -->
+    <div class="compass-card hidden" id="compassCard" style="margin-top:13px;">
+      <div class="ch">
+        <span class="ch-icon">🧭</span>
+        <span class="ch-title">吉方指南針</span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+          <div class="compass-status">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">等待感應器</span>
+          </div>
+        </div>
+      </div>
+      <div class="compass-body">
+
+        <!-- Canvas 羅盤 -->
+        <div class="compass-canvas-wrap">
+          <canvas id="compassCanvas" width="520" height="520"></canvas>
+        </div>
+
+        <!-- 偏差資訊 -->
+        <div class="bearing-info">
+          <div>
+            <div style="font-size:10px;color:var(--muted)">裝置朝向</div>
+            <div class="bearing-val" id="deviceBearing">—°</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted)">目標吉方</div>
+            <div class="bearing-val" id="targetBearing">—°</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--muted)">偏差角度</div>
+            <div class="bearing-val" id="diffBearing">—°</div>
+          </div>
+        </div>
+
+        <!-- 吉方清單 -->
+        <div class="ji-list" id="jiList"></div>
+
+        <!-- 啟動按鈕 -->
+        <button class="btn compass-btn" id="btnCompass" onclick="startCompass()">
+          🧭 開啟感應器
+        </button>
+
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <script>
 // ═══════════════════════════════════════
 //  CONFIG
 // ═══════════════════════════════════════
-const WORKER_URL = 'https://arcar.kftseng2oo1.workers.dev';
-const MODEL      = 'claude-opus-4-5';
+const WORKER_URL='https://arcar.kftseng2oo1.workers.dev';
+const MODEL='claude-opus-4-5';
 
 // ═══════════════════════════════════════
-//  常數
+//  常數（完整保留 v4 邏輯）
 // ═══════════════════════════════════════
 const TIAN_GAN=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-const DI_ZHI  =['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const DI_ZHI=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
 const J60=[];for(let i=0;i<60;i++)J60.push(TIAN_GAN[i%10]+DI_ZHI[i%12]);
 const PDIR={1:'坎北',2:'坤西南',3:'震東',4:'巽東南',5:'中宮',6:'乾西北',7:'兌西',8:'艮東北',9:'離南'};
 const STEMS9=['戊','己','庚','辛','壬','癸','丁','丙','乙'];
@@ -394,6 +433,30 @@ const BOARD_LO=[4,9,2,3,5,7,8,1,6];
 const ZTP={子:1,丑:8,寅:8,卯:3,辰:4,巳:4,午:9,未:2,申:2,酉:7,戌:6,亥:6};
 const SHI_N=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
 const SHI_S=[0,0,2,2,4,4,6,6,8,8];
+
+// 宮位 → 方位角（正北=0°，順時針）
+// 奇門九宮方位：
+//   9離=南=180°, 1坎=北=0°, 3震=東=90°, 7兌=西=270°
+//   4巽=東南=135°, 8艮=東北=45°, 6乾=西北=315°, 2坤=西南=225°
+const PALACE_DEG={1:0,9:180,3:90,7:270,4:135,8:45,6:315,2:225,5:null};
+
+// 吉門：由好到次好
+const JI_DOORS   =['生門','開門','休門','景門'];
+const XIONG_DOORS=['死門','驚門','傷門','杜門'];
+
+// 五行色
+const WX_COLOR={
+  '木':'#38b848','火':'#e85030','土':'#c89820','金':'#90c0e0','水':'#3060e0'
+};
+// 宮位五行
+const PAL_WX={1:'水',2:'土',3:'木',4:'木',5:'土',6:'金',7:'金',8:'土',9:'火'};
+
+// 門的吉凶色
+const DOOR_COLOR={
+  '生門':'#38b848','開門':'#90c0e0','休門':'#c8a84a','景門':'#d8a060',
+  '死門':'#a03030','驚門':'#a03090','傷門':'#c06020','杜門':'#606090'
+};
+
 const JIEQI=[
   {name:'小寒',m:1,d:6,yang:true,baseJu:4},{name:'大寒',m:1,d:20,yang:true,baseJu:7},
   {name:'立春',m:2,d:4,yang:true,baseJu:8},{name:'雨水',m:2,d:19,yang:true,baseJu:5},
@@ -409,141 +472,8 @@ const JIEQI=[
   {name:'大雪',m:12,d:7,yang:false,baseJu:6},{name:'冬至',m:12,d:22,yang:true,baseJu:1},
 ];
 
-// 格局判斷資料庫（吉/凶/平 + 現代說明）
-const GEJU_DB = {
-  '青龍返首': {lv:'吉', icon:'🐉', note:'突破困境、柳暗花明'},
-  '飛鳥跌穴': {lv:'吉', icon:'🦅', note:'精準落點、一擊即中'},
-  '龍返首':   {lv:'吉', icon:'🐉', note:'回歸正軌、重獲機會'},
-  '虎猖狂':   {lv:'凶', icon:'🐅', note:'小心意外與衝突'},
-  '天網四張': {lv:'凶', icon:'🕸', note:'多重阻礙、暫緩行動'},
-  '五不遇時': {lv:'凶', icon:'⚠', note:'時機未到、靜待為宜'},
-  '伏吟':     {lv:'凶', icon:'😶', note:'原地踏步、進退兩難'},
-  '反吟':     {lv:'凶', icon:'🔄', note:'事倍功半、方向需調整'},
-  '普通盤':   {lv:'平', icon:'☯', note:'平穩局勢、穩紮穩打'},
-};
-
-const DOOR_MEANING = {
-  '休門':'靜養、休息、退守為吉',
-  '生門':'生機蓬勃、求財謀事最佳',
-  '傷門':'競爭激烈、需防口舌是非',
-  '杜門':'封閉隱藏、適合謀略籌備',
-  '景門':'文書、宣傳、外交場合吉',
-  '死門':'終結與重啟、清除舊包袱',
-  '驚門':'震驚變動、謹防突發事件',
-  '開門':'開創新局、出行求財吉利',
-};
-
-const STAR_MEANING = {
-  '蓬星':'開拓、行動力強',
-  '芮星':'穩固、積累能量',
-  '沖星':'衝勁、但需防莽撞',
-  '輔星':'輔助、貴人相助',
-  '禽星':'中央協調、多方斡旋',
-  '心星':'智慧、深思熟慮',
-  '柱星':'穩定支撐、長期佈局',
-  '任星':'承擔責任、默默耕耘',
-  '英星':'光芒四射、展現才華',
-};
-
-const GOD_MEANING = {
-  '值符':'主導優勢，掌握主動',
-  '螣蛇':'變化莫測，謹防欺詐',
-  '太陰':'隱蔽保護，適合暗中運作',
-  '六合':'合作順遂，人際和諧',
-  '白虎':'競爭壓力，防血光意外',
-  '玄武':'陰謀暗流，留意小人',
-  '九地':'穩固根基，深耕佈局',
-  '九天':'飛躍突破，登高望遠',
-};
-
 // ═══════════════════════════════════════
-//  AI System Prompt
-// ═══════════════════════════════════════
-const SYSTEM_PROMPT = `# Role
-你是一位精通「現代行為科學」與「奇門遁甲」的戰略決策顧問。你的任務是將排盤結果轉化為使用者一看就懂的「行動指引卡」。
-
-# 翻譯邏輯（Mapping Logic）
-- 生門 → 主動出擊、創造機會的好時機
-- 休門 → 適合充電、等待時機成熟
-- 開門 → 勇敢開創、出擊首選
-- 死門 → 終結舊事、清除負擔後重啟（禁止說「死」帶來恐懼，要說終結與重生）
-- 景門 → 表達、展示、宣傳自己
-- 傷門 → 行動力強但易起衝突，需謹慎溝通
-- 杜門 → 謀定後動，適合策略籌備
-- 驚門 → 留意變數，不宜輕舉妄動
-- 值符 → 掌握主動權，局勢對你有利
-- 螣蛇 → 情況複雜，防信息失真
-- 太陰 → 低調進行，暗中佈局效果更好
-- 六合 → 借助合作夥伴，人際關係是關鍵
-- 白虎 → 競爭激烈，避免正面衝突
-- 玄武 → 留意背後的隱患或不誠實的人
-- 九地 → 打好基礎，慢工出細活
-- 九天 → 大膽突破，有機會一飛衝天
-- 蓬星 → 積極探索，主動出擊
-- 芮星 → 腳踏實地，積累實力
-- 英星 → 發揮個人魅力，光明正大
-- 心星 → 多思考少衝動，智取勝武
-- 柱星 → 長遠佈局，不急於一時
-- 任星 → 承擔使命，以責任感驅動
-- 沖星 → 行動迅速，但防剛則易折
-- 輔星 → 尋求支援，貴人自來
-- 禽星 → 居中協調，多方整合
-- 三奇（丁丙乙）→ 「奇門特助」降臨，行動特別吉利
-- 六儀（戊己庚辛壬癸）→ 標準能量，按盤中吉凶判斷
-- 旬空宮位 → 該方位/領域的力量暫時缺位，不宜主攻
-
-# 負面格局轉化原則
-- 絕對禁止使用恐嚇性語言
-- 凶門（死門、驚門）→ 轉化為「清理舊事、做好準備」的時機
-- 白虎、玄武 → 轉化為「提高警覺、做好防護」
-- 旬空 → 轉化為「某方面需低調，換個方向更有力」
-- 五不遇時 → 轉化為「這是靜心思考而非行動的時刻」
-
-# Output Format（嚴格輸出 JSON，不得有其他文字）
-{
-  "geju": "格局名稱（若無特殊格局則寫「平穩局勢」）",
-  "geju_level": "吉/凶/平",
-  "tone": "10字以內的能量定調",
-  "timing": "【時】具體建議（1-2句）",
-  "location": "【地】方位建議（直接說東南西北）",
-  "people": "【人】人際關係建議（1-2句）",
-  "object": "【物】穿搭顏色或環境佈置建議",
-  "ai_quote": "一句富有啟發性的戰略金句"
-}`;
-
-// ═══════════════════════════════════════
-//  UI Init
-// ═══════════════════════════════════════
-(function init(){
-  const ms=document.getElementById('inMonth');
-  for(let m=1;m<=12;m++){const o=document.createElement('option');o.value=m;o.text=m+'月';ms.appendChild(o);}
-  ms.addEventListener('change',updDays);
-  document.getElementById('inYear').addEventListener('change',updDays);
-  document.getElementById('modelTag').textContent=MODEL;
-  setNow();
-})();
-function updDays(){
-  const y=+document.getElementById('inYear').value||2025;
-  const m=+document.getElementById('inMonth').value||1;
-  const days=new Date(y,m,0).getDate();
-  const ds=document.getElementById('inDay');const prev=+ds.value||1;
-  ds.innerHTML='';
-  for(let d=1;d<=days;d++){const o=document.createElement('option');o.value=d;o.text=d+'日';ds.appendChild(o);}
-  ds.value=Math.min(prev,days);
-}
-function setNow(){
-  const n=new Date();
-  document.getElementById('inYear').value=n.getFullYear();
-  document.getElementById('inMonth').value=n.getMonth()+1;
-  updDays();
-  document.getElementById('inDay').value=n.getDate();
-  const h=n.getHours();
-  document.getElementById('inHour').value=h<1||h>=23?0:Math.floor((h+1)/2);
-}
-function setQ(q){document.getElementById('userQ').value=q;}
-
-// ═══════════════════════════════════════
-//  排盤邏輯（v2 完整保留）
+//  排盤邏輯（完整 v4）
 // ═══════════════════════════════════════
 function dayGZ(y,m,d){
   const diff=Math.round((new Date(y,m-1,d)-new Date(2000,0,1))/86400000);
@@ -622,7 +552,325 @@ function doBoard(y,m,d,shi){
 }
 
 // ═══════════════════════════════════════
-//  渲染盤面
+//  吉方計算
+// ═══════════════════════════════════════
+function calcJiFang(R){
+  // 收集所有宮位的門，按吉凶排序
+  const result=[];
+  for(const pal of [1,2,3,4,6,7,8,9]){
+    const door=R.hmp[pal];
+    const deg=PALACE_DEG[pal];
+    if(deg===null) continue;
+    const isKong=R.kongPals.has(pal);
+    const jiRank=JI_DOORS.indexOf(door);
+    const xiongRank=XIONG_DOORS.indexOf(door);
+    result.push({pal,door,deg,isKong,jiRank,xiongRank,
+      wx:PAL_WX[pal],color:DOOR_COLOR[door]||'#808080'});
+  }
+  // 吉門優先（非旬空），再按 jiRank 排序
+  result.sort((a,b)=>{
+    const aJi=a.jiRank>=0&&!a.isKong;const bJi=b.jiRank>=0&&!b.isKong;
+    if(aJi&&!bJi)return -1;if(!aJi&&bJi)return 1;
+    if(aJi&&bJi)return a.jiRank-b.jiRank;
+    return a.xiongRank-b.xiongRank;
+  });
+  return result;
+}
+
+// ═══════════════════════════════════════
+//  指南針狀態
+// ═══════════════════════════════════════
+let compassActive=false;
+let deviceHeading=null;   // 裝置朝向（正北=0，順時針）
+let targetDeg=0;          // 目標吉方角度
+let jiFangList=[];        // 吉方清單
+let selectedJiIdx=0;      // 當前選中的吉方
+let rafId=null;
+let compassGranted=false;
+
+function setCompassStatus(state, text){
+  const dot=document.getElementById('statusDot');
+  const txt=document.getElementById('statusText');
+  dot.className='status-dot'+(state==='active'?' active':state==='error'?' error':'');
+  txt.textContent=text;
+}
+
+async function startCompass(){
+  const btn=document.getElementById('btnCompass');
+  // iOS 13+ 需要請求 DeviceOrientationEvent 權限
+  if(typeof DeviceOrientationEvent!=='undefined'
+     && typeof DeviceOrientationEvent.requestPermission==='function'){
+    try{
+      const perm=await DeviceOrientationEvent.requestPermission();
+      if(perm!=='granted'){
+        setCompassStatus('error','感應器權限被拒絕');return;
+      }
+      compassGranted=true;
+    }catch(e){
+      setCompassStatus('error','權限請求失敗：'+e.message);return;
+    }
+  }else{
+    compassGranted=true;
+  }
+  // 註冊事件
+  window.addEventListener('deviceorientationabsolute',onOrientation,true);
+  window.addEventListener('deviceorientation',onOrientation,true);
+  compassActive=true;
+  btn.textContent='🧭 感應器啟動中…';
+  btn.disabled=true;
+  setCompassStatus('active','感應器已啟動');
+  // 開始繪製
+  rafId=requestAnimationFrame(drawCompass);
+}
+
+function onOrientation(e){
+  let heading=null;
+  if(e.webkitCompassHeading!==undefined && e.webkitCompassHeading!==null){
+    // iOS：webkitCompassHeading 直接是正北朝向角
+    heading=e.webkitCompassHeading;
+  } else if(e.absolute && e.alpha!==null){
+    // Android absolute：alpha 是從正北順時針旋轉角
+    heading=(360-e.alpha)%360;
+  } else if(e.alpha!==null){
+    // 非絕對值（模擬器或部分設備）
+    heading=(360-e.alpha)%360;
+  }
+  if(heading!==null){
+    deviceHeading=heading;
+    document.getElementById('deviceBearing').textContent=Math.round(heading)+'°';
+    updateDiffBearing();
+  }
+}
+
+function selectJiFang(idx){
+  selectedJiIdx=idx;
+  targetDeg=jiFangList[idx]?.deg||0;
+  document.getElementById('targetBearing').textContent=Math.round(targetDeg)+'°';
+  updateDiffBearing();
+  // 更新清單高亮
+  document.querySelectorAll('.ji-item').forEach((el,i)=>{
+    el.classList.toggle('active',i===idx);
+  });
+}
+function updateDiffBearing(){
+  if(deviceHeading===null) return;
+  let diff=targetDeg-deviceHeading;
+  diff=((diff+180)%360+360)%360-180; // -180~180
+  document.getElementById('diffBearing').textContent=
+    (diff>=0?'+':'')+Math.round(diff)+'°';
+}
+
+// ═══════════════════════════════════════
+//  Canvas 羅盤繪製
+// ═══════════════════════════════════════
+function drawCompass(){
+  const canvas=document.getElementById('compassCanvas');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height,CX=W/2,CY=H/2,R=W/2-4;
+
+  ctx.clearRect(0,0,W,H);
+
+  // 背景
+  const bgGrad=ctx.createRadialGradient(CX,CY,0,CX,CY,R);
+  bgGrad.addColorStop(0,'#1a1428');
+  bgGrad.addColorStop(0.7,'#0e0c1e');
+  bgGrad.addColorStop(1,'#07060f');
+  ctx.beginPath();ctx.arc(CX,CY,R,0,Math.PI*2);
+  ctx.fillStyle=bgGrad;ctx.fill();
+
+  // ── 旋轉角度：讓正北始終指向畫布頂部
+  const rot=deviceHeading!==null?(-deviceHeading*Math.PI/180):0;
+
+  ctx.save();
+  ctx.translate(CX,CY);
+  ctx.rotate(rot);
+
+  // ── 五行色扇形（背景）
+  const wxSectors=[
+    {name:'火',deg:180,span:72,color:'rgba(232,80,48,0.18)'},  // 南
+    {name:'木',deg:90, span:72,color:'rgba(56,184,72,0.18)'},   // 東
+    {name:'水',deg:0,  span:72,color:'rgba(48,96,224,0.18)'},   // 北
+    {name:'金',deg:270,span:72,color:'rgba(144,192,224,0.18)'}, // 西
+    {name:'土',deg:45, span:36,color:'rgba(200,152,32,0.14)'},  // 東北
+    {name:'土',deg:135,span:36,color:'rgba(200,152,32,0.14)'},  // 東南
+    {name:'土',deg:225,span:36,color:'rgba(200,152,32,0.14)'},  // 西南
+    {name:'土',deg:315,span:36,color:'rgba(200,152,32,0.14)'},  // 西北
+  ];
+  for(const s of wxSectors){
+    const a1=(s.deg-s.span/2-90)*Math.PI/180;
+    const a2=(s.deg+s.span/2-90)*Math.PI/180;
+    ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,R*0.88,a1,a2);ctx.closePath();
+    ctx.fillStyle=s.color;ctx.fill();
+  }
+
+  // ── 吉門扇形弧帶（外環）
+  for(const ji of jiFangList){
+    if(ji.jiRank<0) continue; // 只畫吉門
+    const a1=(ji.deg-18-90)*Math.PI/180;
+    const a2=(ji.deg+18-90)*Math.PI/180;
+    const alpha=ji.isKong?0.18:0.45-ji.jiRank*0.08;
+    ctx.beginPath();ctx.arc(0,0,R*0.86,a1,a2);ctx.arc(0,0,R*0.72,a2,a1,true);ctx.closePath();
+    const c=ji.color;
+    ctx.fillStyle=c.replace('#','rgba(').replace(/([0-9a-f]{2})/gi,(m,p)=>parseInt(p,16)+',')
+      .replace(/,$/,`,${alpha})`); // 近似透明版
+    // 直接用 globalAlpha
+    ctx.globalAlpha=ji.isKong?0.2:0.5-ji.jiRank*0.08;
+    ctx.fillStyle=ji.color;ctx.fill();
+    ctx.globalAlpha=1;
+  }
+
+  // ── 刻度環
+  // 72格（每5度一格，每45度為八卦分隔）
+  for(let deg=0;deg<360;deg+=5){
+    const a=(deg-90)*Math.PI/180;
+    const isMajor=deg%45===0;const isMinor=deg%15===0;
+    const inner=isMajor?R*0.88:isMinor?R*0.90:R*0.92;
+    const outer=R*0.96;
+    ctx.save();
+    ctx.rotate(a);
+    ctx.beginPath();ctx.moveTo(0,-inner);ctx.lineTo(0,-outer);
+    ctx.strokeStyle=isMajor?'rgba(200,168,74,0.9)':isMinor?'rgba(200,168,74,0.5)':'rgba(200,168,74,0.25)';
+    ctx.lineWidth=isMajor?2:0.8;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // ── 外圓框
+  ctx.beginPath();ctx.arc(0,0,R*0.97,0,Math.PI*2);
+  ctx.strokeStyle='rgba(200,168,74,0.6)';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.beginPath();ctx.arc(0,0,R*0.70,0,Math.PI*2);
+  ctx.strokeStyle='rgba(200,168,74,0.3)';ctx.lineWidth=1;ctx.stroke();
+
+  // ── 八卦方位文字
+  const dirs=[
+    {t:'離',sub:'南・火',deg:180,color:'#e87050'},
+    {t:'坎',sub:'北・水',deg:0,  color:'#5080e8'},
+    {t:'震',sub:'東・木',deg:90, color:'#40c858'},
+    {t:'兌',sub:'西・金',deg:270,color:'#90c8e8'},
+    {t:'巽',sub:'東南',  deg:135,color:'#70b840'},
+    {t:'艮',sub:'東北',  deg:45, color:'#5888c8'},
+    {t:'坤',sub:'西南',  deg:225,color:'#c0a030'},
+    {t:'乾',sub:'西北',  deg:315,color:'#80a8d0'},
+  ];
+  for(const d of dirs){
+    const a=(d.deg-90)*Math.PI/180;
+    const tr=R*0.80;
+    ctx.save();
+    ctx.rotate(a);
+    ctx.translate(0,-tr);
+    ctx.rotate(-a); // 文字保持正立
+    ctx.font=`bold ${R*0.075}px 'Noto Serif TC',serif`;
+    ctx.fillStyle=d.color;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(d.t,0,0);
+    ctx.restore();
+  }
+
+  // ── 宮位門標籤（中環）
+  for(const ji of jiFangList){
+    const a=(ji.deg-90)*Math.PI/180;
+    const tr=R*0.57;
+    ctx.save();
+    ctx.rotate(a);
+    ctx.translate(0,-tr);
+    ctx.rotate(-a);
+    // 門名
+    ctx.font=`600 ${R*0.062}px 'Noto Serif TC',serif`;
+    ctx.fillStyle=ji.isKong?'rgba(160,80,80,0.7)':ji.color;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(ji.door.replace('門',''),0,-R*0.03);
+    // 旬空標記
+    if(ji.isKong){
+      ctx.font=`${R*0.045}px serif`;
+      ctx.fillStyle='rgba(176,48,48,0.8)';
+      ctx.fillText('空',0,R*0.055);
+    }
+    ctx.restore();
+  }
+
+  ctx.restore(); // 結束旋轉
+
+  // ── 指針（固定，不隨地球旋轉）
+  // 計算指針需指向的角度（相對於畫面的角度）
+  const arrowAngle=deviceHeading!==null
+    ? (targetDeg-deviceHeading)*Math.PI/180
+    : 0;
+
+  // 指針繪製（指向目標吉方）
+  ctx.save();
+  ctx.translate(CX,CY);
+  ctx.rotate(arrowAngle-Math.PI/2); // 0=右，需要-90°讓0=上
+
+  // 光暈
+  ctx.shadowColor=jiFangList[selectedJiIdx]?.color||'#c8a84a';
+  ctx.shadowBlur=18;
+
+  // 箭頭主體
+  const arrowLen=R*0.38;
+  const arrowW=R*0.04;
+  ctx.beginPath();
+  ctx.moveTo(0,-arrowLen);          // 頂點
+  ctx.lineTo(-arrowW,0);
+  ctx.lineTo(-arrowW*0.4,arrowLen*0.25);
+  ctx.lineTo(arrowW*0.4,arrowLen*0.25);
+  ctx.lineTo(arrowW,0);
+  ctx.closePath();
+  const arrowColor=jiFangList[selectedJiIdx]?.color||'#c8a84a';
+  ctx.fillStyle=arrowColor;
+  ctx.fill();
+
+  // 反向尾部（灰色）
+  ctx.beginPath();
+  ctx.moveTo(0,arrowLen*0.35);
+  ctx.lineTo(-arrowW*0.7,arrowLen*0.12);
+  ctx.lineTo(arrowW*0.7,arrowLen*0.12);
+  ctx.closePath();
+  ctx.fillStyle='rgba(120,120,150,0.6)';
+  ctx.fill();
+
+  ctx.shadowBlur=0;
+  ctx.restore();
+
+  // ── 中心圓
+  ctx.save();ctx.translate(CX,CY);
+  const cGrad=ctx.createRadialGradient(0,0,0,0,0,R*0.12);
+  cGrad.addColorStop(0,'#2a2040');
+  cGrad.addColorStop(1,'#14101e');
+  ctx.beginPath();ctx.arc(0,0,R*0.12,0,Math.PI*2);
+  ctx.fillStyle=cGrad;ctx.fill();
+  ctx.strokeStyle='rgba(200,168,74,0.6)';ctx.lineWidth=1.5;ctx.stroke();
+
+  // 太極小圓
+  const tR=R*0.07;
+  ctx.beginPath();ctx.arc(0,0,tR,0,Math.PI*2);
+  ctx.fillStyle='rgba(240,224,144,0.9)';ctx.fill();
+  ctx.beginPath();
+  ctx.arc(0,0,tR,-Math.PI/2,Math.PI/2);
+  ctx.lineTo(0,tR);ctx.arc(0,tR/2,tR/2,Math.PI/2,-Math.PI/2,true);
+  ctx.arc(0,-tR/2,tR/2,Math.PI/2,-Math.PI/2);ctx.closePath();
+  ctx.fillStyle='rgba(20,14,32,0.95)';ctx.fill();
+  ctx.beginPath();ctx.arc(0,-tR/2,tR/6,0,Math.PI*2);ctx.fillStyle='rgba(240,224,144,0.9)';ctx.fill();
+  ctx.beginPath();ctx.arc(0,tR/2,tR/6,0,Math.PI*2);ctx.fillStyle='rgba(20,14,32,0.95)';ctx.fill();
+  ctx.restore();
+
+  // 無感應器時顯示靜態提示
+  if(!compassActive){
+    ctx.save();ctx.translate(CX,CY);
+    ctx.font=`${R*0.07}px 'Noto Serif TC',serif`;
+    ctx.fillStyle='rgba(160,152,124,0.7)';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('點擊「開啟感應器」',0,-R*0.12);
+    ctx.fillText('開始指引',0,R*0.05);
+    ctx.restore();
+  }
+
+  if(compassActive){
+    rafId=requestAnimationFrame(drawCompass);
+  }
+}
+
+// ═══════════════════════════════════════
+//  UI 渲染
 // ═══════════════════════════════════════
 function renderInfo(R){
   const g=document.getElementById('igrid');
@@ -638,6 +886,7 @@ function renderInfo(R){
     <div class="ichip"><div class="ichip-l">${l}</div>
     <div class="ichip-v ${c||''}">${v}</div></div>`).join('');
 }
+
 function renderBoard(R){
   const bd=document.getElementById('board');bd.innerHTML='';
   BOARD_LO.forEach(p=>{
@@ -660,17 +909,44 @@ function renderBoard(R){
   });
 }
 
+function renderCompass(R){
+  jiFangList=calcJiFang(R);
+  selectedJiIdx=0;
+  targetDeg=jiFangList[0]?.deg||0;
+  document.getElementById('targetBearing').textContent=Math.round(targetDeg)+'°';
+
+  // 吉方清單
+  const listEl=document.getElementById('jiList');
+  listEl.innerHTML=jiFangList.slice(0,6).map((ji,i)=>`
+    <div class="ji-item${i===0?' active':''}" onclick="selectJiFang(${i})">
+      <div class="ji-dot" style="background:${ji.color};color:${ji.color}">　</div>
+      <div class="ji-info">
+        <div class="ji-dir">${PDIR[ji.pal]}${ji.isKong?' ⚠️':''}</div>
+        <div class="ji-door">${ji.door}${ji.isKong?' (旬空)':''}</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted)">${ji.deg}°</div>
+    </div>`).join('');
+
+  document.getElementById('compassCard').classList.remove('hidden');
+  // 初始靜態繪製
+  if(!compassActive) drawCompass();
+}
+
 // ═══════════════════════════════════════
-//  指引卡渲染
+//  指引卡（v4 完整保留）
 // ═══════════════════════════════════════
-function renderGuideCard(json, R){
-  const lv = json.geju_level||'平';
-  const lvTag = lv==='吉'?'gj-ji':lv==='凶'?'gj-xiong':'gj-ping';
-  const gjInfo = GEJU_DB[json.geju]||{lv,icon:'☯',note:''};
-  const isYin = R.dun==='陰遁';
+const GEJU_DB={'青龍返首':{lv:'吉',icon:'🐉',note:'突破困境'},'飛鳥跌穴':{lv:'吉',icon:'🦅',note:'精準落點'},
+  '虎猖狂':{lv:'凶',icon:'🐅',note:'小心衝突'},'天網四張':{lv:'凶',icon:'🕸',note:'多重阻礙'},
+  '五不遇時':{lv:'凶',icon:'⚠',note:'時機未到'},'伏吟':{lv:'凶',icon:'😶',note:'原地踏步'},
+  '反吟':{lv:'凶',icon:'🔄',note:'方向需調整'},'普通盤':{lv:'平',icon:'☯',note:'穩紮穩打'}};
+
+function renderGuideCard(json,R){
+  const lv=json.geju_level||'平';
+  const lvTag=lv==='吉'?'gj-ji':lv==='凶'?'gj-xiong':'gj-ping';
+  const gjInfo=GEJU_DB[json.geju]||{lv,icon:'☯',note:''};
   document.getElementById('guideSlot').innerHTML=`
   <div class="guide-card">
-    <div class="gc-header${isYin?' yin-header':''}">
+    <div class="gc-header${R.dun==='陰遁'?' yin-header':''}">
       <div class="gc-badge">${gjInfo.icon||'☯'}</div>
       <div>
         <span class="gj-tag ${lvTag}">${lv}｜${json.geju}</span>
@@ -701,104 +977,65 @@ function renderGuideCard(json, R){
 }
 
 // ═══════════════════════════════════════
-//  AI 對話
+//  AI
 // ═══════════════════════════════════════
-let chatHist=[];
-let curBoard=null;
+let chatHist=[];let curBoard=null;
 
-// 組合送給 AI 的 User Message（JSON格式完整盤局）
-function buildUserMsg(R, question){
-  // 找值使門落宮的神/星
-  const zsGod  = R.gp[R.zsp]  || '—';
-  const zsStar = R.hp[R.zsp]  || '—';
-  const zsEarth= R.ep[R.zsp]  || '—';
+const SYSTEM_PROMPT=`# Role
+你是一位精通「現代行為科學」與「奇門遁甲」的戰略決策顧問。你的任務是將排盤結果轉化為使用者一看就懂的「行動指引卡」。
 
-  // 找值符宮資訊
-  const zfGod  = R.gp[R.xp]  || '—';
-  const zfStar = R.zfs;
-  const zfDoor = DOOR_BASE[R.xp] || '—';
-  const zfEarth= R.ep[R.xp]  || '—';
+# 翻譯邏輯（Mapping Logic）
+- 生門→主動出擊創造機會 | 休門→充電等待 | 開門→勇敢開創 | 死門→終結重啟
+- 景門→表達展示 | 傷門→行動但防衝突 | 杜門→謀定後動 | 驚門→留意變數
+- 值符→掌握主動 | 螣蛇→防信息失真 | 太陰→低調佈局
+- 六合→借助合作 | 白虎→避免正面衝突 | 玄武→留意背後隱患
+- 九地→打好基礎 | 九天→大膽突破
+- 三奇（丁丙乙）→特助降臨 | 旬空→該方位力量缺位
 
-  // 三奇資訊
-  const qiPals=Object.entries(R.ep).filter(([,s])=>SAN_QI.has(s)).map(([p,s])=>`${s}在${PDIR[p]}`);
+# 負面格局轉化原則
+絕對禁止使用恐嚇性語言。死門=終結重啟；凶神=提高警覺；旬空=低調換方向。
 
-  // 吉方（生門、開門、休門所在宮）
+# Output Format（嚴格輸出 JSON，不得有其他文字）
+{"geju":"格局名稱","geju_level":"吉/凶/平","tone":"10字以內能量定調",
+"timing":"【時】具體建議","location":"【地】方位建議",
+"people":"【人】人際建議","object":"【物】穿搭建議","ai_quote":"戰略金句"}`;
+
+function buildUserMsg(R,q){
   const jiDir=Object.entries(R.hmp)
-    .filter(([,d])=>['生門','開門','休門'].includes(d))
+    .filter(([,d])=>JI_DOORS.includes(d))
     .map(([p,d])=>`${d}/${PDIR[p]}`).join('、');
-
-  const payload={
-    // 格局資訊
-    dun: R.dun,
-    ju: R.ju+'局',
-    jieqi: R.jieqi,
-    yuan: R.yuan,
-    // 核心宮位
-    zhifu_palace: PDIR[R.xp],
-    zhifu_star: zfStar,
-    zhifu_door: zfDoor,
-    zhifu_god: zfGod,
-    zhifu_earth: zfEarth,
-    zhishi_palace: PDIR[R.zsp],
-    zhishi_door: R.zsd,
-    zhishi_star: zsStar,
-    zhishi_god: zsGod,
-    zhishi_earth: zsEarth,
-    // 吉方
-    ji_fang: jiDir||'平均分佈',
-    // 三奇
-    san_qi: qiPals.length?qiPals.join('、'):'本盤無三奇',
-    // 旬空
-    xun_kong: R.kongZhi.join('、'),
-    xun_kong_palaces: Array.from(R.kongPals).map(p=>PDIR[p]).join('、'),
-    // 完整九宮摘要
-    nine_palaces: BOARD_LO.map(p=>({
-      palace: PDIR[p],
-      god: R.gp[p]||'—',
-      star: R.hp[p]||'—',
-      door: R.hmp[p]||'—',
-      earth: R.ep[p]||'—',
-      marks: [p===R.xp?'值符':null, p===R.zsp?'值使':null, R.kongPals.has(p)?'旬空':null].filter(Boolean),
-    })),
-    // 使用者問題
-    user_question: question,
-  };
-  return `以下是奇門遁甲盤局資訊（JSON格式），請根據這些資料生成行動指引卡：\n\n${JSON.stringify(payload,null,2)}`;
+  const qiPals=Object.entries(R.ep).filter(([,s])=>SAN_QI.has(s)).map(([p,s])=>`${s}在${PDIR[p]}`);
+  const payload={dun:R.dun,ju:R.ju+'局',jieqi:R.jieqi,yuan:R.yuan,
+    zhifu:{palace:PDIR[R.xp],star:R.zfs,door:DOOR_BASE[R.xp]||'—',god:R.gp[R.xp]},
+    zhishi:{palace:PDIR[R.zsp],door:R.zsd,star:R.hp[R.zsp],god:R.gp[R.zsp]},
+    ji_fang:jiDir||'平均分佈',san_qi:qiPals.length?qiPals.join('、'):'無',
+    xun_kong:R.kongZhi.join('、'),
+    nine_palaces:BOARD_LO.map(p=>({palace:PDIR[p],god:R.gp[p],star:R.hp[p],door:R.hmp[p],earth:R.ep[p]})),
+    user_question:q};
+  return `以下是奇門遁甲盤局（JSON），請生成行動指引卡：\n\n${JSON.stringify(payload,null,2)}`;
 }
-
-async function callAI(userMsg, isFirst){
-  chatHist.push({role:'user',content:userMsg});
-  const systemToUse = isFirst ? SYSTEM_PROMPT
-    : `你是奇門遁甲戰略顧問。使用者正在追問關於剛才盤局的問題。請用溫暖、實用的現代語言回覆，約150-250字，繁體中文。不要重新輸出JSON。`;
-  const resp=await fetch(WORKER_URL,{
-    method:'POST',
+async function callAI(msg,first){
+  chatHist.push({role:'user',content:msg});
+  const sys=first?SYSTEM_PROMPT:`你是奇門遁甲戰略顧問，用溫暖現代語言回覆追問，150-250字，繁體中文，不重新輸出JSON。`;
+  const resp=await fetch(WORKER_URL,{method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({model:MODEL,max_tokens:1000,system:systemToUse,messages:chatHist})
-  });
-  if(!resp.ok) throw new Error(`API ${resp.status}`);
+    body:JSON.stringify({model:MODEL,max_tokens:1000,system:sys,messages:chatHist})});
+  if(!resp.ok)throw new Error(`API ${resp.status}`);
   const data=await resp.json();
   const text=data.content?.[0]?.text||'';
   chatHist.push({role:'assistant',content:text});
   return text;
 }
-
-function parseGuideJSON(text){
-  // 嘗試從回傳文字中萃取 JSON
-  const s=text.indexOf('{'), e=text.lastIndexOf('}');
-  if(s>=0&&e>s){
-    try{return JSON.parse(text.slice(s,e+1));}catch(err){}
-  }
-  // fallback
-  return{geju:'平穩局勢',geju_level:'平',tone:'穩健前行',
-    timing:text,location:'正前方',people:'保持誠信',
-    object:'素色穿搭',ai_quote:'每一步都算數。'};
+function parseJSON(text){
+  const s=text.indexOf('{'),e=text.lastIndexOf('}');
+  if(s>=0&&e>s){try{return JSON.parse(text.slice(s,e+1));}catch(err){}}
+  return{geju:'平穩局勢',geju_level:'平',tone:'穩健前行',timing:text,
+    location:'正前方',people:'保持誠信',object:'素色穿搭',ai_quote:'每一步都算數。'};
 }
-
 function appendMsg(role,html){
   const area=document.getElementById('chatArea');
   const div=document.createElement('div');div.className=`msg ${role}`;
-  div.innerHTML=`<div class="av">${role==='user'?'🙋':'🔮'}</div>
-    <div class="bubble">${html}</div>`;
+  div.innerHTML=`<div class="av">${role==='user'?'🙋':'🔮'}</div><div class="bubble">${html}</div>`;
   area.appendChild(div);area.scrollTop=area.scrollHeight;
 }
 function addTyping(){
@@ -810,35 +1047,55 @@ function addTyping(){
 function rmTyping(){document.getElementById('tdot')?.remove();}
 function fmtMD(t){
   return t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
-          .replace(/`(.+?)`/g,'<em>$1</em>')
-          .replace(/\n/g,'<br>');
+    .replace(/`(.+?)`/g,'<em>$1</em>').replace(/\n/g,'<br>');
 }
-
 function showFollowup(){
-  const fr=document.getElementById('frow');fr.classList.remove('hidden');
-  const FTOPICS=['這個格局對我的問題是好是壞？','吉方具體怎麼利用？',
-    '有哪些事情要特別避免？','最佳行動時間點是？','旬空對我的影響是什麼？'];
+  document.getElementById('frow').classList.remove('hidden');
+  const FTOPICS=['這個格局好不好？','吉方如何利用？','要避免哪些事？','最佳行動時機？','旬空的影響？'];
   document.getElementById('fchips').innerHTML=FTOPICS.map(t=>
     `<button class="fc" onclick="sendFT('${t}')">${t}</button>`).join('');
 }
-
-async function sendFollowup(){
-  const inp=document.getElementById('cin');const q=inp.value.trim();
-  if(!q)return;inp.value='';await sendFT(q);
-}
+async function sendFollowup(){const inp=document.getElementById('cin');const q=inp.value.trim();if(!q)return;inp.value='';await sendFT(q);}
 async function sendFT(q){
   if(!curBoard)return;setDis(true);
   const area=document.getElementById('chatArea');area.classList.remove('hidden');
   appendMsg('user',q);addTyping();
-  try{
-    const r=await callAI(q,false);rmTyping();appendMsg('bot',fmtMD(r));
-  }catch(e){rmTyping();appendMsg('bot','⚠️ '+e.message);}
+  try{const r=await callAI(q,false);rmTyping();appendMsg('bot',fmtMD(r));}
+  catch(e){rmTyping();appendMsg('bot','⚠️ '+e.message);}
   setDis(false);area.scrollTop=area.scrollHeight;
 }
-function setDis(v){
-  document.getElementById('sbtn').disabled=v;
-  document.getElementById('btnGo').disabled=v;
+function setDis(v){document.getElementById('sbtn').disabled=v;document.getElementById('btnGo').disabled=v;}
+
+// ═══════════════════════════════════════
+//  UI Init
+// ═══════════════════════════════════════
+(function init(){
+  const ms=document.getElementById('inMonth');
+  for(let m=1;m<=12;m++){const o=document.createElement('option');o.value=m;o.text=m+'月';ms.appendChild(o);}
+  ms.addEventListener('change',updDays);
+  document.getElementById('inYear').addEventListener('change',updDays);
+  document.getElementById('modelTag').textContent=MODEL;
+  setNow();
+})();
+function updDays(){
+  const y=+document.getElementById('inYear').value||2025;
+  const m=+document.getElementById('inMonth').value||1;
+  const days=new Date(y,m,0).getDate();
+  const ds=document.getElementById('inDay');const prev=+ds.value||1;
+  ds.innerHTML='';
+  for(let d=1;d<=days;d++){const o=document.createElement('option');o.value=d;o.text=d+'日';ds.appendChild(o);}
+  ds.value=Math.min(prev,days);
 }
+function setNow(){
+  const n=new Date();
+  document.getElementById('inYear').value=n.getFullYear();
+  document.getElementById('inMonth').value=n.getMonth()+1;
+  updDays();
+  document.getElementById('inDay').value=n.getDate();
+  const h=n.getHours();
+  document.getElementById('inHour').value=h<1||h>=23?0:Math.floor((h+1)/2);
+}
+function setQ(q){document.getElementById('userQ').value=q;}
 
 // ═══════════════════════════════════════
 //  主程式
@@ -857,29 +1114,21 @@ async function doLayout(){
   setDis(true);
   try{
     const R=doBoard(y,m,d,shi);curBoard=R;chatHist=[];
-
-    // 顯示盤面
     renderInfo(R);renderBoard(R);
     document.getElementById('cardInfo').classList.remove('hidden');
     document.getElementById('cardBoard').classList.remove('hidden');
-
-    // 指引卡 loading
+    // 指南針
+    renderCompass(R);
+    // AI 指引卡
     document.getElementById('guideSlot').innerHTML=`
       <div class="chat-empty"><div class="ce-icon" style="animation:db .9s ease-in-out infinite">☯</div>
       <div class="ce-text">AI 正在解讀盤局…</div></div>`;
     document.getElementById('chatArea').classList.add('hidden');
     document.getElementById('chatArea').innerHTML='';
     document.getElementById('frow').classList.add('hidden');
-
-    // 呼叫 AI
-    const userMsg=buildUserMsg(R,q);
-    const reply=await callAI(userMsg,true);
-
-    // 解析 JSON → 指引卡
-    const guideData=parseGuideJSON(reply);
-    renderGuideCard(guideData,R);
+    const reply=await callAI(buildUserMsg(R,q),true);
+    renderGuideCard(parseJSON(reply),R);
     showFollowup();
-
   }catch(e){
     document.getElementById('guideSlot').innerHTML=`
       <div class="chat-empty"><div class="ce-text" style="color:var(--red)">⚠️ ${e.message}</div></div>`;
@@ -889,6 +1138,12 @@ async function doLayout(){
 }
 
 window.addEventListener('load',setNow);
+// 頁面關閉時清理
+window.addEventListener('beforeunload',()=>{
+  window.removeEventListener('deviceorientationabsolute',onOrientation,true);
+  window.removeEventListener('deviceorientation',onOrientation,true);
+  if(rafId)cancelAnimationFrame(rafId);
+});
 </script>
 </body>
 </html>
