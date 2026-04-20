@@ -250,6 +250,79 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
   color:var(--bg);font-size:14px;cursor:pointer;transition:background .2s;display:flex;align-items:center;}
 .sbtn:hover{background:var(--gold2);}
 .sbtn:disabled{opacity:.4;cursor:not-allowed;}
+/* ── 校準覆蓋層 ── */
+.calib-overlay{
+  position:absolute;inset:0;border-radius:50%;
+  background:rgba(8,6,18,0.92);
+  display:flex;align-items:center;justify-content:center;
+  z-index:10;
+  backdrop-filter:blur(4px);
+  animation:fadeIn .3s ease;
+}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.calib-inner{
+  display:flex;flex-direction:column;align-items:center;
+  gap:10px;padding:20px;text-align:center;
+}
+.calib-icon{font-size:32px;animation:spin 4s linear infinite;}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}  }
+.calib-title{
+  font-family:'Ma Shan Zheng',serif;
+  font-size:18px;color:var(--gold);letter-spacing:.2em;
+}
+.calib-desc{font-size:12px;color:var(--text2);line-height:1.7;}
+.calib-desc strong{color:var(--gold2);}
+.calib-heading{
+  font-size:28px;font-weight:700;color:var(--teal2);
+  letter-spacing:.05em;min-width:80px;
+  text-shadow:0 0 16px rgba(37,212,172,.5);
+}
+.calib-confirm-btn{
+  margin-top:4px;
+  padding:10px 24px;
+  background:var(--teal);color:var(--bg);
+  border:none;border-radius:8px;
+  font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;
+  cursor:pointer;letter-spacing:.1em;
+  transition:background .2s,transform .1s;
+  box-shadow:0 0 16px rgba(24,176,144,.4);
+}
+.calib-confirm-btn:hover{background:var(--teal2);transform:scale(1.03);}
+.calib-confirm-btn:active{transform:scale(0.97);}
+.calib-skip-btn{
+  background:transparent;border:none;
+  color:var(--muted);font-size:11px;
+  cursor:pointer;text-decoration:underline;
+  font-family:'Noto Serif TC',serif;
+  transition:color .2s;
+}
+.calib-skip-btn:hover{color:var(--text2);}
+
+/* 校準狀態列 */
+.calib-bar{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  background:rgba(24,176,144,.1);
+  border:1px solid rgba(24,176,144,.25);
+  border-radius:8px;padding:7px 14px;
+  font-size:12px;color:var(--teal2);
+  width:100%;
+}
+.calib-redo-btn{
+  background:transparent;border:1px solid var(--teal);
+  color:var(--teal);border-radius:5px;padding:2px 8px;
+  font-size:11px;cursor:pointer;font-family:'Noto Serif TC',serif;
+  transition:all .18s;
+}
+.calib-redo-btn:hover{background:var(--teal);color:var(--bg);}
+
+/* 校準成功動畫（羅盤邊框閃爍） */
+@keyframes calibFlash{
+  0%  {box-shadow:0 0 0 0 rgba(37,212,172,.8);}
+  50% {box-shadow:0 0 0 10px rgba(37,212,172,0);}
+  100%{box-shadow:0 0 0 0 rgba(37,212,172,0);}
+}
+.calib-flash{animation:calibFlash .6s ease 2;}
+
 .hidden{display:none!important;}
 </style>
 </head>
@@ -369,9 +442,28 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
       </div>
       <div class="compass-body">
 
-        <!-- Canvas 羅盤 -->
+        <!-- Canvas 羅盤 + 校準覆蓋層 -->
         <div class="compass-canvas-wrap">
           <canvas id="compassCanvas" width="520" height="520"></canvas>
+          <!-- 校準覆蓋層 -->
+          <div id="calibOverlay" class="calib-overlay hidden">
+            <div class="calib-inner">
+              <div class="calib-icon">🧭</div>
+              <div class="calib-title">方向校準</div>
+              <div class="calib-desc">請將裝置對準<strong>正北方（坎位）</strong><br>確認後按下校準按鈕</div>
+              <div class="calib-heading" id="calibHeadingShow">— °</div>
+              <button class="calib-confirm-btn" id="calibConfirmBtn" onclick="confirmCalibration()">
+                ✓ 確認校準
+              </button>
+              <button class="calib-skip-btn" onclick="skipCalibration()">略過</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 校準狀態提示列 -->
+        <div class="calib-bar hidden" id="calibBar">
+          <span id="calibBarText">已校準</span>
+          <button class="calib-redo-btn" onclick="redoCalibration()">重新校準</button>
         </div>
 
         <!-- 偏差資訊 -->
@@ -581,14 +673,23 @@ function calcJiFang(R){
 //  指南針狀態
 // ═══════════════════════════════════════
 let compassActive=false;
-let deviceHeading=null;   // 裝置朝向（正北=0，順時針）
-let targetDeg=0;          // 目標吉方角度
-let jiFangList=[];        // 吉方清單
-let selectedJiIdx=0;      // 當前選中的吉方
+let deviceHeading=null;     // 感應器原始讀值（0-360）
+let calibOffset=0;          // 校準偏移量：calibratedHeading = rawHeading - calibOffset
+let isCalibrated=false;     // 是否已完成校準
+let calibPending=false;     // 校準覆蓋層是否顯示中
+let targetDeg=0;
+let jiFangList=[];
+let selectedJiIdx=0;
 let rafId=null;
 let compassGranted=false;
 
-function setCompassStatus(state, text){
+// 取得校準後的朝向（確保 0-360）
+function getCalibratedHeading(){
+  if(deviceHeading===null) return null;
+  return ((deviceHeading - calibOffset) % 360 + 360) % 360;
+}
+
+function setCompassStatus(state,text){
   const dot=document.getElementById('statusDot');
   const txt=document.getElementById('statusText');
   dot.className='status-dot'+(state==='active'?' active':state==='error'?' error':'');
@@ -597,47 +698,91 @@ function setCompassStatus(state, text){
 
 async function startCompass(){
   const btn=document.getElementById('btnCompass');
-  // iOS 13+ 需要請求 DeviceOrientationEvent 權限
   if(typeof DeviceOrientationEvent!=='undefined'
      && typeof DeviceOrientationEvent.requestPermission==='function'){
     try{
       const perm=await DeviceOrientationEvent.requestPermission();
-      if(perm!=='granted'){
-        setCompassStatus('error','感應器權限被拒絕');return;
-      }
+      if(perm!=='granted'){setCompassStatus('error','感應器權限被拒絕');return;}
       compassGranted=true;
-    }catch(e){
-      setCompassStatus('error','權限請求失敗：'+e.message);return;
-    }
-  }else{
-    compassGranted=true;
-  }
-  // 註冊事件
+    }catch(e){setCompassStatus('error','權限請求失敗：'+e.message);return;}
+  }else{compassGranted=true;}
+
   window.addEventListener('deviceorientationabsolute',onOrientation,true);
   window.addEventListener('deviceorientation',onOrientation,true);
   compassActive=true;
   btn.textContent='🧭 感應器啟動中…';
   btn.disabled=true;
   setCompassStatus('active','感應器已啟動');
-  // 開始繪製
+
+  // 稍等感應器穩定後再顯示校準畫面
+  setTimeout(showCalibrationOverlay, 800);
   rafId=requestAnimationFrame(drawCompass);
+}
+
+function showCalibrationOverlay(){
+  calibPending=true;
+  document.getElementById('calibOverlay').classList.remove('hidden');
+}
+
+function confirmCalibration(){
+  if(deviceHeading===null) return;
+  // 記錄當前讀值作為偏移量（此時裝置對準北方，rawHeading 應為 0°）
+  calibOffset=deviceHeading;
+  isCalibrated=true;
+  calibPending=false;
+  document.getElementById('calibOverlay').classList.add('hidden');
+  // 顯示校準狀態列
+  const bar=document.getElementById('calibBar');
+  bar.classList.remove('hidden');
+  document.getElementById('calibBarText').textContent=
+    `已校準（偏移 ${Math.round(calibOffset)}°）`;
+  // 成功動畫
+  const wrap=document.querySelector('.compass-canvas-wrap');
+  wrap.classList.add('calib-flash');
+  setTimeout(()=>wrap.classList.remove('calib-flash'),1300);
+  setCompassStatus('active','已校準・追蹤中');
+  updateDiffBearing();
+}
+
+function skipCalibration(){
+  calibOffset=0;
+  isCalibrated=true;
+  calibPending=false;
+  document.getElementById('calibOverlay').classList.add('hidden');
+  document.getElementById('calibBar').classList.remove('hidden');
+  document.getElementById('calibBarText').textContent='已略過校準（以感應器原始值為準）';
+  setCompassStatus('active','感應器追蹤中');
+}
+
+function redoCalibration(){
+  isCalibrated=false;
+  calibPending=true;
+  document.getElementById('calibOverlay').classList.remove('hidden');
+  setCompassStatus('active','重新校準中…');
 }
 
 function onOrientation(e){
   let heading=null;
-  if(e.webkitCompassHeading!==undefined && e.webkitCompassHeading!==null){
-    // iOS：webkitCompassHeading 直接是正北朝向角
+  if(e.webkitCompassHeading!==undefined&&e.webkitCompassHeading!==null){
     heading=e.webkitCompassHeading;
-  } else if(e.absolute && e.alpha!==null){
-    // Android absolute：alpha 是從正北順時針旋轉角
+  }else if(e.absolute&&e.alpha!==null){
     heading=(360-e.alpha)%360;
-  } else if(e.alpha!==null){
-    // 非絕對值（模擬器或部分設備）
+  }else if(e.alpha!==null){
     heading=(360-e.alpha)%360;
   }
-  if(heading!==null){
-    deviceHeading=heading;
-    document.getElementById('deviceBearing').textContent=Math.round(heading)+'°';
+  if(heading===null) return;
+  deviceHeading=heading;
+
+  // 校準覆蓋層：顯示原始讀值（未校準）
+  if(calibPending){
+    document.getElementById('calibHeadingShow').textContent=
+      Math.round(heading)+'°';
+  }
+
+  // 正常追蹤：使用校準後的值
+  const cal=getCalibratedHeading();
+  if(cal!==null){
+    document.getElementById('deviceBearing').textContent=Math.round(cal)+'°';
     updateDiffBearing();
   }
 }
@@ -653,9 +798,10 @@ function selectJiFang(idx){
   });
 }
 function updateDiffBearing(){
-  if(deviceHeading===null) return;
-  let diff=targetDeg-deviceHeading;
-  diff=((diff+180)%360+360)%360-180; // -180~180
+  const cal=getCalibratedHeading();
+  if(cal===null) return;
+  let diff=targetDeg-cal;
+  diff=((diff+180)%360+360)%360-180;
   document.getElementById('diffBearing').textContent=
     (diff>=0?'+':'')+Math.round(diff)+'°';
 }
@@ -689,7 +835,9 @@ function drawCompass(){
   //        再 -deviceHeading 反向追蹤。
   // 但實測結果差了 +90°，故補正為 -deviceHeading + 0（不加 baseRot），
   // 即底盤旋轉 = -deviceHeading * π/180，Canvas 的 0°(東) 不需再修正。
-  const headingRot = deviceHeading !== null ? (-deviceHeading * Math.PI / 180) : 0;
+  // 使用校準後的方位角驅動底盤旋轉
+  const calHeading = getCalibratedHeading();
+  const headingRot = calHeading !== null ? (-calHeading * Math.PI / 180) : 0;
   const rot = headingRot; // 直接用，不加 baseRot
 
   ctx.save();
@@ -803,8 +951,8 @@ function drawCompass(){
   //   = -deviceHeading*π/180 + (targetDeg-90)*π/180
   //   = (targetDeg - deviceHeading - 90)*π/180
   // 箭頭繪製方向：moveTo(0,-arrowLen) 朝上（螢幕-Y），rotate(0)=指向上方
-  const arrowAngle = deviceHeading !== null
-    ? (targetDeg - deviceHeading - 90) * Math.PI / 180
+  const arrowAngle = calHeading !== null
+    ? (targetDeg - calHeading - 90) * Math.PI / 180
     : -Math.PI / 2;
 
   ctx.save();
