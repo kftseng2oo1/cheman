@@ -835,11 +835,12 @@ function drawCompass(){
   //        再 -deviceHeading 反向追蹤。
   // 但實測結果差了 +90°，故補正為 -deviceHeading + 0（不加 baseRot），
   // 即底盤旋轉 = -deviceHeading * π/180，Canvas 的 0°(東) 不需再修正。
-  // 底盤旋轉邏輯：
-  // Canvas 預設 0°=右方（東/震），需要 -π/2 讓 0°=上方（北/坎）
-  // 再加 -calHeading 讓底盤隨裝置反向旋轉，保持北方朝上
+  // 底盤旋轉：
+  // webkitCompassHeading：裝置頂部偏離正北的角度（順時針為正）
+  // 裝置順時鐘轉 → calHeading 增加 → 底盤需順時鐘轉補償（+calHeading）
+  // 加上 -π/2 讓 Canvas 的 0°(右/東) 對齊 0°(上/北)
   const calHeading = getCalibratedHeading();
-  const headingRot = calHeading !== null ? (-calHeading * Math.PI / 180) : 0;
+  const headingRot = calHeading !== null ? (calHeading * Math.PI / 180) : 0;
   const rot = -Math.PI / 2 + headingRot;
 
   ctx.save();
@@ -953,16 +954,15 @@ function drawCompass(){
   //   = -deviceHeading*π/180 + (targetDeg-90)*π/180
   //   = (targetDeg - deviceHeading - 90)*π/180
   // 箭頭繪製方向：moveTo(0,-arrowLen) 朝上（螢幕-Y），rotate(0)=指向上方
-  // ── 指針（螢幕坐標，不隨底盤旋轉）
-  // rot = -π/2 + (-calHeading * π/180)
-  // 指針螢幕角度 = rot + targetDeg*π/180
-  //              = -π/2 - calHeading*π/180 + targetDeg*π/180
-  //              = (targetDeg - calHeading)*π/180 - π/2
-  // 箭頭 moveTo(0,-arrowLen) 朝上，rotate(0)=指向畫面上方（北），
-  // 所以最終再加 -π/2 讓計算角度從右方基準轉為上方基準。
-  // 合併：rotate((targetDeg - calHeading - 90) * π/180)
+  // 指針螢幕角度：
+  // rot = -π/2 + calHeading*π/180
+  // 指針需指向 targetDeg（地理角度）
+  // 螢幕角度 = rot + targetDeg*π/180
+  //          = -π/2 + (calHeading + targetDeg)*π/180
+  // ctx.rotate(angle) 中 0=右，箭頭朝上需再加 -π/2 → 合併後：
+  // rotate((calHeading + targetDeg - 90) * π/180)
   const arrowAngle = calHeading !== null
-    ? (targetDeg - calHeading - 90) * Math.PI / 180
+    ? (calHeading + targetDeg - 90) * Math.PI / 180
     : -Math.PI / 2;
 
   ctx.save();
