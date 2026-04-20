@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>奇門遁甲 · 行動指引</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=Ma+Shan+Zheng&display=swap');
+
+:root {
+  --bg:      #09090f;
+  --surface: #0f0f1a;
+  --panel:   #131320;
+  --panel2:  #17172a;
+  --border:  #222238;
+  --border2: #2e2e50;
+  --gold:    #c8a84a;
+  --gold2:   #e8d080;
+  --gold-dim:#7a6420;
+  --red:     #b83030;
+  --teal:    #18b090;
+  --teal2:   #25d4ac;
+  --blue:    #4a8cc8;
+  --purple:  #8870c8;
+  --text:    #e0d8c8;
+  --text2:   #a0987c;
+  --muted:   #505068;
+  --yang:    #d88040;
+  --yin:     #6090c0;
+  --qi-clr:  #e8b830;
+  --yi-clr:  #7aaccf;
+  --kong-clr:#b03030;
+  --ai-user: #141c2a;
+  --ai-bot:  #0d1520;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Noto Serif TC',serif;min-height:100vh;
+  background-image:
+    radial-gradient(ellipse 70% 50% at 10% 5%,#141428 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 95%,#0a1520 0%,transparent 60%);
+}
+
+/* ── Header ── */
+header{text-align:center;padding:26px 16px 16px;border-bottom:1px solid var(--border);position:relative;}
+.hd{position:absolute;top:0;left:50%;transform:translateX(-50%);width:200px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(22px,5.5vw,36px);color:var(--gold);
+  letter-spacing:.28em;text-shadow:0 0 30px rgba(200,168,74,.35),0 2px 4px rgba(0,0,0,.8);}
+.hsub{font-size:11px;color:var(--muted);letter-spacing:.18em;margin-top:5px;}
+
+/* ── Layout ── */
+.wrap{max-width:1060px;margin:0 auto;padding:18px 14px 40px;display:grid;grid-template-columns:1fr;gap:16px;}
+@media(min-width:740px){
+  .wrap{grid-template-columns:400px 1fr;align-items:start;}
+  .col-r{grid-column:2;}
+}
+
+/* ── Card ── */
+.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.ch{display:flex;align-items:center;gap:8px;padding:11px 15px;border-bottom:1px solid var(--border);background:var(--panel2);}
+.ch-icon{font-size:14px;}
+.ch-title{font-size:11px;letter-spacing:.12em;color:var(--text2);text-transform:uppercase;font-weight:600;}
+.ch-tag{margin-left:auto;font-size:9px;color:var(--muted);}
+.cb{padding:14px 16px;}
+
+/* ── Form ── */
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:9px;margin-bottom:11px;}
+.field label{display:block;font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;text-transform:uppercase;}
+.field select,.field input[type=number]{
+  width:100%;background:var(--panel2);border:1px solid var(--border2);color:var(--text);
+  padding:7px 9px;border-radius:7px;font-family:'Noto Serif TC',serif;font-size:13px;
+  outline:none;transition:border-color .2s,box-shadow .2s;appearance:none;
+}
+.field select:focus,.field input:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(200,168,74,.12);}
+.qwrap{margin-bottom:11px;}
+.qwrap label{display:block;font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:5px;text-transform:uppercase;}
+.qwrap textarea{
+  width:100%;background:var(--panel2);border:1px solid var(--border2);color:var(--text);
+  padding:10px 12px;border-radius:8px;font-family:'Noto Serif TC',serif;font-size:14px;
+  resize:vertical;min-height:68px;max-height:140px;outline:none;line-height:1.65;
+  transition:border-color .2s,box-shadow .2s;
+}
+.qwrap textarea::placeholder{color:var(--muted);font-size:13px;}
+.qwrap textarea:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(200,168,74,.12);}
+.qtags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:11px;}
+.qtag{font-size:11px;padding:4px 10px;border:1px solid var(--border2);border-radius:20px;
+  color:var(--text2);cursor:pointer;background:transparent;transition:all .18s;font-family:'Noto Serif TC',serif;}
+.qtag:hover{border-color:var(--gold);color:var(--gold);background:rgba(200,168,74,.08);}
+.brow{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{padding:9px 20px;border:1px solid currentColor;background:transparent;font-family:'Noto Serif TC',serif;
+  font-size:13px;letter-spacing:.08em;border-radius:7px;cursor:pointer;transition:all .2s;
+  color:var(--gold);display:flex;align-items:center;gap:5px;}
+.btn:hover{background:var(--gold);color:var(--bg);}
+.btn.now{color:var(--teal);}
+.btn.now:hover{background:var(--teal);color:var(--bg);}
+.btn.primary{background:var(--gold);color:var(--bg);font-weight:600;}
+.btn.primary:hover{background:var(--gold2);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* ── Info chips ── */
+.igrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:7px;}
+.ichip{background:var(--panel2);border:1px solid var(--border);border-radius:7px;padding:7px 10px;}
+.ichip-l{font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.ichip-v{font-size:13px;color:var(--gold);font-weight:600;margin-top:2px;}
+.cv-yang{color:var(--yang);}.cv-yin{color:var(--yin);}.cv-kong{color:var(--kong-clr);}
+
+/* ── Board ── */
+.bwrap{padding:13px;}
+.board{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);
+  aspect-ratio:1/1;gap:3px;background:var(--border);
+  border:1.5px solid var(--gold-dim);border-radius:9px;overflow:hidden;
+  box-shadow:0 0 40px rgba(200,168,74,.1),inset 0 0 40px rgba(0,0,0,.5);}
+.cell{background:var(--surface);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:1px;padding:4px 3px 16px;position:relative;overflow:hidden;transition:background .2s;}
+.cell:hover{background:#131320;}
+.cell[data-p="5"]{background:#0b0b15;}
+.cell.zf{background:#161408;border:1px solid rgba(200,168,74,.25);}
+.cell.zs{background:#081614;border:1px solid rgba(24,176,144,.25);}
+.cell.zf.zs{background:#0e1408;}
+.cell.kong{background:#140808;border:1px solid rgba(176,48,48,.2);}
+.pn{position:absolute;top:3px;left:5px;font-size:8px;color:var(--muted);}
+.pd{position:absolute;top:3px;right:4px;font-size:7px;color:var(--muted);letter-spacing:0;}
+.cg{font-size:clamp(9px,2vw,12px);color:var(--purple);font-weight:600;}
+.cs{font-size:clamp(10px,2.2vw,13px);color:#e8b840;font-weight:700;}
+.cd{font-size:clamp(9px,2vw,12px);color:#50c888;font-weight:600;}
+.ce{font-size:clamp(9px,2vw,12px);font-weight:700;}
+.eq{color:var(--qi-clr);}.ey{color:var(--yi-clr);}
+.dv{width:52%;height:1px;background:var(--border2);margin:1px 0;flex-shrink:0;}
+.bc{position:absolute;bottom:2px;font-size:7px;border-radius:3px;padding:0 3px;font-weight:700;}
+.bc-zf{right:3px;color:var(--gold);background:rgba(200,168,74,.18);}
+.bc-zs{left:3px;color:var(--teal2);background:rgba(24,176,144,.15);}
+.bc-ko{right:3px;bottom:12px;color:var(--kong-clr);background:rgba(176,48,48,.15);}
+.cn{font-size:7px;color:var(--muted);letter-spacing:0;}
+.lgrow{display:flex;flex-wrap:wrap;gap:7px;padding:10px 14px;border-top:1px solid var(--border);justify-content:center;}
+.leg{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);}
+.ld{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
+/* ── 指引卡 ── */
+.guide-card{
+  margin:0 16px 16px;
+  border:1px solid var(--border2);border-radius:10px;overflow:hidden;
+  animation:fadeUp .4s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.gc-header{
+  padding:14px 16px 12px;
+  display:flex;align-items:flex-start;gap:12px;
+  background:linear-gradient(135deg,#1a1a0e 0%,#12120a 100%);
+  border-bottom:1px solid var(--border2);
+}
+.gc-header.yin-header{background:linear-gradient(135deg,#0a121e 0%,#080e18 100%);}
+.gc-badge{
+  font-size:24px;flex-shrink:0;margin-top:2px;
+  filter:drop-shadow(0 0 8px rgba(200,168,74,.5));
+}
+.gc-tone{font-size:16px;color:var(--gold2);font-weight:700;letter-spacing:.05em;line-height:1.4;}
+.gc-format{font-size:11px;color:var(--muted);margin-top:3px;letter-spacing:.08em;}
+.gc-body{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);}
+.gc-item{
+  background:var(--panel);padding:12px 14px;
+  display:flex;flex-direction:column;gap:5px;
+}
+.gc-item:last-child:nth-child(odd){grid-column:1/-1;}
+.gc-label{
+  font-size:9px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--muted);display:flex;align-items:center;gap:5px;
+}
+.gc-label-icon{font-size:13px;}
+.gc-val{font-size:13px;color:var(--text);line-height:1.65;}
+.gc-val strong{color:var(--gold);}
+.gc-quote{
+  padding:13px 16px;
+  background:var(--panel2);
+  font-size:13px;color:var(--teal2);
+  font-style:italic;letter-spacing:.05em;line-height:1.7;
+  border-top:1px solid var(--border2);
+  text-align:center;
+}
+
+/* 格局標籤 */
+.gj-tag{
+  display:inline-block;font-size:10px;padding:2px 8px;border-radius:12px;
+  font-weight:700;letter-spacing:.08em;margin-bottom:4px;
+}
+.gj-ji{background:rgba(200,168,74,.2);color:var(--gold2);}
+.gj-xiong{background:rgba(176,48,48,.2);color:#e06060;}
+.gj-ping{background:rgba(80,80,120,.3);color:#a0a0d0;}
+
+/* ── 對話區 ── */
+.chat-area{
+  display:flex;flex-direction:column;
+  max-height:360px;min-height:120px;overflow-y:auto;
+  padding:14px 16px;gap:13px;scroll-behavior:smooth;
+}
+.chat-area::-webkit-scrollbar{width:4px;}
+.chat-area::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.msg{display:flex;gap:9px;align-items:flex-start;animation:msgIn .3s ease;}
+@keyframes msgIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.msg.user{flex-direction:row-reverse;}
+.av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:13px;flex-shrink:0;border:1px solid var(--border2);}
+.msg.user .av{background:var(--ai-user);}
+.msg.bot  .av{background:var(--panel2);}
+.bubble{max-width:88%;padding:9px 13px;border-radius:11px;font-size:13px;
+  line-height:1.75;border:1px solid var(--border);}
+.msg.user .bubble{background:var(--ai-user);border-color:var(--border2);border-top-right-radius:3px;}
+.msg.bot  .bubble{background:var(--ai-bot);border-top-left-radius:3px;}
+.bubble strong{color:var(--gold);}
+.bubble em{color:var(--teal2);font-style:normal;}
+.typing-dots{display:flex;gap:4px;align-items:center;padding:4px 0;}
+.typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--muted);
+  animation:db .9s ease-in-out infinite;}
+.typing-dots span:nth-child(2){animation-delay:.15s;}
+.typing-dots span:nth-child(3){animation-delay:.3s;}
+@keyframes db{0%,80%,100%{transform:translateY(0);opacity:.4;}40%{transform:translateY(-5px);opacity:1;}}
+.chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:28px;color:var(--muted);text-align:center;gap:8px;}
+.ce-icon{font-size:32px;opacity:.35;}
+.ce-text{font-size:12px;line-height:1.8;letter-spacing:.05em;}
+
+/* ── 追問 ── */
+.frow{padding:10px 16px 13px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:7px;}
+.fchips{display:flex;flex-wrap:wrap;gap:5px;}
+.fc{font-size:11px;padding:4px 10px;border:1px solid var(--border2);border-radius:20px;
+  color:var(--text2);cursor:pointer;background:transparent;
+  transition:all .18s;font-family:'Noto Serif TC',serif;}
+.fc:hover{border-color:var(--teal2);color:var(--teal2);background:rgba(24,176,144,.08);}
+.cinrow{display:flex;gap:7px;}
+.cin{flex:1;background:var(--panel2);border:1px solid var(--border2);color:var(--text);
+  padding:8px 12px;border-radius:8px;font-family:'Noto Serif TC',serif;font-size:13px;outline:none;
+  transition:border-color .2s;}
+.cin:focus{border-color:var(--gold);}
+.cin::placeholder{color:var(--muted);}
+.sbtn{padding:8px 13px;background:var(--gold);border:none;border-radius:8px;
+  color:var(--bg);font-size:14px;cursor:pointer;transition:background .2s;display:flex;align-items:center;}
+.sbtn:hover{background:var(--gold2);}
+.sbtn:disabled{opacity:.4;cursor:not-allowed;}
+
+.hidden{display:none!important;}
+</style>
+
+<!-- PWA Meta — auto-injected by PWA 打包神器 -->
+<meta name="application-name" content="奇門遁甲大師">
+<meta name="description" content="">
+<meta name="theme-color" content="#1a73e8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="奇門遁甲大師">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
+<script>if('serviceWorker'in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(r){console.log('[SW] registered:',r.scope)}).catch(function(e){console.warn('[SW] failed:',e)});});}</script>
+</head>
+<body>
+<header>
+  <div class="hd"></div>
+  <h1>奇門遁甲</h1>
+  <p class="hsub">行動指引 · 問卦諮詢 · AI 戰略解盤</p>
+</header>
+
+<div class="wrap">
+
+  <!-- ═══ 左欄 ═══ -->
+  <div>
+
+    <!-- 起盤輸入 -->
+    <div class="card">
+      <div class="ch"><span class="ch-icon">🗓</span><span class="ch-title">起盤設定</span></div>
+      <div class="cb">
+        <div class="fg">
+          <div class="field"><label>年</label><input type="number" id="inYear" min="1900" max="2100"></div>
+          <div class="field"><label>月</label><select id="inMonth"></select></div>
+          <div class="field"><label>日</label><select id="inDay"></select></div>
+          <div class="field">
+            <label>時辰</label>
+            <select id="inHour">
+              <option value="0">子 23–1</option><option value="1">丑 1–3</option>
+              <option value="2">寅 3–5</option><option value="3">卯 5–7</option>
+              <option value="4">辰 7–9</option><option value="5">巳 9–11</option>
+              <option value="6">午 11–13</option><option value="7">未 13–15</option>
+              <option value="8">申 15–17</option><option value="9">酉 17–19</option>
+              <option value="10">戌 19–21</option><option value="11">亥 21–23</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>置局法</label>
+            <select id="inMethod"><option value="chai">拆補法</option><option value="zhirun">置閏法</option></select>
+          </div>
+        </div>
+        <div class="qwrap">
+          <label>你的問題</label>
+          <textarea id="userQ" placeholder="例如：我正在考慮換工作，這個時機合適嗎？"></textarea>
+        </div>
+        <div class="qtags">
+          <button class="qtag" onclick="setQ('近期事業發展方向如何？')">事業</button>
+          <button class="qtag" onclick="setQ('感情與婚姻方面有什麼建議？')">感情</button>
+          <button class="qtag" onclick="setQ('財運與投資時機的建議？')">財運</button>
+          <button class="qtag" onclick="setQ('健康方面需要注意什麼？')">健康</button>
+          <button class="qtag" onclick="setQ('近期做這個決定是否合適？')">決策</button>
+          <button class="qtag" onclick="setQ('如何趨吉避凶，把握當前機運？')">趨吉</button>
+        </div>
+        <div class="brow">
+          <button class="btn now" onclick="setNow()">⏱ 現在</button>
+          <button class="btn primary" id="btnGo" onclick="doLayout()">☯ 起盤解析</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 盤局資訊 -->
+    <div class="card hidden" id="cardInfo" style="margin-top:14px;">
+      <div class="ch"><span class="ch-icon">📊</span><span class="ch-title">盤局資訊</span></div>
+      <div class="cb"><div class="igrid" id="igrid"></div></div>
+    </div>
+
+    <!-- 九宮盤面 -->
+    <div class="card hidden" id="cardBoard" style="margin-top:14px;">
+      <div class="ch"><span class="ch-icon">⬡</span><span class="ch-title">九宮盤面</span></div>
+      <div class="bwrap"><div class="board" id="board"></div></div>
+      <div class="lgrow">
+        <div class="leg"><div class="ld" style="background:#8870c8"></div>神</div>
+        <div class="leg"><div class="ld" style="background:#e8b840"></div>星</div>
+        <div class="leg"><div class="ld" style="background:#50c888"></div>門</div>
+        <div class="leg"><div class="ld" style="background:#e8b830"></div>三奇</div>
+        <div class="leg"><div class="ld" style="background:#7aaccf"></div>六儀</div>
+        <div class="leg"><div class="ld" style="background:#c8a84a"></div>值符</div>
+        <div class="leg"><div class="ld" style="background:#18b090"></div>值使</div>
+        <div class="leg"><div class="ld" style="background:#b03030"></div>旬空</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 右欄 ═══ -->
+  <div class="col-r">
+    <div class="card" style="display:flex;flex-direction:column;">
+      <div class="ch">
+        <span class="ch-icon">🔮</span>
+        <span class="ch-title">行動指引卡</span>
+        <span class="ch-tag" id="modelTag"></span>
+      </div>
+
+      <!-- 指引卡佔位 -->
+      <div id="guideSlot">
+        <div class="chat-empty">
+          <div class="ce-icon">☯</div>
+          <div class="ce-text">輸入你的問題<br>按下「起盤解析」<br>AI 將為你生成專屬行動指引</div>
+        </div>
+      </div>
+
+      <!-- 對話區（指引卡下方） -->
+      <div class="chat-area hidden" id="chatArea"></div>
+
+      <!-- 追問 -->
+      <div class="frow hidden" id="frow">
+        <div class="fchips" id="fchips"></div>
+        <div class="cinrow">
+          <input class="cin" id="cin" placeholder="繼續追問…" onkeydown="if(event.key==='Enter')sendFollowup()">
+          <button class="sbtn" id="sbtn" onclick="sendFollowup()">➤</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════
+const WORKER_URL = 'https://arcar.kftseng2oo1.workers.dev';
+const MODEL      = 'claude-opus-4-5';
+
+// ═══════════════════════════════════════
+//  常數
+// ═══════════════════════════════════════
+const TIAN_GAN=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const DI_ZHI  =['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const J60=[];for(let i=0;i<60;i++)J60.push(TIAN_GAN[i%10]+DI_ZHI[i%12]);
+const PDIR={1:'坎北',2:'坤西南',3:'震東',4:'巽東南',5:'中宮',6:'乾西北',7:'兌西',8:'艮東北',9:'離南'};
+const STEMS9=['戊','己','庚','辛','壬','癸','丁','丙','乙'];
+const SAN_QI=new Set(['丁','丙','乙']);
+const DOOR_BASE={1:'休門',2:'死門',3:'傷門',4:'杜門',9:'景門',7:'驚門',6:'開門',8:'生門'};
+const DOOR_SEQ=['休門','死門','傷門','杜門','景門','驚門','開門','生門'];
+const DOOR_PATH=[1,2,3,4,9,6,7,8];
+const STAR_BASE={1:'蓬星',2:'芮星',3:'沖星',4:'輔星',5:'禽星',6:'心星',7:'柱星',8:'任星',9:'英星'};
+const STAR8=['蓬星','芮星','沖星','輔星','心星','柱星','任星','英星'];
+const SPATH8=[1,2,3,4,6,7,8,9];
+const GODS=['值符','螣蛇','太陰','六合','白虎','玄武','九地','九天'];
+const GPATH=[1,8,3,4,9,2,7,6];
+const P9=[1,2,3,4,5,6,7,8,9];
+const BOARD_LO=[4,9,2,3,5,7,8,1,6];
+const ZTP={子:1,丑:8,寅:8,卯:3,辰:4,巳:4,午:9,未:2,申:2,酉:7,戌:6,亥:6};
+const SHI_N=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const SHI_S=[0,0,2,2,4,4,6,6,8,8];
+const JIEQI=[
+  {name:'小寒',m:1,d:6,yang:true,baseJu:4},{name:'大寒',m:1,d:20,yang:true,baseJu:7},
+  {name:'立春',m:2,d:4,yang:true,baseJu:8},{name:'雨水',m:2,d:19,yang:true,baseJu:5},
+  {name:'驚蟄',m:3,d:6,yang:true,baseJu:2},{name:'春分',m:3,d:21,yang:true,baseJu:3},
+  {name:'清明',m:4,d:5,yang:true,baseJu:6},{name:'穀雨',m:4,d:20,yang:true,baseJu:9},
+  {name:'立夏',m:5,d:6,yang:true,baseJu:7},{name:'小滿',m:5,d:21,yang:true,baseJu:1},
+  {name:'芒種',m:6,d:6,yang:true,baseJu:4},{name:'夏至',m:6,d:21,yang:false,baseJu:9},
+  {name:'小暑',m:7,d:7,yang:false,baseJu:6},{name:'大暑',m:7,d:23,yang:false,baseJu:3},
+  {name:'立秋',m:8,d:7,yang:false,baseJu:2},{name:'處暑',m:8,d:23,yang:false,baseJu:5},
+  {name:'白露',m:9,d:8,yang:false,baseJu:8},{name:'秋分',m:9,d:23,yang:false,baseJu:7},
+  {name:'寒露',m:10,d:8,yang:false,baseJu:4},{name:'霜降',m:10,d:23,yang:false,baseJu:1},
+  {name:'立冬',m:11,d:7,yang:false,baseJu:3},{name:'小雪',m:11,d:22,yang:false,baseJu:9},
+  {name:'大雪',m:12,d:7,yang:false,baseJu:6},{name:'冬至',m:12,d:22,yang:true,baseJu:1},
+];
+
+// 格局判斷資料庫（吉/凶/平 + 現代說明）
+const GEJU_DB = {
+  '青龍返首': {lv:'吉', icon:'🐉', note:'突破困境、柳暗花明'},
+  '飛鳥跌穴': {lv:'吉', icon:'🦅', note:'精準落點、一擊即中'},
+  '龍返首':   {lv:'吉', icon:'🐉', note:'回歸正軌、重獲機會'},
+  '虎猖狂':   {lv:'凶', icon:'🐅', note:'小心意外與衝突'},
+  '天網四張': {lv:'凶', icon:'🕸', note:'多重阻礙、暫緩行動'},
+  '五不遇時': {lv:'凶', icon:'⚠', note:'時機未到、靜待為宜'},
+  '伏吟':     {lv:'凶', icon:'😶', note:'原地踏步、進退兩難'},
+  '反吟':     {lv:'凶', icon:'🔄', note:'事倍功半、方向需調整'},
+  '普通盤':   {lv:'平', icon:'☯', note:'平穩局勢、穩紮穩打'},
+};
+
+const DOOR_MEANING = {
+  '休門':'靜養、休息、退守為吉',
+  '生門':'生機蓬勃、求財謀事最佳',
+  '傷門':'競爭激烈、需防口舌是非',
+  '杜門':'封閉隱藏、適合謀略籌備',
+  '景門':'文書、宣傳、外交場合吉',
+  '死門':'終結與重啟、清除舊包袱',
+  '驚門':'震驚變動、謹防突發事件',
+  '開門':'開創新局、出行求財吉利',
+};
+
+const STAR_MEANING = {
+  '蓬星':'開拓、行動力強',
+  '芮星':'穩固、積累能量',
+  '沖星':'衝勁、但需防莽撞',
+  '輔星':'輔助、貴人相助',
+  '禽星':'中央協調、多方斡旋',
+  '心星':'智慧、深思熟慮',
+  '柱星':'穩定支撐、長期佈局',
+  '任星':'承擔責任、默默耕耘',
+  '英星':'光芒四射、展現才華',
+};
+
+const GOD_MEANING = {
+  '值符':'主導優勢，掌握主動',
+  '螣蛇':'變化莫測，謹防欺詐',
+  '太陰':'隱蔽保護，適合暗中運作',
+  '六合':'合作順遂，人際和諧',
+  '白虎':'競爭壓力，防血光意外',
+  '玄武':'陰謀暗流，留意小人',
+  '九地':'穩固根基，深耕佈局',
+  '九天':'飛躍突破，登高望遠',
+};
+
+// ═══════════════════════════════════════
+//  AI System Prompt
+// ═══════════════════════════════════════
+const SYSTEM_PROMPT = `# Role
+你是一位精通「現代行為科學」與「奇門遁甲」的戰略決策顧問。你的任務是將排盤結果轉化為使用者一看就懂的「行動指引卡」。
+
+# 翻譯邏輯（Mapping Logic）
+- 生門 → 主動出擊、創造機會的好時機
+- 休門 → 適合充電、等待時機成熟
+- 開門 → 勇敢開創、出擊首選
+- 死門 → 終結舊事、清除負擔後重啟（禁止說「死」帶來恐懼，要說終結與重生）
+- 景門 → 表達、展示、宣傳自己
+- 傷門 → 行動力強但易起衝突，需謹慎溝通
+- 杜門 → 謀定後動，適合策略籌備
+- 驚門 → 留意變數，不宜輕舉妄動
+- 值符 → 掌握主動權，局勢對你有利
+- 螣蛇 → 情況複雜，防信息失真
+- 太陰 → 低調進行，暗中佈局效果更好
+- 六合 → 借助合作夥伴，人際關係是關鍵
+- 白虎 → 競爭激烈，避免正面衝突
+- 玄武 → 留意背後的隱患或不誠實的人
+- 九地 → 打好基礎，慢工出細活
+- 九天 → 大膽突破，有機會一飛衝天
+- 蓬星 → 積極探索，主動出擊
+- 芮星 → 腳踏實地，積累實力
+- 英星 → 發揮個人魅力，光明正大
+- 心星 → 多思考少衝動，智取勝武
+- 柱星 → 長遠佈局，不急於一時
+- 任星 → 承擔使命，以責任感驅動
+- 沖星 → 行動迅速，但防剛則易折
+- 輔星 → 尋求支援，貴人自來
+- 禽星 → 居中協調，多方整合
+- 三奇（丁丙乙）→ 「奇門特助」降臨，行動特別吉利
+- 六儀（戊己庚辛壬癸）→ 標準能量，按盤中吉凶判斷
+- 旬空宮位 → 該方位/領域的力量暫時缺位，不宜主攻
+
+# 負面格局轉化原則
+- 絕對禁止使用恐嚇性語言
+- 凶門（死門、驚門）→ 轉化為「清理舊事、做好準備」的時機
+- 白虎、玄武 → 轉化為「提高警覺、做好防護」
+- 旬空 → 轉化為「某方面需低調，換個方向更有力」
+- 五不遇時 → 轉化為「這是靜心思考而非行動的時刻」
+
+# Output Format（嚴格輸出 JSON，不得有其他文字）
+{
+  "geju": "格局名稱（若無特殊格局則寫「平穩局勢」）",
+  "geju_level": "吉/凶/平",
+  "tone": "10字以內的能量定調",
+  "timing": "【時】具體建議（1-2句）",
+  "location": "【地】方位建議（直接說東南西北）",
+  "people": "【人】人際關係建議（1-2句）",
+  "object": "【物】穿搭顏色或環境佈置建議",
+  "ai_quote": "一句富有啟發性的戰略金句"
+}`;
+
+// ═══════════════════════════════════════
+//  UI Init
+// ═══════════════════════════════════════
+(function init(){
+  const ms=document.getElementById('inMonth');
+  for(let m=1;m<=12;m++){const o=document.createElement('option');o.value=m;o.text=m+'月';ms.appendChild(o);}
+  ms.addEventListener('change',updDays);
+  document.getElementById('inYear').addEventListener('change',updDays);
+  document.getElementById('modelTag').textContent=MODEL;
+  setNow();
+})();
+function updDays(){
+  const y=+document.getElementById('inYear').value||2025;
+  const m=+document.getElementById('inMonth').value||1;
+  const days=new Date(y,m,0).getDate();
+  const ds=document.getElementById('inDay');const prev=+ds.value||1;
+  ds.innerHTML='';
+  for(let d=1;d<=days;d++){const o=document.createElement('option');o.value=d;o.text=d+'日';ds.appendChild(o);}
+  ds.value=Math.min(prev,days);
+}
+function setNow(){
+  const n=new Date();
+  document.getElementById('inYear').value=n.getFullYear();
+  document.getElementById('inMonth').value=n.getMonth()+1;
+  updDays();
+  document.getElementById('inDay').value=n.getDate();
+  const h=n.getHours();
+  document.getElementById('inHour').value=h<1||h>=23?0:Math.floor((h+1)/2);
+}
+function setQ(q){document.getElementById('userQ').value=q;}
+
+// ═══════════════════════════════════════
+//  排盤邏輯（v2 完整保留）
+// ═══════════════════════════════════════
+function dayGZ(y,m,d){
+  const diff=Math.round((new Date(y,m-1,d)-new Date(2000,0,1))/86400000);
+  const idx=((40+diff)%60+60)%60;
+  return{gz:J60[idx],gan:TIAN_GAN[idx%10],zhi:DI_ZHI[idx%12],idx};
+}
+function hgzIdx(dayIdx,shi){
+  const sg=SHI_S[dayIdx%10];const hg=(sg+shi)%10;const hz=shi%12;
+  for(let i=0;i<60;i++)if(i%10===hg&&i%12===hz)return i;return 0;
+}
+function getXun(hIdx){
+  const xs=Math.floor(hIdx/10)*10;
+  const YI=['戊','己','庚','辛','壬','癸'];
+  const ki=[(xs%12+10)%12,(xs%12+11)%12];
+  return{xunYi:YI[xs/10],xunName:J60[xs]+'旬',kongZhi:ki.map(i=>DI_ZHI[i])};
+}
+function getJQ(m,d){
+  const cur=m*100+d;let best=null;
+  for(const jq of JIEQI){const v=jq.m*100+jq.d;if(v<=cur&&(!best||v>best.v))best={...jq,v};}
+  return best||JIEQI[JIEQI.length-1];
+}
+function calcJu(y,m,d){
+  const jq=getJQ(m,d);const dun=jq.yang?'陽遁':'陰遁';
+  const diff=Math.round((new Date(y,m-1,d)-new Date(y,jq.m-1,jq.d))/86400000);
+  const yi=Math.min(Math.floor(diff/5),2);
+  const YUAN=['上元','中元','下元'];
+  const ju=jq.yang?((jq.baseJu-1+yi)%9)+1:((jq.baseJu-1-yi+9)%9)+1;
+  return{dun,ju,jieqi:jq.name,yuan:YUAN[yi]};
+}
+function epFn(ju,dun){
+  const ep={};
+  for(let i=0;i<9;i++){const idx=dun==='陽遁'?(ju-1+i)%9:((ju-1-i)%9+9)%9;ep[P9[idx]]=STEMS9[i];}
+  return ep;
+}
+function hpFn(xp,zfs,dun){
+  const hp={};let s2=zfs==='禽星'?'芮星':zfs;
+  const si=STAR8.indexOf(s2);const pi=SPATH8.indexOf(xp===5?2:xp);
+  for(let i=0;i<8;i++){
+    const s=dun==='陽遁'?(si+i)%8:((si-i)%8+8)%8;
+    const p=dun==='陽遁'?(pi+i)%8:((pi-i)%8+8)%8;
+    hp[SPATH8[p]]=STAR8[s];
+  }hp[5]='（禽★2）';return hp;
+}
+function hmpFn(zsp,zsd,dun){
+  const hmp={};const di=DOOR_SEQ.indexOf(zsd);const pi=Math.max(DOOR_PATH.indexOf(zsp),0);
+  for(let i=0;i<8;i++){
+    const d2=dun==='陽遁'?(di+i)%8:((di-i)%8+8)%8;
+    const p2=dun==='陽遁'?(pi+i)%8:((pi-i)%8+8)%8;
+    hmp[DOOR_PATH[p2]]=DOOR_SEQ[d2];
+  }hmp[5]='（無門）';return hmp;
+}
+function gpFn(xp,dun){
+  const gp={};const si=GPATH.indexOf(xp===5?2:xp);
+  for(let i=0;i<8;i++){const p=dun==='陽遁'?(si+i)%8:((si-i)%8+8)%8;gp[GPATH[p]]=GODS[i];}
+  gp[5]='（無神）';return gp;
+}
+function zspalFn(xp,hIdx,dun){
+  const diff=hIdx%10;const ci=P9.indexOf(xp);
+  let ti=dun==='陽遁'?(ci+diff)%9:((ci-diff)%9+9)%9;
+  let p=P9[ti];if(p===5)p=dun==='陽遁'?8:2;return p;
+}
+function doBoard(y,m,d,shi){
+  const dgz=dayGZ(y,m,d);const hi=hgzIdx(dgz.idx,shi);
+  const hganIdx=(SHI_S[dgz.idx%10]+shi)%10;
+  const{dun,ju,jieqi,yuan}=calcJu(y,m,d);
+  const ep=epFn(ju,dun);
+  const{xunYi,xunName,kongZhi}=getXun(hi);
+  const kongPals=new Set(kongZhi.map(z=>ZTP[z]).filter(Boolean));
+  let xp=Object.entries(ep).find(([,s])=>s===xunYi)?.[0];xp=xp?+xp:ju;
+  const zfs=STAR_BASE[xp]||'蓬星';const zsd=DOOR_BASE[xp]||'休門';
+  const zsp=zspalFn(xp,hi,dun);
+  const hp=hpFn(xp,zfs,dun);const hmp=hmpFn(zsp,zsd,dun);const gp=gpFn(xp,dun);
+  return{dun,ju,jieqi,yuan,ep,hp,hmp,gp,
+    dayGZ:dgz,hgan:TIAN_GAN[hganIdx],hzhi:DI_ZHI[shi],hi,
+    xp,xunYi,xunName,kongZhi,kongPals,zfs,zsd,zsp};
+}
+
+// ═══════════════════════════════════════
+//  渲染盤面
+// ═══════════════════════════════════════
+function renderInfo(R){
+  const g=document.getElementById('igrid');
+  const chips=[
+    ['日柱',R.dayGZ.gz],['時柱',R.hgan+SHI_N[R.hi%12]],
+    ['節氣',R.jieqi],['元',R.yuan],
+    ['陰陽',R.dun,R.dun==='陽遁'?'cv-yang':'cv-yin'],
+    ['局數',R.ju+' 局'],['旬',R.xunName],['旬首儀',R.xunYi],
+    ['值符星',R.zfs],['值使門',R.zsd],
+    ['旬空',R.kongZhi.join('、'),'cv-kong'],
+  ];
+  g.innerHTML=chips.map(([l,v,c])=>`
+    <div class="ichip"><div class="ichip-l">${l}</div>
+    <div class="ichip-v ${c||''}">${v}</div></div>`).join('');
+}
+function renderBoard(R){
+  const bd=document.getElementById('board');bd.innerHTML='';
+  BOARD_LO.forEach(p=>{
+    const cell=document.createElement('div');cell.className='cell';cell.setAttribute('data-p',p);
+    if(p===R.xp)cell.classList.add('zf');if(p===R.zsp)cell.classList.add('zs');
+    if(R.kongPals.has(p))cell.classList.add('kong');
+    const g=R.gp[p]||'—',s=R.hp[p]||'—',d=R.hmp[p]||'—',e=R.ep[p]||'—';
+    const sc=SAN_QI.has(e)?'eq':'ey';
+    cell.innerHTML=`
+      <span class="pn">${p}</span><span class="pd">${PDIR[p]||''}</span>
+      <span class="cg">${g}</span><div class="dv"></div>
+      <span class="cs">${s==='（禽★2）'?'—':s}</span>
+      ${p===2?'<span class="cn">禽附</span>':''}
+      <span class="cd">${d}</span><div class="dv"></div>
+      <span class="ce ${sc}">${e}</span>
+      ${p===R.xp?'<span class="bc bc-zf">值符</span>':''}
+      ${p===R.zsp?'<span class="bc bc-zs">值使</span>':''}
+      ${R.kongPals.has(p)?'<span class="bc bc-ko">旬空</span>':''}`;
+    bd.appendChild(cell);
+  });
+}
+
+// ═══════════════════════════════════════
+//  指引卡渲染
+// ═══════════════════════════════════════
+function renderGuideCard(json, R){
+  const lv = json.geju_level||'平';
+  const lvTag = lv==='吉'?'gj-ji':lv==='凶'?'gj-xiong':'gj-ping';
+  const gjInfo = GEJU_DB[json.geju]||{lv,icon:'☯',note:''};
+  const isYin = R.dun==='陰遁';
+  document.getElementById('guideSlot').innerHTML=`
+  <div class="guide-card">
+    <div class="gc-header${isYin?' yin-header':''}">
+      <div class="gc-badge">${gjInfo.icon||'☯'}</div>
+      <div>
+        <span class="gj-tag ${lvTag}">${lv}｜${json.geju}</span>
+        <div class="gc-tone">${json.tone}</div>
+        <div class="gc-format">${gjInfo.note||''}</div>
+      </div>
+    </div>
+    <div class="gc-body">
+      <div class="gc-item">
+        <div class="gc-label"><span class="gc-label-icon">⏰</span>時機</div>
+        <div class="gc-val">${json.timing}</div>
+      </div>
+      <div class="gc-item">
+        <div class="gc-label"><span class="gc-label-icon">🧭</span>方位</div>
+        <div class="gc-val">${json.location}</div>
+      </div>
+      <div class="gc-item">
+        <div class="gc-label"><span class="gc-label-icon">🤝</span>人際</div>
+        <div class="gc-val">${json.people}</div>
+      </div>
+      <div class="gc-item">
+        <div class="gc-label"><span class="gc-label-icon">✨</span>物件</div>
+        <div class="gc-val">${json.object}</div>
+      </div>
+    </div>
+    <div class="gc-quote">「 ${json.ai_quote} 」</div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+//  AI 對話
+// ═══════════════════════════════════════
+let chatHist=[];
+let curBoard=null;
+
+// 組合送給 AI 的 User Message（JSON格式完整盤局）
+function buildUserMsg(R, question){
+  // 找值使門落宮的神/星
+  const zsGod  = R.gp[R.zsp]  || '—';
+  const zsStar = R.hp[R.zsp]  || '—';
+  const zsEarth= R.ep[R.zsp]  || '—';
+
+  // 找值符宮資訊
+  const zfGod  = R.gp[R.xp]  || '—';
+  const zfStar = R.zfs;
+  const zfDoor = DOOR_BASE[R.xp] || '—';
+  const zfEarth= R.ep[R.xp]  || '—';
+
+  // 三奇資訊
+  const qiPals=Object.entries(R.ep).filter(([,s])=>SAN_QI.has(s)).map(([p,s])=>`${s}在${PDIR[p]}`);
+
+  // 吉方（生門、開門、休門所在宮）
+  const jiDir=Object.entries(R.hmp)
+    .filter(([,d])=>['生門','開門','休門'].includes(d))
+    .map(([p,d])=>`${d}/${PDIR[p]}`).join('、');
+
+  const payload={
+    // 格局資訊
+    dun: R.dun,
+    ju: R.ju+'局',
+    jieqi: R.jieqi,
+    yuan: R.yuan,
+    // 核心宮位
+    zhifu_palace: PDIR[R.xp],
+    zhifu_star: zfStar,
+    zhifu_door: zfDoor,
+    zhifu_god: zfGod,
+    zhifu_earth: zfEarth,
+    zhishi_palace: PDIR[R.zsp],
+    zhishi_door: R.zsd,
+    zhishi_star: zsStar,
+    zhishi_god: zsGod,
+    zhishi_earth: zsEarth,
+    // 吉方
+    ji_fang: jiDir||'平均分佈',
+    // 三奇
+    san_qi: qiPals.length?qiPals.join('、'):'本盤無三奇',
+    // 旬空
+    xun_kong: R.kongZhi.join('、'),
+    xun_kong_palaces: Array.from(R.kongPals).map(p=>PDIR[p]).join('、'),
+    // 完整九宮摘要
+    nine_palaces: BOARD_LO.map(p=>({
+      palace: PDIR[p],
+      god: R.gp[p]||'—',
+      star: R.hp[p]||'—',
+      door: R.hmp[p]||'—',
+      earth: R.ep[p]||'—',
+      marks: [p===R.xp?'值符':null, p===R.zsp?'值使':null, R.kongPals.has(p)?'旬空':null].filter(Boolean),
+    })),
+    // 使用者問題
+    user_question: question,
+  };
+  return `以下是奇門遁甲盤局資訊（JSON格式），請根據這些資料生成行動指引卡：\n\n${JSON.stringify(payload,null,2)}`;
+}
+
+async function callAI(userMsg, isFirst){
+  chatHist.push({role:'user',content:userMsg});
+  const systemToUse = isFirst ? SYSTEM_PROMPT
+    : `你是奇門遁甲戰略顧問。使用者正在追問關於剛才盤局的問題。請用溫暖、實用的現代語言回覆，約150-250字，繁體中文。不要重新輸出JSON。`;
+  const resp=await fetch(WORKER_URL,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:MODEL,max_tokens:1000,system:systemToUse,messages:chatHist})
+  });
+  if(!resp.ok) throw new Error(`API ${resp.status}`);
+  const data=await resp.json();
+  const text=data.content?.[0]?.text||'';
+  chatHist.push({role:'assistant',content:text});
+  return text;
+}
+
+function parseGuideJSON(text){
+  // 嘗試從回傳文字中萃取 JSON
+  const s=text.indexOf('{'), e=text.lastIndexOf('}');
+  if(s>=0&&e>s){
+    try{return JSON.parse(text.slice(s,e+1));}catch(err){}
+  }
+  // fallback
+  return{geju:'平穩局勢',geju_level:'平',tone:'穩健前行',
+    timing:text,location:'正前方',people:'保持誠信',
+    object:'素色穿搭',ai_quote:'每一步都算數。'};
+}
+
+function appendMsg(role,html){
+  const area=document.getElementById('chatArea');
+  const div=document.createElement('div');div.className=`msg ${role}`;
+  div.innerHTML=`<div class="av">${role==='user'?'🙋':'🔮'}</div>
+    <div class="bubble">${html}</div>`;
+  area.appendChild(div);area.scrollTop=area.scrollHeight;
+}
+function addTyping(){
+  const area=document.getElementById('chatArea');
+  const d=document.createElement('div');d.className='msg bot';d.id='tdot';
+  d.innerHTML=`<div class="av">🔮</div><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  area.appendChild(d);area.scrollTop=area.scrollHeight;
+}
+function rmTyping(){document.getElementById('tdot')?.remove();}
+function fmtMD(t){
+  return t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+          .replace(/`(.+?)`/g,'<em>$1</em>')
+          .replace(/\n/g,'<br>');
+}
+
+function showFollowup(){
+  const fr=document.getElementById('frow');fr.classList.remove('hidden');
+  const FTOPICS=['這個格局對我的問題是好是壞？','吉方具體怎麼利用？',
+    '有哪些事情要特別避免？','最佳行動時間點是？','旬空對我的影響是什麼？'];
+  document.getElementById('fchips').innerHTML=FTOPICS.map(t=>
+    `<button class="fc" onclick="sendFT('${t}')">${t}</button>`).join('');
+}
+
+async function sendFollowup(){
+  const inp=document.getElementById('cin');const q=inp.value.trim();
+  if(!q)return;inp.value='';await sendFT(q);
+}
+async function sendFT(q){
+  if(!curBoard)return;setDis(true);
+  const area=document.getElementById('chatArea');area.classList.remove('hidden');
+  appendMsg('user',q);addTyping();
+  try{
+    const r=await callAI(q,false);rmTyping();appendMsg('bot',fmtMD(r));
+  }catch(e){rmTyping();appendMsg('bot','⚠️ '+e.message);}
+  setDis(false);area.scrollTop=area.scrollHeight;
+}
+function setDis(v){
+  document.getElementById('sbtn').disabled=v;
+  document.getElementById('btnGo').disabled=v;
+}
+
+// ═══════════════════════════════════════
+//  主程式
+// ═══════════════════════════════════════
+async function doLayout(){
+  const y=+document.getElementById('inYear').value;
+  const m=+document.getElementById('inMonth').value;
+  const d=+document.getElementById('inDay').value;
+  const shi=+document.getElementById('inHour').value;
+  const q=document.getElementById('userQ').value.trim();
+  if(!q){
+    const ta=document.getElementById('userQ');
+    ta.style.borderColor='var(--gold)';ta.focus();
+    setTimeout(()=>ta.style.borderColor='',1800);return;
+  }
+  setDis(true);
+  try{
+    const R=doBoard(y,m,d,shi);curBoard=R;chatHist=[];
+
+    // 顯示盤面
+    renderInfo(R);renderBoard(R);
+    document.getElementById('cardInfo').classList.remove('hidden');
+    document.getElementById('cardBoard').classList.remove('hidden');
+
+    // 指引卡 loading
+    document.getElementById('guideSlot').innerHTML=`
+      <div class="chat-empty"><div class="ce-icon" style="animation:db .9s ease-in-out infinite">☯</div>
+      <div class="ce-text">AI 正在解讀盤局…</div></div>`;
+    document.getElementById('chatArea').classList.add('hidden');
+    document.getElementById('chatArea').innerHTML='';
+    document.getElementById('frow').classList.add('hidden');
+
+    // 呼叫 AI
+    const userMsg=buildUserMsg(R,q);
+    const reply=await callAI(userMsg,true);
+
+    // 解析 JSON → 指引卡
+    const guideData=parseGuideJSON(reply);
+    renderGuideCard(guideData,R);
+    showFollowup();
+
+  }catch(e){
+    document.getElementById('guideSlot').innerHTML=`
+      <div class="chat-empty"><div class="ce-text" style="color:var(--red)">⚠️ ${e.message}</div></div>`;
+    console.error(e);
+  }
+  setDis(false);
+}
+
+window.addEventListener('load',setNow);
+</script>
+</body>
+</html>
