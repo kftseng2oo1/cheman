@@ -681,29 +681,36 @@ function drawCompass(){
   // ── 底盤旋轉：讓地理正北永遠朝畫布頂部
   // Canvas 預設 0° = 右邊（東），需要先 -90° 讓 0° = 上（北）
   // 再加上 -deviceHeading，讓羅盤隨裝置反向旋轉（保持北方朝上）
-  const baseRot = -Math.PI / 2; // Canvas 坐標修正：讓北(0°)朝畫面上
+  // Canvas 預設 0°=右(東)。
+  // 目標：地理北(0°) 朝畫面上方。
+  // webkitCompassHeading：裝置頂部所指的地理方位角（朝北=0，朝東=90，朝南=180）
+  // 底盤需反向旋轉 deviceHeading，讓北方固定朝上。
+  // 實測：無旋轉時東方朝上（Canvas 預設），所以需要先 -90° 讓北朝上，
+  //        再 -deviceHeading 反向追蹤。
+  // 但實測結果差了 +90°，故補正為 -deviceHeading + 0（不加 baseRot），
+  // 即底盤旋轉 = -deviceHeading * π/180，Canvas 的 0°(東) 不需再修正。
   const headingRot = deviceHeading !== null ? (-deviceHeading * Math.PI / 180) : 0;
-  const rot = baseRot + headingRot;
+  const rot = headingRot; // 直接用，不加 baseRot
 
   ctx.save();
   ctx.translate(CX,CY);
   ctx.rotate(rot);
 
   // ── 五行色扇形（deg 為地理角度，北=0°順時針）
+  // 底盤 rot 無 baseRot，所以元素角度需 -90° 讓北=畫面上
   const wxSectors=[
-    {name:'火',deg:180,span:72,color:'rgba(232,80,48,0.18)'},  // 南
-    {name:'木',deg:90, span:72,color:'rgba(56,184,72,0.18)'},   // 東
-    {name:'水',deg:0,  span:72,color:'rgba(48,96,224,0.18)'},   // 北
-    {name:'金',deg:270,span:72,color:'rgba(144,192,224,0.18)'}, // 西
-    {name:'土',deg:45, span:36,color:'rgba(200,152,32,0.14)'},  // 東北
-    {name:'土',deg:135,span:36,color:'rgba(200,152,32,0.14)'},  // 東南
-    {name:'土',deg:225,span:36,color:'rgba(200,152,32,0.14)'},  // 西南
-    {name:'土',deg:315,span:36,color:'rgba(200,152,32,0.14)'},  // 西北
+    {name:'火',deg:180,span:72,color:'rgba(232,80,48,0.18)'},
+    {name:'木',deg:90, span:72,color:'rgba(56,184,72,0.18)'},
+    {name:'水',deg:0,  span:72,color:'rgba(48,96,224,0.18)'},
+    {name:'金',deg:270,span:72,color:'rgba(144,192,224,0.18)'},
+    {name:'土',deg:45, span:36,color:'rgba(200,152,32,0.14)'},
+    {name:'土',deg:135,span:36,color:'rgba(200,152,32,0.14)'},
+    {name:'土',deg:225,span:36,color:'rgba(200,152,32,0.14)'},
+    {name:'土',deg:315,span:36,color:'rgba(200,152,32,0.14)'},
   ];
   for(const s of wxSectors){
-    // deg 直接轉弧度（baseRot 已處理偏移，這裡直接用地理角度）
-    const a1 = s.deg * Math.PI / 180 - s.span / 2 * Math.PI / 180;
-    const a2 = s.deg * Math.PI / 180 + s.span / 2 * Math.PI / 180;
+    const a1 = (s.deg - s.span/2 - 90) * Math.PI / 180;
+    const a2 = (s.deg + s.span/2 - 90) * Math.PI / 180;
     ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,R*0.88,a1,a2);ctx.closePath();
     ctx.fillStyle=s.color;ctx.fill();
   }
@@ -711,8 +718,8 @@ function drawCompass(){
   // ── 吉門扇形弧帶（外環）
   for(const ji of jiFangList){
     if(ji.jiRank<0) continue;
-    const a1 = ji.deg * Math.PI / 180 - 18 * Math.PI / 180;
-    const a2 = ji.deg * Math.PI / 180 + 18 * Math.PI / 180;
+    const a1 = (ji.deg - 18 - 90) * Math.PI / 180;
+    const a2 = (ji.deg + 18 - 90) * Math.PI / 180;
     ctx.beginPath();ctx.arc(0,0,R*0.86,a1,a2);ctx.arc(0,0,R*0.72,a2,a1,true);ctx.closePath();
     ctx.globalAlpha=ji.isKong?0.2:0.5-ji.jiRank*0.08;
     ctx.fillStyle=ji.color;ctx.fill();
@@ -721,7 +728,7 @@ function drawCompass(){
 
   // ── 刻度環（每5度一格）
   for(let deg=0;deg<360;deg+=5){
-    const a = deg * Math.PI / 180;
+    const a = (deg - 90) * Math.PI / 180;
     const isMajor=deg%45===0;const isMinor=deg%15===0;
     const inner=isMajor?R*0.88:isMinor?R*0.90:R*0.92;
     const outer=R*0.96;
@@ -740,24 +747,24 @@ function drawCompass(){
   ctx.beginPath();ctx.arc(0,0,R*0.70,0,Math.PI*2);
   ctx.strokeStyle='rgba(200,168,74,0.3)';ctx.lineWidth=1;ctx.stroke();
 
-  // ── 八卦方位文字（deg 為地理角度）
+  // ── 八卦方位文字
   const dirs=[
-    {t:'離',deg:180,color:'#e87050'}, // 南
-    {t:'坎',deg:0,  color:'#5080e8'}, // 北
-    {t:'震',deg:90, color:'#40c858'}, // 東
-    {t:'兌',deg:270,color:'#90c8e8'}, // 西
-    {t:'巽',deg:135,color:'#70b840'}, // 東南
-    {t:'艮',deg:45, color:'#5888c8'}, // 東北
-    {t:'坤',deg:225,color:'#c0a030'}, // 西南
-    {t:'乾',deg:315,color:'#80a8d0'}, // 西北
+    {t:'離',deg:180,color:'#e87050'},
+    {t:'坎',deg:0,  color:'#5080e8'},
+    {t:'震',deg:90, color:'#40c858'},
+    {t:'兌',deg:270,color:'#90c8e8'},
+    {t:'巽',deg:135,color:'#70b840'},
+    {t:'艮',deg:45, color:'#5888c8'},
+    {t:'坤',deg:225,color:'#c0a030'},
+    {t:'乾',deg:315,color:'#80a8d0'},
   ];
   for(const d of dirs){
-    const a = d.deg * Math.PI / 180;
+    const a = (d.deg - 90) * Math.PI / 180;
     const tr=R*0.80;
     ctx.save();
     ctx.rotate(a);
     ctx.translate(0,-tr);
-    ctx.rotate(-a - rot); // 文字保持正立（抵消底盤旋轉）
+    ctx.rotate(-a - rot); // 抵消底盤旋轉讓文字保持正立
     ctx.font=`bold ${R*0.075}px 'Noto Serif TC',serif`;
     ctx.fillStyle=d.color;
     ctx.textAlign='center';ctx.textBaseline='middle';
@@ -767,7 +774,7 @@ function drawCompass(){
 
   // ── 宮位門標籤（中環）
   for(const ji of jiFangList){
-    const a = ji.deg * Math.PI / 180;
+    const a = (ji.deg - 90) * Math.PI / 180;
     const tr=R*0.57;
     ctx.save();
     ctx.rotate(a);
@@ -787,23 +794,22 @@ function drawCompass(){
 
   ctx.restore(); // 結束底盤旋轉
 
-  // ── 指針（固定不動，始終指向畫面上方為基準）
-  // 地理角度系統：北=0°，順時針正增
-  // 指針需指向目標吉方相對於裝置當前朝向的角度差
-  // 底盤已經旋轉讓北朝上，指針同樣在此坐標系中：
-  //   目標在地理 targetDeg 方向
-  //   裝置朝向 deviceHeading
-  //   指針相對畫面的角度 = targetDeg - deviceHeading（轉成弧度）
-  // 因底盤已套用 baseRot(-90°)，指針也需同步加 baseRot 才能對齊
+  // ── 指針（固定在螢幕坐標，不隨底盤旋轉）
+  // rot = -deviceHeading * π/180（無 baseRot）
+  // 底盤內所有元素用 (deg-90)*π/180，讓地理北朝畫面上
+  // 指針的螢幕角度推導：
+  //   底盤旋轉後，地理 targetDeg 對應的螢幕角度
+  //   = rot + (targetDeg - 90)*π/180
+  //   = -deviceHeading*π/180 + (targetDeg-90)*π/180
+  //   = (targetDeg - deviceHeading - 90)*π/180
+  // 箭頭繪製方向：moveTo(0,-arrowLen) 朝上（螢幕-Y），rotate(0)=指向上方
   const arrowAngle = deviceHeading !== null
-    ? (targetDeg - deviceHeading) * Math.PI / 180
-    : -Math.PI / 2; // 無感應器時指向畫面正上方
+    ? (targetDeg - deviceHeading - 90) * Math.PI / 180
+    : -Math.PI / 2;
 
-  // 指針繪製：arrowAngle=0 表示指向畫面右方（東），
-  // 需要再 -π/2 讓 0 對應畫面上方（北）
   ctx.save();
   ctx.translate(CX,CY);
-  ctx.rotate(arrowAngle - Math.PI / 2);
+  ctx.rotate(arrowAngle);
 
   // 光暈
   ctx.shadowColor=jiFangList[selectedJiIdx]?.color||'#c8a84a';
