@@ -1,335 +1,527 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
 
-    <!-- 背景深空漸層 -->
-    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
-      <stop offset="0%"   stop-color="#1a1a35"/>
-      <stop offset="60%"  stop-color="#0e0e20"/>
-      <stop offset="100%" stop-color="#07070f"/>
+    <!-- ══ 背景：五行旋渦漸層 ══ -->
+    <!-- 以深夜藍紫為底，讓五行色彩自然浮現 -->
+    <radialGradient id="bgCore" cx="50%" cy="45%" r="55%">
+      <stop offset="0%"   stop-color="#1e1428"/>
+      <stop offset="40%"  stop-color="#120e20"/>
+      <stop offset="100%" stop-color="#08060f"/>
     </radialGradient>
 
-    <!-- 金色光暈漸層 -->
-    <radialGradient id="goldGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%"   stop-color="#e8cc70" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="#c8a84a" stop-opacity="0"/>
+    <!-- 五行：木（東・震・青綠） -->
+    <radialGradient id="wood" cx="80%" cy="50%" r="60%">
+      <stop offset="0%"   stop-color="#2d7a3a" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#1a4a20" stop-opacity="0"/>
     </radialGradient>
 
-    <!-- 九宮格線金色漸層 -->
-    <linearGradient id="gridGold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#e8d080"/>
-      <stop offset="50%"  stop-color="#c8a84a"/>
-      <stop offset="100%" stop-color="#a07830"/>
+    <!-- 五行：火（南・離・赤紅） -->
+    <radialGradient id="fire" cx="50%" cy="15%" r="55%">
+      <stop offset="0%"   stop-color="#c83020" stop-opacity="0.50"/>
+      <stop offset="100%" stop-color="#801808" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- 五行：土（中・黃） -->
+    <radialGradient id="earth" cx="50%" cy="50%" r="30%">
+      <stop offset="0%"   stop-color="#b8901a" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#805010" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- 五行：金（西・兌・白銀） -->
+    <radialGradient id="metal" cx="20%" cy="50%" r="60%">
+      <stop offset="0%"   stop-color="#b0c8e0" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#607890" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- 五行：水（北・坎・深藍） -->
+    <radialGradient id="water" cx="50%" cy="85%" r="55%">
+      <stop offset="0%"   stop-color="#1840a0" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#0c2060" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- 五行扇形漸層（用於外環扇形色帶） -->
+    <!-- 木・東 -->
+    <linearGradient id="woodLine" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#3daa50"/>
+      <stop offset="100%" stop-color="#1e6e2a"/>
+    </linearGradient>
+    <!-- 火・南 -->
+    <linearGradient id="fireLine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#e84820"/>
+      <stop offset="100%" stop-color="#a02810"/>
+    </linearGradient>
+    <!-- 土・中 -->
+    <linearGradient id="earthLine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#d4a020"/>
+      <stop offset="100%" stop-color="#906010"/>
+    </linearGradient>
+    <!-- 金・西 -->
+    <linearGradient id="metalLine" x1="100%" y1="0%" x2="0%" y2="0%">
+      <stop offset="0%"   stop-color="#c8ddf0"/>
+      <stop offset="100%" stop-color="#7090b0"/>
+    </linearGradient>
+    <!-- 水・北 -->
+    <linearGradient id="waterLine" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%"   stop-color="#2858d0"/>
+      <stop offset="100%" stop-color="#102880"/>
     </linearGradient>
 
-    <!-- 外圈漸層 -->
+    <!-- 金色系 -->
+    <linearGradient id="gridGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f0e090"/>
+      <stop offset="50%"  stop-color="#c8a84a"/>
+      <stop offset="100%" stop-color="#906820"/>
+    </linearGradient>
     <linearGradient id="outerRing" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#e8d080"/>
+      <stop offset="0%"   stop-color="#f0e090"/>
       <stop offset="30%"  stop-color="#c8a84a"/>
       <stop offset="70%"  stop-color="#8a6020"/>
-      <stop offset="100%" stop-color="#e8d080"/>
+      <stop offset="100%" stop-color="#f0e090"/>
     </linearGradient>
-
-    <!-- 太極陰陽漸層 -->
-    <linearGradient id="yangGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#f0e0a0"/>
-      <stop offset="100%" stop-color="#c8a84a"/>
-    </linearGradient>
-    <linearGradient id="yinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#1a1a35"/>
-      <stop offset="100%" stop-color="#0a0a18"/>
-    </linearGradient>
-
-    <!-- 星芒漸層 -->
-    <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%"   stop-color="#fff0a0"/>
-      <stop offset="40%"  stop-color="#e8c850"/>
+    <radialGradient id="goldGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#e8cc70" stop-opacity="0.20"/>
       <stop offset="100%" stop-color="#c8a84a" stop-opacity="0"/>
     </radialGradient>
 
-    <!-- 三奇色 -->
-    <linearGradient id="qiColor" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%"   stop-color="#e8b830"/>
-      <stop offset="100%" stop-color="#f0d060"/>
+    <!-- 太極漸層 -->
+    <linearGradient id="yangGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f8eeb0"/>
+      <stop offset="100%" stop-color="#d4a030"/>
+    </linearGradient>
+    <linearGradient id="yinGrad" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#1c1438"/>
+      <stop offset="100%" stop-color="#080614"/>
     </linearGradient>
 
-    <!-- 紅色accent -->
-    <linearGradient id="redAccent" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#d04040"/>
-      <stop offset="100%" stop-color="#a02020"/>
-    </linearGradient>
+    <!-- 三奇：金色 -->
+    <radialGradient id="qiGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#fff0a0"/>
+      <stop offset="60%"  stop-color="#e8c040"/>
+      <stop offset="100%" stop-color="#c89020" stop-opacity="0"/>
+    </radialGradient>
 
-    <!-- 青色accent -->
-    <linearGradient id="tealAccent" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%"   stop-color="#20c8a0"/>
-      <stop offset="100%" stop-color="#109070"/>
-    </linearGradient>
+    <!-- 五行星點 -->
+    <radialGradient id="woodStar" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#80ff90"/>
+      <stop offset="100%" stop-color="#30a040" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="fireStar" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ff8060"/>
+      <stop offset="100%" stop-color="#c03010" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="earthStar" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ffe080"/>
+      <stop offset="100%" stop-color="#c08010" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="metalStar" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#e0f0ff"/>
+      <stop offset="100%" stop-color="#80a0c0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="waterStar" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#6090ff"/>
+      <stop offset="100%" stop-color="#1030a0" stop-opacity="0"/>
+    </radialGradient>
 
-    <!-- 外圈文字路徑 -->
-    <path id="textCircle" d="M 256,256 m -175,0 a 175,175 0 1,1 350,0 a 175,175 0 1,1 -350,0" fill="none"/>
+    <!-- 路徑：文字圓弧 -->
+    <path id="textCircle" d="M256,256 m-175,0 a175,175 0 1,1 350,0 a175,175 0 1,1 -350,0" fill="none"/>
+    <path id="innerTextCircle" d="M256,256 m-138,0 a138,138 0 1,1 276,0 a138,138 0 1,1 -276,0" fill="none"/>
 
-    <!-- 濾鏡：金色光暈 -->
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="4" result="blur"/>
+    <!-- 濾鏡 -->
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
-    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="8" result="blur"/>
+    <filter id="softGlow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
-    <filter id="innerGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+    <filter id="crisp" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="woodGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feFlood flood-color="#40c050" flood-opacity="0.6" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="colorBlur"/>
+      <feMerge><feMergeNode in="colorBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="fireGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feFlood flood-color="#e05020" flood-opacity="0.6" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="colorBlur"/>
+      <feMerge><feMergeNode in="colorBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="earthGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feFlood flood-color="#d0a010" flood-opacity="0.5" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="colorBlur"/>
+      <feMerge><feMergeNode in="colorBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="metalGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feFlood flood-color="#90b8d8" flood-opacity="0.5" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="colorBlur"/>
+      <feMerge><feMergeNode in="colorBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="waterGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feFlood flood-color="#2050c0" flood-opacity="0.6" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="colorBlur"/>
+      <feMerge><feMergeNode in="colorBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
 
-    <!-- 裁切圓形 -->
-    <clipPath id="circleClip">
-      <circle cx="256" cy="256" r="230"/>
-    </clipPath>
-    <clipPath id="innerClip">
-      <circle cx="256" cy="256" r="160"/>
+    <!-- 裁切 -->
+    <clipPath id="outerClip"><circle cx="256" cy="256" r="248"/></clipPath>
+    <clipPath id="midClip">  <circle cx="256" cy="256" r="172"/></clipPath>
+    <clipPath id="innerClip"><circle cx="256" cy="256" r="128"/></clipPath>
+    <clipPath id="boardClip">
+      <rect x="128" y="128" width="256" height="256" rx="4"/>
     </clipPath>
 
   </defs>
 
-  <!-- ═══ 圓形背景 ═══ -->
-  <circle cx="256" cy="256" r="256" fill="#07070f"/>
-  <circle cx="256" cy="256" r="252" fill="url(#bgGrad)"/>
+  <!-- ════════════════════════════════════════
+       底色：深宇宙紫黑
+  ════════════════════════════════════════ -->
+  <circle cx="256" cy="256" r="256" fill="#08060f"/>
+  <circle cx="256" cy="256" r="252" fill="url(#bgCore)"/>
 
-  <!-- 背景金色光暈 -->
-  <circle cx="256" cy="256" r="220" fill="url(#goldGlow)"/>
+  <!-- ════════════════════════════════════════
+       五行光暈底層（大面積漫射）
+       木東・火南・金西・水北・土中
+  ════════════════════════════════════════ -->
+  <!-- 土（中央，最底層） -->
+  <circle cx="256" cy="256" r="252" fill="url(#earth)" clip-path="url(#outerClip)"/>
+  <!-- 木（東・右） -->
+  <circle cx="370" cy="256" r="180" fill="url(#wood)" clip-path="url(#outerClip)" opacity="0.9"/>
+  <!-- 火（南・上，奇門以上為南） -->
+  <circle cx="256" cy="142" r="170" fill="url(#fire)" clip-path="url(#outerClip)" opacity="0.85"/>
+  <!-- 金（西・左） -->
+  <circle cx="142" cy="256" r="180" fill="url(#metal)" clip-path="url(#outerClip)" opacity="0.8"/>
+  <!-- 水（北・下，奇門以下為北） -->
+  <circle cx="256" cy="370" r="170" fill="url(#water)" clip-path="url(#outerClip)" opacity="0.9"/>
+  <!-- 中央金色光暈 -->
+  <circle cx="256" cy="256" r="200" fill="url(#goldGlow)"/>
 
-  <!-- ═══ 外圈裝飾環（雙環） ═══ -->
-  <!-- 最外裝飾環 -->
-  <circle cx="256" cy="256" r="238" fill="none" stroke="url(#outerRing)" stroke-width="1.5" opacity="0.6"/>
-  <circle cx="256" cy="256" r="232" fill="none" stroke="url(#outerRing)" stroke-width="0.6" opacity="0.4"/>
+  <!-- ════════════════════════════════════════
+       外圈：五行色弧帶（環形扇形）
+       將外環分成5段，每段用對應五行色描邊
+       角度分配（以正上為南・火為起點）：
+         火 南  −54°~54°   （108°）
+         木 東   54°~126°  （72°）
+         土 東南 126°~162° （36°，寄）
+         金 西   234°~306° （72°）
+         土 西南 162°~234° （72°，含土）
+         水 北   306°~414° （108°）
+  ════════════════════════════════════════ -->
 
-  <!-- 主外圈 -->
-  <circle cx="256" cy="256" r="224" fill="none" stroke="url(#outerRing)" stroke-width="2.5"/>
+  <!-- 外圈五行色弧（stroke-dasharray 技巧） -->
+  <!-- 總周長 = 2π×224 ≈ 1407 -->
+  <!-- 火：南方 108°→ 420px；木：東 72°→280px；金：西 72°→280px；水：北 108°→420px；土：中央四隅 -->
 
-  <!-- 外圈刻度（24節氣，每15度一格） -->
-  <g stroke="url(#gridGold)" stroke-linecap="round" opacity="0.7">
-    <!-- 24等分刻度 -->
-    <line x1="256" y1="32"  x2="256" y2="44"  transform="rotate(0   256 256)" stroke-width="2"/>
-    <line x1="256" y1="32"  x2="256" y2="40"  transform="rotate(15  256 256)" stroke-width="1"/>
-    <line x1="256" y1="32"  x2="256" y2="44"  transform="rotate(30  256 256)" stroke-width="2"/>
-    <line x1="256" y1="32"  x2="256" y2="40"  transform="rotate(45  256 256)" stroke-width="1"/>
-    <line x1="256" y1="32"  x2="256" y2="44"  transform="rotate(60  256 256)" stroke-width="2"/>
-    <line x1="256" y1="32"  x2="256" y2="40"  transform="rotate(75  256 256)" stroke-width="1"/>
-    <line x1="256" y1="32"  x2="256" y2="44"  transform="rotate(90  256 256)" stroke-width="2"/>
-    <line x1="256" y1="32"  x2="256" y2="40"  transform="rotate(105 256 256)" stroke-width="1"/>
-    <line x1="256" y1="32"  x2="256" y2="44"  transform="rotate(120 256 256)" stroke-width="2"/>
-    <line x1="256" y1="32"  x2="256" y2="40"  transform="rotate(135 256 256)" stroke-width="1"/>
-    <line x1="256" y1="32"  x2="256" y2="44"  transform="rotate(150 256 256)" stroke-width="2"/>
-    <line x1="256" y1="32"  x2="256" y2="40"  transform="rotate(165 256 256)" stroke-width="1"/>
-    <line x1="256" y1="32"  x2="256" y2="44"  transform="rotate(180 256 256)" stroke-width="2"/>
-    <line x1="256" y1="32"  x2="256" y2="40"  transform="rotate(195 256 256)" stroke-width="1"/>
-    <line x1="256" y1="32"  x2="256" y2="44"  transform="rotate(210 256 256)" stroke-width="2"/>
-    <line x1="256" y1="32"  x2="256" y2="40"  transform="rotate(225 256 256)" stroke-width="1"/>
-    <line x1="256" y1="32"  x2="256" y2="44"  transform="rotate(240 256 256)" stroke-width="2"/>
-    <line x1="256" y1="32"  x2="256" y2="40"  transform="rotate(255 256 256)" stroke-width="1"/>
-    <line x1="256" y1="32"  x2="256" y2="44"  transform="rotate(270 256 256)" stroke-width="2"/>
-    <line x1="256" y1="32"  x2="256" y2="40"  transform="rotate(285 256 256)" stroke-width="1"/>
-    <line x1="256" y1="32"  x2="256" y2="44"  transform="rotate(300 256 256)" stroke-width="2"/>
-    <line x1="256" y1="32"  x2="256" y2="40"  transform="rotate(315 256 256)" stroke-width="1"/>
-    <line x1="256" y1="32"  x2="256" y2="44"  transform="rotate(330 256 256)" stroke-width="2"/>
-    <line x1="256" y1="32"  x2="256" y2="40"  transform="rotate(345 256 256)" stroke-width="1"/>
-  </g>
+  <!-- 火弧（南，正上方±54°，旋轉-90+270=-90→rotate 180讓正上為起點） -->
+  <!-- SVG 0°=右，我們的南=上，所以火起始於 -90-54=-144°，結束於-144+108=-36° -->
+  <circle cx="256" cy="256" r="224"
+    fill="none" stroke="#e04818" stroke-width="6" stroke-opacity="0.75"
+    stroke-dasharray="420 987"
+    stroke-dashoffset="-564"
+    stroke-linecap="round"/>
 
-  <!-- 四正方位大菱形標記 -->
-  <polygon points="256,38 261,48 256,58 251,48" fill="url(#gridGold)" opacity="0.9"/>
-  <polygon points="256,38 261,48 256,58 251,48" fill="url(#gridGold)" opacity="0.9" transform="rotate(90  256 256)"/>
-  <polygon points="256,38 261,48 256,58 251,48" fill="url(#gridGold)" opacity="0.9" transform="rotate(180 256 256)"/>
-  <polygon points="256,38 261,48 256,58 251,48" fill="url(#gridGold)" opacity="0.9" transform="rotate(270 256 256)"/>
+  <!-- 木弧（東，右側，54°~126°，即-36°~36° from right） -->
+  <circle cx="256" cy="256" r="224"
+    fill="none" stroke="#30a840" stroke-width="6" stroke-opacity="0.75"
+    stroke-dasharray="280 1127"
+    stroke-dashoffset="-422"
+    stroke-linecap="round"/>
 
-  <!-- ═══ 八卦方位文字 ═══ -->
-  <g font-family="'Noto Serif TC', serif" font-size="16" fill="url(#gridGold)" text-anchor="middle" dominant-baseline="middle" opacity="0.85" filter="url(#innerGlow)">
-    <!-- 坎北 -->
-    <text x="256" y="72">坎</text>
-    <!-- 離南 -->
-    <text x="256" y="442">離</text>
-    <!-- 震東 -->
-    <text x="442" y="260">震</text>
-    <!-- 兌西 -->
-    <text x="72"  y="260">兌</text>
-    <!-- 艮東北 -->
-    <text x="378" y="135">艮</text>
-    <!-- 坤西南 -->
-    <text x="135" y="378">坤</text>
-    <!-- 巽東南 -->
-    <text x="378" y="378">巽</text>
-    <!-- 乾西北 -->
-    <text x="135" y="135">乾</text>
-  </g>
+  <!-- 金弧（西，左側，234°~306°） -->
+  <circle cx="256" cy="256" r="224"
+    fill="none" stroke="#90b8d8" stroke-width="6" stroke-opacity="0.75"
+    stroke-dasharray="280 1127"
+    stroke-dashoffset="-1125"
+    stroke-linecap="round"/>
 
-  <!-- ═══ 中層：八卦爻象環 ═══ -->
-  <!-- 乾 ☰ 西北 (315°) -->
-  <g transform="rotate(-45 256 256) translate(0 -178)" opacity="0.75">
-    <g transform="translate(256 256)">
-      <rect x="-14" y="-10" width="28" height="4" rx="2" fill="url(#gridGold)"/>
-      <rect x="-14" y="-3"  width="28" height="4" rx="2" fill="url(#gridGold)"/>
-      <rect x="-14" y="4"   width="28" height="4" rx="2" fill="url(#gridGold)"/>
+  <!-- 水弧（北，正下方，306°~414°即306°~360°+0°~54°） -->
+  <circle cx="256" cy="256" r="224"
+    fill="none" stroke="#2858d0" stroke-width="6" stroke-opacity="0.75"
+    stroke-dasharray="420 987"
+    stroke-dashoffset="-1405"
+    stroke-linecap="round"/>
+
+  <!-- 土弧（四隅，黃色，兩段：126°~234°拆為兩小段） -->
+  <circle cx="256" cy="256" r="224"
+    fill="none" stroke="#c89820" stroke-width="6" stroke-opacity="0.65"
+    stroke-dasharray="110 1297"
+    stroke-dashoffset="-702"
+    stroke-linecap="round"/>
+  <circle cx="256" cy="256" r="224"
+    fill="none" stroke="#c89820" stroke-width="6" stroke-opacity="0.65"
+    stroke-dasharray="110 1297"
+    stroke-dashoffset="-1238"
+    stroke-linecap="round"/>
+
+  <!-- 主外框線 -->
+  <circle cx="256" cy="256" r="238" fill="none" stroke="url(#outerRing)" stroke-width="1" opacity="0.4"/>
+  <circle cx="256" cy="256" r="230" fill="none" stroke="url(#outerRing)" stroke-width="0.6" opacity="0.3"/>
+  <circle cx="256" cy="256" r="224" fill="none" stroke="url(#outerRing)" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- ════════════════════════════════════════
+       外圈刻度（24節氣）
+  ════════════════════════════════════════ -->
+  <g stroke-linecap="round" opacity="0.65">
+    <!-- 五行色刻度：依方位染色 -->
+    <!-- 火區（南・上）：紅 -->
+    <g stroke="#e06030" stroke-width="2">
+      <line x1="256" y1="32" x2="256" y2="44" transform="rotate(0   256 256)"/>
+      <line x1="256" y1="32" x2="256" y2="40" transform="rotate(15  256 256)" stroke-width="1"/>
+      <line x1="256" y1="32" x2="256" y2="44" transform="rotate(330 256 256)"/>
+      <line x1="256" y1="32" x2="256" y2="40" transform="rotate(345 256 256)" stroke-width="1"/>
+    </g>
+    <!-- 木區（東・右）：綠 -->
+    <g stroke="#38b848" stroke-width="2">
+      <line x1="256" y1="32" x2="256" y2="44" transform="rotate(90  256 256)"/>
+      <line x1="256" y1="32" x2="256" y2="40" transform="rotate(75  256 256)" stroke-width="1"/>
+      <line x1="256" y1="32" x2="256" y2="40" transform="rotate(105 256 256)" stroke-width="1"/>
+    </g>
+    <!-- 金區（西・左）：銀白 -->
+    <g stroke="#90b8d8" stroke-width="2">
+      <line x1="256" y1="32" x2="256" y2="44" transform="rotate(270 256 256)"/>
+      <line x1="256" y1="32" x2="256" y2="40" transform="rotate(255 256 256)" stroke-width="1"/>
+      <line x1="256" y1="32" x2="256" y2="40" transform="rotate(285 256 256)" stroke-width="1"/>
+    </g>
+    <!-- 水區（北・下）：深藍 -->
+    <g stroke="#3868e0" stroke-width="2">
+      <line x1="256" y1="32" x2="256" y2="44" transform="rotate(180 256 256)"/>
+      <line x1="256" y1="32" x2="256" y2="40" transform="rotate(165 256 256)" stroke-width="1"/>
+      <line x1="256" y1="32" x2="256" y2="40" transform="rotate(195 256 256)" stroke-width="1"/>
+    </g>
+    <!-- 土區（四隅）：黃 -->
+    <g stroke="#c89820" stroke-width="2">
+      <line x1="256" y1="32" x2="256" y2="44" transform="rotate(45  256 256)"/>
+      <line x1="256" y1="32" x2="256" y2="40" transform="rotate(30  256 256)" stroke-width="1"/>
+      <line x1="256" y1="32" x2="256" y2="40" transform="rotate(60  256 256)" stroke-width="1"/>
+      <line x1="256" y1="32" x2="256" y2="44" transform="rotate(135 256 256)"/>
+      <line x1="256" y1="32" x2="256" y2="40" transform="rotate(120 256 256)" stroke-width="1"/>
+      <line x1="256" y1="32" x2="256" y2="40" transform="rotate(150 256 256)" stroke-width="1"/>
+      <line x1="256" y1="32" x2="256" y2="44" transform="rotate(225 256 256)"/>
+      <line x1="256" y1="32" x2="256" y2="40" transform="rotate(210 256 256)" stroke-width="1"/>
+      <line x1="256" y1="32" x2="256" y2="40" transform="rotate(240 256 256)" stroke-width="1"/>
+      <line x1="256" y1="32" x2="256" y2="44" transform="rotate(315 256 256)"/>
+      <line x1="256" y1="32" x2="256" y2="40" transform="rotate(300 256 256)" stroke-width="1"/>
     </g>
   </g>
-  <!-- 坤 ☷ 西南 (225°) -->
-  <g transform="rotate(45 256 256) translate(0 178)" opacity="0.75">
-    <g transform="translate(256 256) rotate(180)">
-      <rect x="-14" y="-10" width="12" height="4" rx="2" fill="url(#gridGold)"/>
-      <rect x="2"   y="-10" width="12" height="4" rx="2" fill="url(#gridGold)"/>
-      <rect x="-14" y="-3"  width="12" height="4" rx="2" fill="url(#gridGold)"/>
-      <rect x="2"   y="-3"  width="12" height="4" rx="2" fill="url(#gridGold)"/>
-      <rect x="-14" y="4"   width="12" height="4" rx="2" fill="url(#gridGold)"/>
-      <rect x="2"   y="4"   width="12" height="4" rx="2" fill="url(#gridGold)"/>
-    </g>
+
+  <!-- 四正方位大菱形標記（五行色） -->
+  <!-- 南（火・紅） -->
+  <polygon points="256,34 261,46 256,58 251,46" fill="#e06030" filter="url(#fireGlow)" opacity="0.9"/>
+  <!-- 東（木・綠） -->
+  <polygon points="256,34 261,46 256,58 251,46" fill="#38b848" filter="url(#woodGlow)" opacity="0.9" transform="rotate(90 256 256)"/>
+  <!-- 北（水・藍） -->
+  <polygon points="256,34 261,46 256,58 251,46" fill="#3868e0" filter="url(#waterGlow)" opacity="0.9" transform="rotate(180 256 256)"/>
+  <!-- 西（金・銀） -->
+  <polygon points="256,34 261,46 256,58 251,46" fill="#90b8d8" filter="url(#metalGlow)" opacity="0.9" transform="rotate(270 256 256)"/>
+
+  <!-- 四隅小菱形（土・黃） -->
+  <polygon points="256,34 260,43 256,52 252,43" fill="#c89820" filter="url(#earthGlow)" opacity="0.8" transform="rotate(45  256 256)"/>
+  <polygon points="256,34 260,43 256,52 252,43" fill="#c89820" filter="url(#earthGlow)" opacity="0.8" transform="rotate(135 256 256)"/>
+  <polygon points="256,34 260,43 256,52 252,43" fill="#c89820" filter="url(#earthGlow)" opacity="0.8" transform="rotate(225 256 256)"/>
+  <polygon points="256,34 260,43 256,52 252,43" fill="#c89820" filter="url(#earthGlow)" opacity="0.8" transform="rotate(315 256 256)"/>
+
+  <!-- ════════════════════════════════════════
+       八卦方位文字（五行染色）
+  ════════════════════════════════════════ -->
+  <g font-family="'Noto Serif TC', serif" font-size="17" text-anchor="middle" dominant-baseline="middle" font-weight="600" filter="url(#crisp)">
+    <!-- 離南・火・紅 -->
+    <text x="256" y="72"  fill="#e87050" opacity="0.95">離</text>
+    <!-- 坎北・水・藍 -->
+    <text x="256" y="443" fill="#5080e8" opacity="0.95">坎</text>
+    <!-- 震東・木・綠 -->
+    <text x="443" y="260" fill="#40c858" opacity="0.95">震</text>
+    <!-- 兌西・金・銀 -->
+    <text x="70"  y="260" fill="#90c0e0" opacity="0.95">兌</text>
+    <!-- 巽東南・木+土 -->
+    <text x="380" y="133" fill="#70b840" opacity="0.85">巽</text>
+    <!-- 艮東北・土+水 -->
+    <text x="380" y="380" fill="#5890c8" opacity="0.85">艮</text>
+    <!-- 乾西北・金+水 -->
+    <text x="133" y="133" fill="#80a8d0" opacity="0.85">乾</text>
+    <!-- 坤西南・土+金 -->
+    <text x="133" y="380" fill="#c0a030" opacity="0.85">坤</text>
   </g>
 
-  <!-- ═══ 第二環：八方射線 ═══ -->
-  <g stroke="url(#gridGold)" stroke-width="0.8" opacity="0.3">
-    <line x1="256" y1="84" x2="256" y2="172" transform="rotate(0   256 256)"/>
-    <line x1="256" y1="84" x2="256" y2="172" transform="rotate(45  256 256)"/>
-    <line x1="256" y1="84" x2="256" y2="172" transform="rotate(90  256 256)"/>
-    <line x1="256" y1="84" x2="256" y2="172" transform="rotate(135 256 256)"/>
-    <line x1="256" y1="84" x2="256" y2="172" transform="rotate(180 256 256)"/>
-    <line x1="256" y1="84" x2="256" y2="172" transform="rotate(225 256 256)"/>
-    <line x1="256" y1="84" x2="256" y2="172" transform="rotate(270 256 256)"/>
-    <line x1="256" y1="84" x2="256" y2="172" transform="rotate(315 256 256)"/>
+  <!-- ════════════════════════════════════════
+       五行標籤環（中圈）
+  ════════════════════════════════════════ -->
+  <!-- 五行漢字，沿中環排列 -->
+  <g font-family="'Noto Serif TC', serif" font-size="12" text-anchor="middle" dominant-baseline="middle" font-weight="700" opacity="0.8">
+    <!-- 火 南 -->
+    <text x="256" y="108" fill="#e87050" filter="url(#fireGlow)">火</text>
+    <!-- 木 東 -->
+    <text x="406" y="260" fill="#40c858" filter="url(#woodGlow)">木</text>
+    <!-- 金 西 -->
+    <text x="108" y="260" fill="#90c0e0" filter="url(#metalGlow)">金</text>
+    <!-- 水 北 -->
+    <text x="256" y="406" fill="#5080e8" filter="url(#waterGlow)">水</text>
+    <!-- 土 東南（右上） -->
+    <text x="360" y="152" fill="#d0a020" filter="url(#earthGlow)">土</text>
   </g>
 
-  <!-- 中環線 -->
-  <circle cx="256" cy="256" r="172" fill="none" stroke="url(#outerRing)" stroke-width="1.5" opacity="0.5"/>
+  <!-- ════════════════════════════════════════
+       八方射線（五行色）
+  ════════════════════════════════════════ -->
+  <!-- 火・南 -->
+  <line x1="256" y1="88" x2="256" y2="172" stroke="#e06030" stroke-width="1" opacity="0.35" transform="rotate(0 256 256)"/>
+  <!-- 木・東 -->
+  <line x1="256" y1="88" x2="256" y2="172" stroke="#38b848" stroke-width="1" opacity="0.35" transform="rotate(90 256 256)"/>
+  <!-- 水・北 -->
+  <line x1="256" y1="88" x2="256" y2="172" stroke="#3868e0" stroke-width="1" opacity="0.35" transform="rotate(180 256 256)"/>
+  <!-- 金・西 -->
+  <line x1="256" y1="88" x2="256" y2="172" stroke="#90b8d8" stroke-width="1" opacity="0.35" transform="rotate(270 256 256)"/>
+  <!-- 土・四隅 -->
+  <line x1="256" y1="88" x2="256" y2="172" stroke="#c89820" stroke-width="0.8" opacity="0.28" transform="rotate(45  256 256)"/>
+  <line x1="256" y1="88" x2="256" y2="172" stroke="#c89820" stroke-width="0.8" opacity="0.28" transform="rotate(135 256 256)"/>
+  <line x1="256" y1="88" x2="256" y2="172" stroke="#c89820" stroke-width="0.8" opacity="0.28" transform="rotate(225 256 256)"/>
+  <line x1="256" y1="88" x2="256" y2="172" stroke="#c89820" stroke-width="0.8" opacity="0.28" transform="rotate(315 256 256)"/>
 
-  <!-- ═══ 九宮格（核心） ═══ -->
-  <!-- 九宮背景圓 -->
-  <circle cx="256" cy="256" r="128" fill="#0d0d1e" opacity="0.95"/>
-  <circle cx="256" cy="256" r="128" fill="none" stroke="url(#gridGold)" stroke-width="2"/>
+  <!-- 中環線（五行色漸層） -->
+  <circle cx="256" cy="256" r="172" fill="none" stroke="url(#outerRing)" stroke-width="1.5" opacity="0.45"/>
+
+  <!-- ════════════════════════════════════════
+       九宮格（五行色底）
+  ════════════════════════════════════════ -->
+  <!-- 九宮底圓 -->
+  <circle cx="256" cy="256" r="130" fill="#0e0c1c" opacity="0.96"/>
+
+  <!-- 九宮各格五行色底：洛書 4/9/2  3/5/7  8/1/6 -->
+  <!-- 方位・五行對應：
+       9離(火)=南    4巽(木)=東南   2坤(土)=西南
+       3震(木)=東    5中(土)=中     7兌(金)=西
+       8艮(土)=東北  1坎(水)=北     6乾(金)=西北  -->
+  <g clip-path="url(#boardClip)" opacity="0.22">
+    <!-- Row1: 巽4木・離9火・坤2土 -->
+    <rect x="128" y="128" width="86" height="86" fill="#2a7a30"/><!-- 木 -->
+    <rect x="214" y="128" width="86" height="86" fill="#c03010"/><!-- 火 -->
+    <rect x="300" y="128" width="86" height="86" fill="#a07810"/><!-- 土 -->
+    <!-- Row2: 震3木・中5土・兌7金 -->
+    <rect x="128" y="214" width="86" height="86" fill="#2a7a30"/><!-- 木 -->
+    <rect x="214" y="214" width="86" height="86" fill="#a07810"/><!-- 土 -->
+    <rect x="300" y="214" width="86" height="86" fill="#506898"/><!-- 金 -->
+    <!-- Row3: 艮8土・坎1水・乾6金 -->
+    <rect x="128" y="300" width="86" height="86" fill="#a07810"/><!-- 土 -->
+    <rect x="214" y="300" width="86" height="86" fill="#1838a0"/><!-- 水 -->
+    <rect x="300" y="300" width="86" height="86" fill="#506898"/><!-- 金 -->
+  </g>
 
   <!-- 九宮格線 -->
-  <g stroke="url(#gridGold)" stroke-width="1.5" opacity="0.8" clip-path="url(#innerClip)">
-    <!-- 橫線 -->
-    <line x1="128" y1="213" x2="384" y2="213"/>
-    <line x1="128" y1="299" x2="384" y2="299"/>
-    <!-- 縱線 -->
-    <line x1="213" y1="128" x2="213" y2="384"/>
-    <line x1="299" y1="128" x2="299" y2="384"/>
+  <g stroke="url(#gridGold)" stroke-width="1.5" opacity="0.75" clip-path="url(#innerClip)">
+    <line x1="126" y1="213" x2="386" y2="213"/>
+    <line x1="126" y1="299" x2="386" y2="299"/>
+    <line x1="213" y1="126" x2="213" y2="386"/>
+    <line x1="299" y1="126" x2="299" y2="386"/>
+  </g>
+  <!-- 九宮外框 -->
+  <circle cx="256" cy="256" r="128" fill="none" stroke="url(#gridGold)" stroke-width="2" opacity="0.8"/>
+
+  <!-- 洛書數字（五行色） -->
+  <g font-family="serif" font-size="14" text-anchor="middle" dominant-baseline="middle" font-weight="600">
+    <!-- Row1: 4巽木 9離火 2坤土 -->
+    <text x="171" y="171" fill="#50d860" opacity="0.65">四</text>
+    <text x="256" y="171" fill="#f07050" opacity="0.75">九</text>
+    <text x="341" y="171" fill="#d0a828" opacity="0.60">二</text>
+    <!-- Row2: 3震木 5中土 7兌金 -->
+    <text x="171" y="256" fill="#50d860" opacity="0.65">三</text>
+    <text x="256" y="256" fill="#d8b030" opacity="0.70">五</text>
+    <text x="341" y="256" fill="#90c8e8" opacity="0.65">七</text>
+    <!-- Row3: 8艮土 1坎水 6乾金 -->
+    <text x="171" y="341" fill="#d0a828" opacity="0.60">八</text>
+    <text x="256" y="341" fill="#5888f0" opacity="0.75">一</text>
+    <text x="341" y="341" fill="#90c8e8" opacity="0.65">六</text>
   </g>
 
-  <!-- 九宮數字（洛書）：4 9 2 / 3 5 7 / 8 1 6 -->
-  <!-- 亮度依照洛書吉凶：9最亮，5中，其餘均勻 -->
-  <g font-family="serif" font-size="15" fill="url(#gridGold)" text-anchor="middle" dominant-baseline="middle" opacity="0.5">
-    <!-- Row 1: 巽4  離9  坤2 -->
-    <text x="171" y="171">四</text>
-    <text x="256" y="171">九</text>
-    <text x="341" y="171">二</text>
-    <!-- Row 2: 震3  中5  兌7 -->
-    <text x="171" y="256">三</text>
-    <text x="256" y="256">五</text>
-    <text x="341" y="256">七</text>
-    <!-- Row 3: 艮8  坎1  乾6 -->
-    <text x="171" y="341">八</text>
-    <text x="256" y="341">一</text>
-    <text x="341" y="341">六</text>
-  </g>
+  <!-- ════════════════════════════════════════
+       太極（中心）
+  ════════════════════════════════════════ -->
+  <circle cx="256" cy="256" r="52" fill="#0c0a18"/>
+  <circle cx="256" cy="256" r="48" fill="url(#yangGrad)" filter="url(#crisp)"/>
 
-  <!-- 值符宮（1宮坎位）高亮 -->
-  <rect x="213" y="299" width="86" height="86" fill="url(#gridGold)" opacity="0.06" clip-path="url(#innerClip)"/>
-  <rect x="213" y="213" width="86" height="86" fill="url(#tealAccent)" opacity="0.06" clip-path="url(#innerClip)"/>
-
-  <!-- ═══ 太極符號（中心） ═══ -->
-  <!-- 中心圓底色 -->
-  <circle cx="256" cy="256" r="50" fill="#0d0d1e"/>
-
-  <!-- 太極大圓 -->
-  <circle cx="256" cy="256" r="46" fill="url(#yangGrad)" filter="url(#innerGlow)"/>
-
-  <!-- 陰半部 -->
-  <path d="M 256,210 A 46,46 0 0,0 256,302 A 23,23 0 0,1 256,256 A 23,23 0 0,0 256,210 Z"
+  <!-- 陰半 -->
+  <path d="M256,208 A48,48 0 0,0 256,304 A24,24 0 0,1 256,256 A24,24 0 0,0 256,208 Z"
         fill="url(#yinGrad)"/>
 
-  <!-- 陽小圓（上） -->
-  <circle cx="256" cy="233" r="11" fill="url(#yangGrad)"/>
-  <!-- 陰小圓（下） -->
-  <circle cx="256" cy="279" r="11" fill="url(#yinGrad)"/>
+  <!-- 陽小圓 -->
+  <circle cx="256" cy="232" r="12" fill="url(#yangGrad)"/>
+  <!-- 陰小圓 -->
+  <circle cx="256" cy="280" r="12" fill="url(#yinGrad)"/>
 
-  <!-- 陽小點 -->
-  <circle cx="256" cy="233" r="4" fill="url(#yinGrad)" opacity="0.9"/>
-  <!-- 陰小點 -->
-  <circle cx="256" cy="279" r="4" fill="url(#yangGrad)" opacity="0.9"/>
+  <!-- 陽點 -->
+  <circle cx="256" cy="232" r="4.5" fill="#100c20" opacity="0.9"/>
+  <!-- 陰點 -->
+  <circle cx="256" cy="280" r="4.5" fill="#f0e090" opacity="0.9"/>
 
   <!-- 太極外框 -->
-  <circle cx="256" cy="256" r="46" fill="none" stroke="url(#gridGold)" stroke-width="1.5"/>
+  <circle cx="256" cy="256" r="48" fill="none" stroke="url(#gridGold)" stroke-width="1.5"/>
 
-  <!-- ═══ 三奇符號（丁丙乙）環繞太極 ═══ -->
-  <!-- 三個金色小星點，對應三奇 -->
-  <g filter="url(#glow)">
-    <!-- 丙（正上，離宮） -->
-    <circle cx="256" cy="196" r="5" fill="url(#qiColor)"/>
-    <circle cx="256" cy="196" r="8" fill="none" stroke="url(#qiColor)" stroke-width="0.8" opacity="0.5"/>
-    <!-- 丁（左下，兌宮方向） -->
-    <circle cx="210" cy="283" r="5" fill="url(#qiColor)"/>
-    <circle cx="210" cy="283" r="8" fill="none" stroke="url(#qiColor)" stroke-width="0.8" opacity="0.5"/>
-    <!-- 乙（右下，震宮方向） -->
-    <circle cx="302" cy="283" r="5" fill="url(#qiColor)"/>
-    <circle cx="302" cy="283" r="8" fill="none" stroke="url(#qiColor)" stroke-width="0.8" opacity="0.5"/>
+  <!-- ════════════════════════════════════════
+       五行星點（環繞太極，五色光點）
+       按五行相生順序：木→火→土→金→水
+       位置對應方位（上=南=火，右=東=木...）
+  ════════════════════════════════════════ -->
+  <!-- 火・南・正上 -->
+  <circle cx="256" cy="192" r="7"  fill="url(#fireStar)"  filter="url(#fireGlow)"/>
+  <circle cx="256" cy="192" r="3.5" fill="#ff8060"/>
+
+  <!-- 木・東・右 -->
+  <circle cx="320" cy="256" r="7"  fill="url(#woodStar)"  filter="url(#woodGlow)"/>
+  <circle cx="320" cy="256" r="3.5" fill="#60e870"/>
+
+  <!-- 土・東南・右上（相生居間） -->
+  <circle cx="306" cy="206" r="5.5" fill="url(#earthStar)" filter="url(#earthGlow)"/>
+  <circle cx="306" cy="206" r="2.5"  fill="#f0d060"/>
+
+  <!-- 金・西・左 -->
+  <circle cx="192" cy="256" r="7"  fill="url(#metalStar)" filter="url(#metalGlow)"/>
+  <circle cx="192" cy="256" r="3.5" fill="#c0dff8"/>
+
+  <!-- 水・北・正下 -->
+  <circle cx="256" cy="320" r="7"  fill="url(#waterStar)" filter="url(#waterGlow)"/>
+  <circle cx="256" cy="320" r="3.5" fill="#5090ff"/>
+
+  <!-- 五行相生連線 -->
+  <polygon points="256,192 320,256 306,306 192,256 206,206"
+           fill="none" stroke="url(#gridGold)" stroke-width="0.8"
+           stroke-dasharray="5,4" opacity="0.35"/>
+
+  <!-- 三奇點（金色，更小，在五行點之間） -->
+  <g filter="url(#glow)" opacity="0.9">
+    <!-- 丙（上左） -->
+    <circle cx="218" cy="198" r="4" fill="url(#qiGlow)"/>
+    <!-- 丁（正右上） -->
+    <circle cx="298" cy="185" r="4" fill="url(#qiGlow)"/>
+    <!-- 乙（下） -->
+    <circle cx="256" cy="350" r="4" fill="url(#qiGlow)"/>
   </g>
 
-  <!-- 三奇連線（等邊三角形） -->
-  <polygon points="256,196 210,283 302,283"
-           fill="none" stroke="url(#qiColor)" stroke-width="0.8"
-           stroke-dasharray="4,3" opacity="0.45"/>
-
-  <!-- ═══ 四正方位星芒 ═══ -->
-  <!-- 正北（坎） -->
-  <polygon points="256,144 259,155 256,166 253,155"
-           fill="url(#starGlow)" opacity="0.7" filter="url(#innerGlow)"/>
-  <!-- 正南（離） -->
-  <polygon points="256,346 259,357 256,368 253,357"
-           fill="url(#starGlow)" opacity="0.7" filter="url(#innerGlow)"/>
-  <!-- 正東（震） -->
-  <polygon points="346,256 357,259 368,256 357,253"
-           fill="url(#starGlow)" opacity="0.7" filter="url(#innerGlow)"/>
-  <!-- 正西（兌） -->
-  <polygon points="144,256 155,259 166,256 155,253"
-           fill="url(#starGlow)" opacity="0.7" filter="url(#innerGlow)"/>
-
-  <!-- ═══ 八門符號（小圓點標記） ═══ -->
-  <g fill="url(#tealAccent)" opacity="0.6">
-    <!-- 坎1 休門 -->
-    <circle cx="256" cy="324" r="3"/>
-    <!-- 坤2 死門 -->
-    <circle cx="312" cy="312" r="3"/>
-    <!-- 震3 傷門 -->
-    <circle cx="324" cy="256" r="3"/>
-    <!-- 巽4 杜門 -->
-    <circle cx="312" cy="200" r="3"/>
-    <!-- 乾6 開門 -->
-    <circle cx="200" cy="200" r="3"/>
-    <!-- 兌7 驚門 -->
-    <circle cx="188" cy="256" r="3"/>
-    <!-- 艮8 生門 -->
-    <circle cx="200" cy="312" r="3"/>
-    <!-- 離9 景門 -->
-    <circle cx="256" cy="188" r="3"/>
-  </g>
-
-  <!-- ═══ 外圈文字裝飾 ═══ -->
-  <!-- 頂部品牌文字 -->
-  <text font-family="'Noto Serif TC', 'Ma Shan Zheng', serif" font-size="13"
-        fill="url(#gridGold)" text-anchor="middle" opacity="0.75" letter-spacing="3">
-    <textPath href="#textCircle" startOffset="12%">奇　門　遁　甲　時　家</textPath>
+  <!-- ════════════════════════════════════════
+       外圈文字（弧形）
+  ════════════════════════════════════════ -->
+  <text font-family="'Noto Serif TC', serif" font-size="12.5"
+        fill="url(#gridGold)" text-anchor="middle" opacity="0.72" letter-spacing="3">
+    <textPath href="#textCircle" startOffset="11%">奇　門　遁　甲　時　家</textPath>
   </text>
   <text font-family="'Noto Serif TC', serif" font-size="10"
-        fill="url(#gridGold)" text-anchor="middle" opacity="0.5" letter-spacing="2">
+        fill="url(#gridGold)" text-anchor="middle" opacity="0.45" letter-spacing="2">
     <textPath href="#textCircle" startOffset="62%">九　宮　八　卦　六　儀　三　奇</textPath>
   </text>
 
-  <!-- ═══ 最外邊框 ═══ -->
-  <circle cx="256" cy="256" r="254" fill="none" stroke="url(#outerRing)" stroke-width="1" opacity="0.4"/>
+  <!-- ════════════════════════════════════════
+       最外框 & 角落星光
+  ════════════════════════════════════════ -->
+  <circle cx="256" cy="256" r="250" fill="none" stroke="url(#outerRing)" stroke-width="1" opacity="0.35"/>
 
-  <!-- ═══ 頂部星光點綴 ═══ -->
-  <g filter="url(#softGlow)" opacity="0.6">
-    <circle cx="256" cy="40" r="2.5" fill="#e8d080"/>
-    <circle cx="256" cy="472" r="2.5" fill="#e8d080"/>
-    <circle cx="40"  cy="256" r="2.5" fill="#e8d080"/>
-    <circle cx="472" cy="256" r="2.5" fill="#e8d080"/>
-  </g>
+  <!-- 四正星光（五行色） -->
+  <circle cx="256" cy="37"  r="3" fill="#e87050" filter="url(#softGlow)" opacity="0.8"/>
+  <circle cx="475" cy="256" r="3" fill="#40c858" filter="url(#softGlow)" opacity="0.8"/>
+  <circle cx="256" cy="475" r="3" fill="#5080e8" filter="url(#softGlow)" opacity="0.8"/>
+  <circle cx="37"  cy="256" r="3" fill="#90c0e0" filter="url(#softGlow)" opacity="0.8"/>
 
 </svg>

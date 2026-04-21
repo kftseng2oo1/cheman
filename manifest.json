@@ -1,6 +1,6 @@
 {
-  "name": "奇門遁甲大師",
-  "short_name": "奇門遁甲大師",
+  "name": "奇門遁甲自動對位",
+  "short_name": "奇門遁甲自動對位",
   "description": "",
   "start_url": "/cheman/",
   "scope": "/cheman/",
@@ -14,8 +14,8 @@
   ],
   "shortcuts": [
     {
-      "name": "開啟 奇門遁甲大師",
-      "short_name": "奇門遁甲大師",
+      "name": "開啟 奇門遁甲自動對位",
+      "short_name": "奇門遁甲自動對位",
       "url": "/cheman/",
       "icons": [
         {

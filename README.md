@@ -1,4 +1,4 @@
-# 奇門遁甲大師
+# 奇門遁甲自動對位
 
 > 一個 Progressive Web App
 
@@ -18,7 +18,7 @@
 ```bash
 git init
 git add .
-git commit -m "init: 奇門遁甲大師 PWA"
+git commit -m "init: 奇門遁甲自動對位 PWA"
 git branch -M main
 git remote add origin https://github.com/<username>/<repo>.git
 git push -u origin main
