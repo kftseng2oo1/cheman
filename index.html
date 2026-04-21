@@ -250,6 +250,36 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
   color:var(--bg);font-size:14px;cursor:pointer;transition:background .2s;display:flex;align-items:center;}
 .sbtn:hover{background:var(--gold2);}
 .sbtn:disabled{opacity:.4;cursor:not-allowed;}
+/* ── 雙盤並排 ── */
+.dual-compass-row{
+  display:flex;gap:12px;width:100%;
+  justify-content:center;
+}
+.compass-panel{
+  flex:1;min-width:0;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.compass-panel-label{
+  font-size:11px;letter-spacing:.1em;color:var(--text2);
+  text-transform:uppercase;font-weight:600;
+}
+.compass-panel-info{
+  display:flex;align-items:center;gap:6px;
+}
+
+/* 偏差提示 */
+.diff-hint{
+  display:flex;align-items:center;gap:14px;
+  background:var(--panel2);border:1px solid var(--border2);
+  border-radius:10px;padding:10px 18px;width:100%;
+  justify-content:center;
+}
+.diff-arrow{
+  font-size:28px;transition:transform .3s ease;
+  color:var(--gold);filter:drop-shadow(0 0 6px rgba(200,168,74,.5));
+}
+.diff-label{font-size:11px;color:var(--muted);letter-spacing:.05em;}
+
 /* ── 校準覆蓋層 ── */
 .calib-overlay{
   position:absolute;inset:0;border-radius:50%;
@@ -432,7 +462,7 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
     <div class="compass-card hidden" id="compassCard" style="margin-top:13px;">
       <div class="ch">
         <span class="ch-icon">🧭</span>
-        <span class="ch-title">吉方指南針</span>
+        <span class="ch-title">方位指引</span>
         <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
           <div class="compass-status">
             <div class="status-dot" id="statusDot"></div>
@@ -442,43 +472,58 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
       </div>
       <div class="compass-body">
 
-        <!-- Canvas 羅盤 + 校準覆蓋層 -->
-        <div class="compass-canvas-wrap">
-          <canvas id="compassCanvas" width="520" height="520"></canvas>
-          <!-- 校準覆蓋層 -->
-          <div id="calibOverlay" class="calib-overlay hidden">
-            <div class="calib-inner">
-              <div class="calib-icon">🧭</div>
-              <div class="calib-title">方向校準</div>
-              <div class="calib-desc">請將裝置對準<strong>正北方（坎位）</strong><br>確認後按下校準按鈕</div>
-              <div class="calib-heading" id="calibHeadingShow">— °</div>
-              <button class="calib-confirm-btn" id="calibConfirmBtn" onclick="confirmCalibration()">
-                ✓ 確認校準
-              </button>
-              <button class="calib-skip-btn" onclick="skipCalibration()">略過</button>
+        <!-- 雙盤並排 -->
+        <div class="dual-compass-row">
+
+          <!-- 左：裝置羅盤 -->
+          <div class="compass-panel">
+            <div class="compass-panel-label">📱 裝置方向</div>
+            <div class="compass-canvas-wrap">
+              <canvas id="deviceCanvas" width="400" height="400"></canvas>
+              <!-- 校準覆蓋層 -->
+              <div id="calibOverlay" class="calib-overlay hidden">
+                <div class="calib-inner">
+                  <div class="calib-icon">🧭</div>
+                  <div class="calib-title">校準</div>
+                  <div class="calib-desc">將裝置對準<strong>正北</strong><br>後按確認</div>
+                  <div class="calib-heading" id="calibHeadingShow">—°</div>
+                  <button class="calib-confirm-btn" onclick="confirmCalibration()">✓ 確認</button>
+                  <button class="calib-skip-btn" onclick="skipCalibration()">略過</button>
+                </div>
+              </div>
+            </div>
+            <div class="compass-panel-info">
+              <span style="font-size:10px;color:var(--muted)">朝向</span>
+              <span class="bearing-val" id="deviceBearing">—°</span>
             </div>
           </div>
+
+          <!-- 右：吉方羅盤（固定不動） -->
+          <div class="compass-panel">
+            <div class="compass-panel-label">☯ 吉方盤局</div>
+            <div class="compass-canvas-wrap">
+              <canvas id="jiCanvas" width="400" height="400"></canvas>
+            </div>
+            <div class="compass-panel-info">
+              <span style="font-size:10px;color:var(--muted)">目標</span>
+              <span class="bearing-val" id="targetBearing">—°</span>
+            </div>
+          </div>
+
         </div>
 
-        <!-- 校準狀態提示列 -->
+        <!-- 校準狀態列 -->
         <div class="calib-bar hidden" id="calibBar">
           <span id="calibBarText">已校準</span>
           <button class="calib-redo-btn" onclick="redoCalibration()">重新校準</button>
         </div>
 
-        <!-- 偏差資訊 -->
-        <div class="bearing-info">
+        <!-- 偏差提示 -->
+        <div class="diff-hint" id="diffHint">
+          <div class="diff-arrow" id="diffArrow">↑</div>
           <div>
-            <div style="font-size:10px;color:var(--muted)">裝置朝向</div>
-            <div class="bearing-val" id="deviceBearing">—°</div>
-          </div>
-          <div>
-            <div style="font-size:10px;color:var(--muted)">目標吉方</div>
-            <div class="bearing-val" id="targetBearing">—°</div>
-          </div>
-          <div>
-            <div style="font-size:10px;color:var(--muted)">偏差角度</div>
-            <div class="bearing-val" id="diffBearing">—°</div>
+            <div class="diff-label">對準吉方還需轉</div>
+            <div class="bearing-val" id="diffBearing" style="font-size:20px">—°</div>
           </div>
         </div>
 
@@ -807,98 +852,43 @@ function updateDiffBearing(){
 }
 
 // ═══════════════════════════════════════
-//  Canvas 羅盤繪製
+//  Canvas 羅盤繪製（分離雙盤）
 // ═══════════════════════════════════════
-function drawCompass(){
-  const canvas=document.getElementById('compassCanvas');
-  const ctx=canvas.getContext('2d');
-  const W=canvas.width,H=canvas.height,CX=W/2,CY=H/2,R=W/2-4;
 
-  ctx.clearRect(0,0,W,H);
+// ── 共用：畫圓形背景
+function drawBg(ctx, R){
+  const grad=ctx.createRadialGradient(0,0,0,0,0,R);
+  grad.addColorStop(0,'#1a1428');
+  grad.addColorStop(0.7,'#0e0c1e');
+  grad.addColorStop(1,'#07060f');
+  ctx.beginPath();ctx.arc(0,0,R,0,Math.PI*2);
+  ctx.fillStyle=grad;ctx.fill();
+}
 
-  // 背景
-  const bgGrad=ctx.createRadialGradient(CX,CY,0,CX,CY,R);
-  bgGrad.addColorStop(0,'#1a1428');
-  bgGrad.addColorStop(0.7,'#0e0c1e');
-  bgGrad.addColorStop(1,'#07060f');
-  ctx.beginPath();ctx.arc(CX,CY,R,0,Math.PI*2);
-  ctx.fillStyle=bgGrad;ctx.fill();
-
-  // ── 底盤旋轉：讓地理正北永遠朝畫布頂部
-  // Canvas 預設 0° = 右邊（東），需要先 -90° 讓 0° = 上（北）
-  // 再加上 -deviceHeading，讓羅盤隨裝置反向旋轉（保持北方朝上）
-  // Canvas 預設 0°=右(東)。
-  // 目標：地理北(0°) 朝畫面上方。
-  // webkitCompassHeading：裝置頂部所指的地理方位角（朝北=0，朝東=90，朝南=180）
-  // 底盤需反向旋轉 deviceHeading，讓北方固定朝上。
-  // 實測：無旋轉時東方朝上（Canvas 預設），所以需要先 -90° 讓北朝上，
-  //        再 -deviceHeading 反向追蹤。
-  // 但實測結果差了 +90°，故補正為 -deviceHeading + 0（不加 baseRot），
-  // 即底盤旋轉 = -deviceHeading * π/180，Canvas 的 0°(東) 不需再修正。
-  // 底盤旋轉：
-  // webkitCompassHeading：裝置頂部偏離正北的角度（順時針為正）
-  // 裝置順時鐘轉 → calHeading 增加 → 底盤需順時鐘轉補償（+calHeading）
-  // 加上 -π/2 讓 Canvas 的 0°(右/東) 對齊 0°(上/北)
-  const calHeading = getCalibratedHeading();
-  const headingRot = calHeading !== null ? (calHeading * Math.PI / 180) : 0;
-  const rot = -Math.PI / 2 + headingRot;
-
-  ctx.save();
-  ctx.translate(CX,CY);
-  ctx.rotate(rot);
-
-  // ── 五行色扇形（deg 為地理角度，北=0°順時針）
-  // rot 已含 -π/2，子元素直接用 deg*π/180 即可
-  const wxSectors=[
-    {name:'火',deg:180,span:72,color:'rgba(232,80,48,0.18)'},
-    {name:'木',deg:90, span:72,color:'rgba(56,184,72,0.18)'},
-    {name:'水',deg:0,  span:72,color:'rgba(48,96,224,0.18)'},
-    {name:'金',deg:270,span:72,color:'rgba(144,192,224,0.18)'},
-    {name:'土',deg:45, span:36,color:'rgba(200,152,32,0.14)'},
-    {name:'土',deg:135,span:36,color:'rgba(200,152,32,0.14)'},
-    {name:'土',deg:225,span:36,color:'rgba(200,152,32,0.14)'},
-    {name:'土',deg:315,span:36,color:'rgba(200,152,32,0.14)'},
-  ];
-  for(const s of wxSectors){
-    const a1 = s.deg * Math.PI/180 - s.span/2 * Math.PI/180;
-    const a2 = s.deg * Math.PI/180 + s.span/2 * Math.PI/180;
-    ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,R*0.88,a1,a2);ctx.closePath();
-    ctx.fillStyle=s.color;ctx.fill();
-  }
-
-  // ── 吉門扇形弧帶（外環）
-  for(const ji of jiFangList){
-    if(ji.jiRank<0) continue;
-    const a1 = ji.deg * Math.PI/180 - 18*Math.PI/180;
-    const a2 = ji.deg * Math.PI/180 + 18*Math.PI/180;
-    ctx.beginPath();ctx.arc(0,0,R*0.86,a1,a2);ctx.arc(0,0,R*0.72,a2,a1,true);ctx.closePath();
-    ctx.globalAlpha=ji.isKong?0.2:0.5-ji.jiRank*0.08;
-    ctx.fillStyle=ji.color;ctx.fill();
-    ctx.globalAlpha=1;
-  }
-
-  // ── 刻度環（每5度一格）
-  for(let deg=0;deg<360;deg+=5){
-    const a = deg * Math.PI/180;
-    const isMajor=deg%45===0; const isMinor=deg%15===0;
-    const inner=isMajor?R*0.88:isMinor?R*0.90:R*0.92;
-    const outer=R*0.96;
-    ctx.save();
-    ctx.rotate(a);
-    ctx.beginPath();ctx.moveTo(0,-inner);ctx.lineTo(0,-outer);
-    ctx.strokeStyle=isMajor?'rgba(200,168,74,0.9)':isMinor?'rgba(200,168,74,0.5)':'rgba(200,168,74,0.25)';
-    ctx.lineWidth=isMajor?2:0.8;
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  // ── 外圓框
+// ── 共用：畫外圓框
+function drawRings(ctx, R){
   ctx.beginPath();ctx.arc(0,0,R*0.97,0,Math.PI*2);
   ctx.strokeStyle='rgba(200,168,74,0.6)';ctx.lineWidth=1.5;ctx.stroke();
   ctx.beginPath();ctx.arc(0,0,R*0.70,0,Math.PI*2);
   ctx.strokeStyle='rgba(200,168,74,0.3)';ctx.lineWidth=1;ctx.stroke();
+}
 
-  // ── 八卦方位文字（直接用地理角度，rot已含-π/2偏移）
+// ── 共用：畫刻度（傳入底盤已旋轉的 ctx）
+function drawTicks(ctx, R){
+  for(let deg=0;deg<360;deg+=5){
+    const a=deg*Math.PI/180;
+    const isMajor=deg%45===0;const isMinor=deg%15===0;
+    const inner=isMajor?R*0.88:isMinor?R*0.90:R*0.92;
+    ctx.save();ctx.rotate(a);
+    ctx.beginPath();ctx.moveTo(0,-inner);ctx.lineTo(0,-R*0.96);
+    ctx.strokeStyle=isMajor?'rgba(200,168,74,0.9)':isMinor?'rgba(200,168,74,0.5)':'rgba(200,168,74,0.22)';
+    ctx.lineWidth=isMajor?2:0.8;ctx.stroke();
+    ctx.restore();
+  }
+}
+
+// ── 共用：畫八卦文字（在已旋轉的底盤 ctx 中，rot=底盤總旋轉量）
+function drawDirs(ctx, R, rot, colorFn){
   const dirs=[
     {t:'離',deg:180,color:'#e87050'},
     {t:'坎',deg:0,  color:'#5080e8'},
@@ -910,106 +900,25 @@ function drawCompass(){
     {t:'乾',deg:315,color:'#80a8d0'},
   ];
   for(const d of dirs){
-    const a = d.deg * Math.PI/180;
-    const tr=R*0.80;
-    ctx.save();
-    ctx.rotate(a);
-    ctx.translate(0,-tr);
-    ctx.rotate(-a - rot); // 抵消底盤旋轉，讓文字正立
-    ctx.font=`bold ${R*0.075}px 'Noto Serif TC',serif`;
-    ctx.fillStyle=d.color;
+    const a=d.deg*Math.PI/180;
+    ctx.save();ctx.rotate(a);ctx.translate(0,-R*0.80);
+    ctx.rotate(-a-rot);
+    ctx.font=`bold ${R*0.09}px 'Noto Serif TC',serif`;
+    ctx.fillStyle=colorFn?colorFn(d):d.color;
     ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(d.t,0,0);
-    ctx.restore();
+    ctx.fillText(d.t,0,0);ctx.restore();
   }
+}
 
-  // ── 宮位門標籤（中環）
-  for(const ji of jiFangList){
-    const a = ji.deg * Math.PI/180;
-    const tr=R*0.57;
-    ctx.save();
-    ctx.rotate(a);
-    ctx.translate(0,-tr);
-    ctx.rotate(-a - rot); // 抵消底盤旋轉
-    ctx.font=`600 ${R*0.062}px 'Noto Serif TC',serif`;
-    ctx.fillStyle=ji.isKong?'rgba(160,80,80,0.7)':ji.color;
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(ji.door.replace('門',''),0,-R*0.03);
-    if(ji.isKong){
-      ctx.font=`${R*0.045}px serif`;
-      ctx.fillStyle='rgba(176,48,48,0.8)';
-      ctx.fillText('空',0,R*0.055);
-    }
-    ctx.restore();
-  }
-
-  ctx.restore(); // 結束底盤旋轉
-
-  // ── 指針（固定在螢幕坐標，不隨底盤旋轉）
-  // rot = -deviceHeading * π/180（無 baseRot）
-  // 底盤內所有元素用 (deg-90)*π/180，讓地理北朝畫面上
-  // 指針的螢幕角度推導：
-  //   底盤旋轉後，地理 targetDeg 對應的螢幕角度
-  //   = rot + (targetDeg - 90)*π/180
-  //   = -deviceHeading*π/180 + (targetDeg-90)*π/180
-  //   = (targetDeg - deviceHeading - 90)*π/180
-  // 箭頭繪製方向：moveTo(0,-arrowLen) 朝上（螢幕-Y），rotate(0)=指向上方
-  // 指針螢幕角度：
-  // rot = -π/2 + calHeading*π/180
-  // 指針需指向 targetDeg（地理角度）
-  // 螢幕角度 = rot + targetDeg*π/180
-  //          = -π/2 + (calHeading + targetDeg)*π/180
-  // ctx.rotate(angle) 中 0=右，箭頭朝上需再加 -π/2 → 合併後：
-  // rotate((calHeading + targetDeg - 90) * π/180)
-  const arrowAngle = calHeading !== null
-    ? (calHeading + targetDeg - 90) * Math.PI / 180
-    : -Math.PI / 2;
-
-  ctx.save();
-  ctx.translate(CX,CY);
-  ctx.rotate(arrowAngle);
-
-  // 光暈
-  ctx.shadowColor=jiFangList[selectedJiIdx]?.color||'#c8a84a';
-  ctx.shadowBlur=18;
-
-  // 箭頭主體
-  const arrowLen=R*0.38;
-  const arrowW=R*0.04;
-  ctx.beginPath();
-  ctx.moveTo(0,-arrowLen);          // 頂點
-  ctx.lineTo(-arrowW,0);
-  ctx.lineTo(-arrowW*0.4,arrowLen*0.25);
-  ctx.lineTo(arrowW*0.4,arrowLen*0.25);
-  ctx.lineTo(arrowW,0);
-  ctx.closePath();
-  const arrowColor=jiFangList[selectedJiIdx]?.color||'#c8a84a';
-  ctx.fillStyle=arrowColor;
-  ctx.fill();
-
-  // 反向尾部（灰色）
-  ctx.beginPath();
-  ctx.moveTo(0,arrowLen*0.35);
-  ctx.lineTo(-arrowW*0.7,arrowLen*0.12);
-  ctx.lineTo(arrowW*0.7,arrowLen*0.12);
-  ctx.closePath();
-  ctx.fillStyle='rgba(120,120,150,0.6)';
-  ctx.fill();
-
-  ctx.shadowBlur=0;
-  ctx.restore();
-
-  // ── 中心圓
-  ctx.save();ctx.translate(CX,CY);
-  const cGrad=ctx.createRadialGradient(0,0,0,0,0,R*0.12);
-  cGrad.addColorStop(0,'#2a2040');
-  cGrad.addColorStop(1,'#14101e');
-  ctx.beginPath();ctx.arc(0,0,R*0.12,0,Math.PI*2);
-  ctx.fillStyle=cGrad;ctx.fill();
+// ── 共用：畫太極中心
+function drawTaiji(ctx, R){
+  const tR=R*0.10;
+  const grad=ctx.createRadialGradient(0,0,0,0,0,R*0.15);
+  grad.addColorStop(0,'#2a2040');grad.addColorStop(1,'#14101e');
+  ctx.beginPath();ctx.arc(0,0,R*0.15,0,Math.PI*2);
+  ctx.fillStyle=grad;ctx.fill();
   ctx.strokeStyle='rgba(200,168,74,0.6)';ctx.lineWidth=1.5;ctx.stroke();
-
-  // 太極小圓
-  const tR=R*0.07;
+  // 太極圖
   ctx.beginPath();ctx.arc(0,0,tR,0,Math.PI*2);
   ctx.fillStyle='rgba(240,224,144,0.9)';ctx.fill();
   ctx.beginPath();
@@ -1019,22 +928,191 @@ function drawCompass(){
   ctx.fillStyle='rgba(20,14,32,0.95)';ctx.fill();
   ctx.beginPath();ctx.arc(0,-tR/2,tR/6,0,Math.PI*2);ctx.fillStyle='rgba(240,224,144,0.9)';ctx.fill();
   ctx.beginPath();ctx.arc(0,tR/2,tR/6,0,Math.PI*2);ctx.fillStyle='rgba(20,14,32,0.95)';ctx.fill();
-  ctx.restore();
+}
 
-  // 無感應器時顯示靜態提示
+// ════════════════════════════════════════
+//  裝置羅盤（隨裝置旋轉，北固定朝上）
+//  只顯示方位，不顯示吉凶門
+// ════════════════════════════════════════
+function drawDeviceCompass(){
+  const canvas=document.getElementById('deviceCanvas');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,CX=W/2,R=W/2-4;
+  ctx.clearRect(0,0,W,W);
+
+  ctx.save();ctx.translate(CX,CX);
+  drawBg(ctx,R);
+
+  // 底盤旋轉：北朝上
+  // rot = -π/2（讓Canvas 0°/右 → 0°/上）再 + calHeading（裝置補償）
+  const cal=getCalibratedHeading();
+  const rot=-Math.PI/2+(cal!==null?cal*Math.PI/180:0);
+  ctx.save();ctx.rotate(rot);
+
+  // 五行底色扇形
+  const wx=[
+    {deg:180,span:72,c:'rgba(232,80,48,0.15)'},
+    {deg:90, span:72,c:'rgba(56,184,72,0.15)'},
+    {deg:0,  span:72,c:'rgba(48,96,224,0.15)'},
+    {deg:270,span:72,c:'rgba(144,192,224,0.15)'},
+    {deg:45, span:36,c:'rgba(200,152,32,0.12)'},
+    {deg:135,span:36,c:'rgba(200,152,32,0.12)'},
+    {deg:225,span:36,c:'rgba(200,152,32,0.12)'},
+    {deg:315,span:36,c:'rgba(200,152,32,0.12)'},
+  ];
+  for(const s of wx){
+    const a1=s.deg*Math.PI/180-s.span/2*Math.PI/180;
+    const a2=s.deg*Math.PI/180+s.span/2*Math.PI/180;
+    ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,R*0.86,a1,a2);ctx.closePath();
+    ctx.fillStyle=s.c;ctx.fill();
+  }
+  drawTicks(ctx,R);
+  drawRings(ctx,R);
+  drawDirs(ctx,R,rot);
+  ctx.restore(); // 結束底盤旋轉
+
+  // 固定正北三角指標（紅色，始終指向畫面正上方）
+  ctx.save();
+  ctx.shadowColor='#e85030';ctx.shadowBlur=12;
+  ctx.beginPath();
+  ctx.moveTo(0,-R*0.92);ctx.lineTo(-5,-R*0.80);ctx.lineTo(5,-R*0.80);ctx.closePath();
+  ctx.fillStyle='#e85030';ctx.fill();
+  ctx.shadowBlur=0;ctx.restore();
+
+  drawTaiji(ctx,R);
+
+  // 無感應器提示
   if(!compassActive){
-    ctx.save();ctx.translate(CX,CY);
-    ctx.font=`${R*0.07}px 'Noto Serif TC',serif`;
-    ctx.fillStyle='rgba(160,152,124,0.7)';
+    ctx.font=`${R*0.09}px 'Noto Serif TC',serif`;
+    ctx.fillStyle='rgba(160,152,124,0.6)';
     ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('點擊「開啟感應器」',0,-R*0.12);
-    ctx.fillText('開始指引',0,R*0.05);
+    ctx.fillText('開啟感應器',0,-R*0.02);
+  }
+
+  ctx.restore();
+}
+
+// ════════════════════════════════════════
+//  吉方羅盤（固定不動，坎北永遠在12點）
+//  顯示各宮位的門，選中吉方高亮
+// ════════════════════════════════════════
+function drawJiCompass(){
+  const canvas=document.getElementById('jiCanvas');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,CX=W/2,R=W/2-4;
+  ctx.clearRect(0,0,W,W);
+
+  ctx.save();ctx.translate(CX,CX);
+  drawBg(ctx,R);
+
+  // 固定底盤：坎北在12點（rot = -π/2 只做Canvas坐標修正，不旋轉）
+  const rot=-Math.PI/2;
+  ctx.save();ctx.rotate(rot);
+
+  // 吉門扇形（整個扇形區塊）
+  for(const ji of jiFangList){
+    const a1=ji.deg*Math.PI/180-18*Math.PI/180;
+    const a2=ji.deg*Math.PI/180+18*Math.PI/180;
+    const isSelected=(jiFangList.indexOf(ji)===selectedJiIdx);
+    ctx.beginPath();ctx.arc(0,0,R*0.86,a1,a2);ctx.arc(0,0,R*0.38,a2,a1,true);ctx.closePath();
+    // 吉門/凶門分色，選中高亮
+    let alpha=ji.jiRank>=0?(0.22-ji.jiRank*0.04):0.08;
+    if(ji.isKong) alpha=0.06;
+    if(isSelected) alpha=Math.min(alpha*2.5,0.55);
+    ctx.globalAlpha=alpha;
+    ctx.fillStyle=ji.color;ctx.fill();
+    ctx.globalAlpha=1;
+    // 選中邊框
+    if(isSelected){
+      ctx.beginPath();ctx.arc(0,0,R*0.86,a1,a2);ctx.arc(0,0,R*0.38,a2,a1,true);ctx.closePath();
+      ctx.strokeStyle=ji.color;ctx.lineWidth=2;
+      ctx.globalAlpha=0.7;ctx.stroke();ctx.globalAlpha=1;
+    }
+  }
+
+  // 分隔線（每45度）
+  for(let deg=0;deg<360;deg+=45){
+    const a=deg*Math.PI/180;
+    ctx.save();ctx.rotate(a);
+    ctx.beginPath();ctx.moveTo(0,-R*0.38);ctx.lineTo(0,-R*0.87);
+    ctx.strokeStyle='rgba(200,168,74,0.25)';ctx.lineWidth=0.8;ctx.stroke();
     ctx.restore();
   }
 
-  if(compassActive){
-    rafId=requestAnimationFrame(drawCompass);
+  drawTicks(ctx,R);
+  drawRings(ctx,R);
+
+  // 門名標籤（中環）
+  for(const ji of jiFangList){
+    const a=ji.deg*Math.PI/180;
+    const tr=R*0.62;
+    ctx.save();ctx.rotate(a);ctx.translate(0,-tr);
+    ctx.rotate(-a-rot);
+    const isSelected=(jiFangList.indexOf(ji)===selectedJiIdx);
+    ctx.font=`700 ${R*0.076}px 'Noto Serif TC',serif`;
+    ctx.fillStyle=ji.isKong?'rgba(160,80,80,0.75)':ji.color;
+    ctx.globalAlpha=isSelected?1:0.75;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(ji.door.replace('門',''),0,-R*0.035);
+    if(ji.isKong){
+      ctx.font=`${R*0.055}px serif`;ctx.fillStyle='rgba(176,48,48,0.9)';
+      ctx.fillText('空',0,R*0.065);
+    }
+    ctx.globalAlpha=1;ctx.restore();
   }
+
+  drawDirs(ctx,R,rot);
+  ctx.restore(); // 結束底盤
+
+  // 選中吉方的指示箭頭（固定朝12點方向為目標方位）
+  if(jiFangList.length>0){
+    const ji=jiFangList[selectedJiIdx];
+    // 在盤面上畫一個指向選中方位的光暈環
+    const a=(ji.deg-90)*Math.PI/180; // 轉成Canvas角度
+    const tx=Math.cos(a)*R*0.62;
+    const ty=Math.sin(a)*R*0.62;
+    ctx.save();
+    ctx.shadowColor=ji.color;ctx.shadowBlur=16;
+    ctx.beginPath();ctx.arc(tx,ty,R*0.07,0,Math.PI*2);
+    ctx.fillStyle=ji.color;ctx.globalAlpha=0.9;ctx.fill();
+    ctx.globalAlpha=1;ctx.shadowBlur=0;
+    // 標示「目標」文字
+    ctx.font=`700 ${R*0.065}px 'Noto Serif TC',serif`;
+    ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('★',tx,ty);
+    ctx.restore();
+  }
+
+  drawTaiji(ctx,R);
+  ctx.restore();
+}
+
+// ── 主循環
+function drawCompass(){
+  drawDeviceCompass();
+  drawJiCompass();
+  updateDiffArrow();
+  if(compassActive) rafId=requestAnimationFrame(drawCompass);
+}
+
+// 偏差箭頭提示
+function updateDiffArrow(){
+  const cal=getCalibratedHeading();
+  if(cal===null||jiFangList.length===0){
+    document.getElementById('diffHint').style.opacity='0.4';
+    return;
+  }
+  let diff=targetDeg-cal;
+  diff=((diff+180)%360+360)%360-180;
+  const arrow=document.getElementById('diffArrow');
+  // 旋轉箭頭指示需要轉的方向與角度
+  const clampedDeg=Math.max(-150,Math.min(150,diff));
+  arrow.style.transform=`rotate(${clampedDeg}deg)`;
+  document.getElementById('diffBearing').textContent=
+    (Math.abs(Math.round(diff))<3?'✓ 已對準':(diff>0?'右轉 ':'左轉 ')+Math.abs(Math.round(diff))+'°');
+  document.getElementById('diffHint').style.opacity='1';
 }
 
 // ═══════════════════════════════════════
@@ -1096,8 +1174,9 @@ function renderCompass(R){
     </div>`).join('');
 
   document.getElementById('compassCard').classList.remove('hidden');
-  // 初始靜態繪製
-  if(!compassActive) drawCompass();
+  // 初始靜態繪製兩個盤
+  drawDeviceCompass();
+  drawJiCompass();
 }
 
 // ═══════════════════════════════════════
