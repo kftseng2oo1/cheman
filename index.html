@@ -259,10 +259,8 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
   align-items:flex-start;
 }
 .compass-panel{
-  flex:1;
-  min-width:0;          /* 允許 flex 子項縮小 */
-  max-width:200px;      /* 每盤最大 200px，兩盤共 400px+gap */
   display:flex;flex-direction:column;align-items:center;gap:5px;
+  flex-shrink:0; /* 不讓 flex 壓縮 */
 }
 .compass-panel-label{
   font-size:10px;letter-spacing:.08em;color:var(--text2);
@@ -271,19 +269,17 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
 .compass-panel-info{
   display:flex;align-items:center;gap:5px;
 }
-/* canvas 包裝：寬度跟 panel 一樣，保持正圓 */
+/* canvas 包裝：尺寸由 JS 計算後設定，始終正方形 */
 .compass-canvas-wrap{
   position:relative;
-  width:100%;
-  aspect-ratio:1/1;
+  /* width/height 由 JS 動態設定 */
+  flex-shrink:0;
 }
-/* canvas 本身 100% 填滿包裝 */
+/* canvas 本身填滿包裝 */
 #deviceCanvas,#jiCanvas{
-  width:100% !important;
-  height:100% !important;
-  border-radius:50%;
-  box-shadow:0 0 20px rgba(144,192,224,.18),0 0 40px rgba(0,0,0,.5);
   display:block;
+  border-radius:50%;
+  box-shadow:0 0 20px rgba(144,192,224,.15),0 0 40px rgba(0,0,0,.5);
 }
 
 /* 偏差提示 */
@@ -371,6 +367,23 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
   100%{box-shadow:0 0 0 0 rgba(37,212,172,0);}
 }
 .calib-flash{animation:calibFlash .6s ease 2;}
+
+/* ── 分享按鈕列 ── */
+.share-row{
+  display:flex;gap:8px;width:100%;justify-content:center;flex-wrap:wrap;
+}
+.share-btn{
+  display:flex;align-items:center;gap:5px;
+  padding:8px 16px;
+  border:1px solid var(--border2);
+  background:var(--panel2);
+  color:var(--text2);
+  border-radius:8px;font-size:12px;
+  font-family:'Noto Serif TC',serif;
+  cursor:pointer;transition:all .2s;letter-spacing:.05em;
+}
+.share-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(200,168,74,.08);}
+.share-btn.dl:hover{border-color:var(--teal2);color:var(--teal2);background:rgba(37,212,172,.08);}
 
 .hidden{display:none!important;}
 </style>
@@ -548,6 +561,12 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
 
         <!-- 吉方清單 -->
         <div class="ji-list" id="jiList"></div>
+
+        <!-- 分享/下載 -->
+        <div class="share-row hidden" id="shareRow">
+          <button class="share-btn dl" onclick="downloadCompass()">⬇ 下載盤面圖</button>
+          <button class="share-btn" onclick="shareCompass()">↗ 分享</button>
+        </div>
 
         <!-- 啟動按鈕 -->
         <button class="btn compass-btn" id="btnCompass" onclick="startCompass()">
@@ -871,8 +890,121 @@ function updateDiffBearing(){
 }
 
 // ═══════════════════════════════════════
-//  Canvas 羅盤繪製（分離雙盤）
+//  Canvas 尺寸：動態計算正方形，解決橢圓問題
 // ═══════════════════════════════════════
+function resizeCanvases(){
+  const row=document.getElementById('compassCard')?.querySelector('.dual-compass-row');
+  if(!row) return;
+  // 可用寬度 = card 內容寬 - gap - padding
+  const cardW=row.getBoundingClientRect().width;
+  const gap=8;
+  // 每個盤面的邊長：(總寬-gap)/2，最大 200，最小 130
+  const size=Math.min(200,Math.max(130,Math.floor((cardW-gap)/2)));
+
+  ['deviceCanvas','jiCanvas'].forEach(id=>{
+    const c=document.getElementById(id);
+    if(!c) return;
+    // 設定 canvas 內部解析度（畫質）：2x device pixel ratio
+    const dpr=window.devicePixelRatio||1;
+    c.width =size*dpr;
+    c.height=size*dpr;
+    // 設定 CSS 顯示尺寸（正方形，防橢圓）
+    c.style.width =size+'px';
+    c.style.height=size+'px';
+    // 同步更新 wrap 尺寸
+    const wrap=c.parentElement;
+    if(wrap){wrap.style.width=size+'px';wrap.style.height=size+'px';}
+  });
+  // 重繪
+  drawDeviceCompass();
+  drawJiCompass();
+}
+
+// ═══════════════════════════════════════
+//  分享 / 下載
+// ═══════════════════════════════════════
+
+// 合成一張圖：左盤 + 右盤 + 底部資訊
+function buildShareCanvas(){
+  const dc=document.getElementById('deviceCanvas');
+  const jc=document.getElementById('jiCanvas');
+  if(!dc||!jc) return null;
+
+  const dpr=window.devicePixelRatio||1;
+  const S=dc.width; // 每個盤的實際像素尺寸（含 dpr）
+  const GAP=Math.round(12*dpr);
+  const PAD=Math.round(16*dpr);
+  const INFO_H=Math.round(90*dpr);
+  const TOTAL_W=S*2+GAP+PAD*2;
+  const TOTAL_H=S+PAD*2+INFO_H;
+
+  const c=document.createElement('canvas');
+  c.width=TOTAL_W; c.height=TOTAL_H;
+  const ctx=c.getContext('2d');
+
+  // 背景
+  const bg=ctx.createLinearGradient(0,0,TOTAL_W,TOTAL_H);
+  bg.addColorStop(0,'#0e0c1e');bg.addColorStop(1,'#080614');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,TOTAL_W,TOTAL_H);
+
+  // 貼兩個盤
+  ctx.drawImage(dc, PAD, PAD, S, S);
+  ctx.drawImage(jc, PAD+S+GAP, PAD, S, S);
+
+  // 底部文字
+  const fSz=Math.round(13*dpr);
+  const fSzSm=Math.round(10*dpr);
+  ctx.font=`700 ${fSz}px 'Noto Serif TC',serif`;
+  ctx.fillStyle='#c8a84a';ctx.textAlign='center';ctx.textBaseline='top';
+
+  const Y=S+PAD+Math.round(10*dpr);
+  // 盤局資訊
+  const R=curBoard;
+  if(R){
+    ctx.fillText(`${R.dun} ${R.ju}局・${R.jieqi}${R.yuan}`, TOTAL_W/2, Y);
+    ctx.font=`${fSzSm}px serif`;
+    ctx.fillStyle='#7a7a9a';
+    const ji=jiFangList[selectedJiIdx];
+    if(ji){
+      ctx.fillText(`吉方：${PDIR[ji.pal]} (${ji.door})`, TOTAL_W/2, Y+fSz+Math.round(6*dpr));
+    }
+    ctx.fillText('奇門遁甲・行動指引', TOTAL_W/2, Y+fSz*2+Math.round(14*dpr));
+  }
+  return c;
+}
+
+async function downloadCompass(){
+  const c=buildShareCanvas();
+  if(!c){alert('請先起盤');return;}
+  const a=document.createElement('a');
+  a.href=c.toDataURL('image/png');
+  const now=new Date();
+  a.download=`qimen_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.png`;
+  a.click();
+}
+
+async function shareCompass(){
+  const c=buildShareCanvas();
+  if(!c){alert('請先起盤');return;}
+  // 轉 Blob
+  c.toBlob(async blob=>{
+    const file=new File([blob],'qimen_compass.png',{type:'image/png'});
+    if(navigator.share && navigator.canShare({files:[file]})){
+      try{
+        const R=curBoard;
+        const ji=jiFangList[selectedJiIdx];
+        await navigator.share({
+          title:'奇門遁甲・吉方指引',
+          text: R?`${R.dun}${R.ju}局・${R.jieqi}${R.yuan}\n吉方：${PDIR[ji?.pal]||'—'} (${ji?.door||'—'})`:'奇門遁甲吉方指引',
+          files:[file],
+        });
+      }catch(e){if(e.name!=='AbortError')console.error(e);}
+    } else {
+      // fallback：直接下載
+      downloadCompass();
+    }
+  },'image/png');
+}
 
 // ── 共用：畫圓形背景
 function drawBg(ctx, R){
@@ -1193,9 +1325,12 @@ function renderCompass(R){
     </div>`).join('');
 
   document.getElementById('compassCard').classList.remove('hidden');
-  // 初始靜態繪製兩個盤
-  drawDeviceCompass();
-  drawJiCompass();
+  document.getElementById('shareRow').classList.remove('hidden');
+
+  // 先讓 DOM 渲染完，再計算尺寸並繪製（用 requestAnimationFrame 確保布局完成）
+  requestAnimationFrame(()=>{
+    resizeCanvases();
+  });
 }
 
 // ═══════════════════════════════════════
@@ -1404,6 +1539,10 @@ async function doLayout(){
 }
 
 window.addEventListener('load',setNow);
+window.addEventListener('resize',()=>{
+  if(document.getElementById('compassCard')?.classList.contains('hidden')) return;
+  resizeCanvases();
+});
 // 頁面關閉時清理
 window.addEventListener('beforeunload',()=>{
   window.removeEventListener('deviceorientationabsolute',onOrientation,true);
