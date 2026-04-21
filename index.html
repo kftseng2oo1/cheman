@@ -1163,19 +1163,20 @@ function drawJiCompass(){
   ctx.save();ctx.rotate(rot);
 
   // 吉門扇形（整個扇形區塊）
+  // arc() 的角度不受 ctx.rotate() 影響，必須手動加上 rot(-π/2) 偏移
+  // 地理角度 deg → arc 角度 = rot + deg*π/180 = -π/2 + deg*π/180 = (deg-90)*π/180
   for(const ji of jiFangList){
-    const a1=ji.deg*Math.PI/180-18*Math.PI/180;
-    const a2=ji.deg*Math.PI/180+18*Math.PI/180;
+    const arcCenter = (ji.deg - 90) * Math.PI / 180;
+    const a1 = arcCenter - 18 * Math.PI / 180;
+    const a2 = arcCenter + 18 * Math.PI / 180;
     const isSelected=(jiFangList.indexOf(ji)===selectedJiIdx);
     ctx.beginPath();ctx.arc(0,0,R*0.86,a1,a2);ctx.arc(0,0,R*0.38,a2,a1,true);ctx.closePath();
-    // 吉門/凶門分色，選中高亮
     let alpha=ji.jiRank>=0?(0.22-ji.jiRank*0.04):0.08;
     if(ji.isKong) alpha=0.06;
     if(isSelected) alpha=Math.min(alpha*2.5,0.55);
     ctx.globalAlpha=alpha;
     ctx.fillStyle=ji.color;ctx.fill();
     ctx.globalAlpha=1;
-    // 選中邊框
     if(isSelected){
       ctx.beginPath();ctx.arc(0,0,R*0.86,a1,a2);ctx.arc(0,0,R*0.38,a2,a1,true);ctx.closePath();
       ctx.strokeStyle=ji.color;ctx.lineWidth=2;
@@ -1183,9 +1184,9 @@ function drawJiCompass(){
     }
   }
 
-  // 分隔線（每45度）
+  // 分隔線（每45度，同樣需要 rot 偏移）
   for(let deg=0;deg<360;deg+=45){
-    const a=deg*Math.PI/180;
+    const a=(deg-90)*Math.PI/180;
     ctx.save();ctx.rotate(a);
     ctx.beginPath();ctx.moveTo(0,-R*0.38);ctx.lineTo(0,-R*0.87);
     ctx.strokeStyle='rgba(200,168,74,0.25)';ctx.lineWidth=0.8;ctx.stroke();
@@ -1196,8 +1197,10 @@ function drawJiCompass(){
   drawRings(ctx,R);
 
   // 門名標籤（中環）
+  // ctx.rotate(a) 後 translate(0,-tr) 是相對旋轉座標的 -Y 方向，等同於 arc 角度
+  // 所以同樣要用 (deg-90)*π/180
   for(const ji of jiFangList){
-    const a=ji.deg*Math.PI/180;
+    const a=(ji.deg-90)*Math.PI/180;
     const tr=R*0.62;
     ctx.save();ctx.rotate(a);ctx.translate(0,-tr);
     ctx.rotate(-a-rot);
