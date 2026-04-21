@@ -156,7 +156,7 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
 .compass-card .ch{background:linear-gradient(135deg,#0a1220 0%,#080e18 100%);}
 .compass-body{
   display:flex;flex-direction:column;align-items:center;
-  padding:16px;gap:14px;
+  padding:12px 12px;gap:10px;
 }
 /* Canvas 包裝 */
 .compass-canvas-wrap{
@@ -252,19 +252,38 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
 .sbtn:disabled{opacity:.4;cursor:not-allowed;}
 /* ── 雙盤並排 ── */
 .dual-compass-row{
-  display:flex;gap:12px;width:100%;
+  display:flex;
+  gap:8px;
+  width:100%;
   justify-content:center;
+  align-items:flex-start;
 }
 .compass-panel{
-  flex:1;min-width:0;
-  display:flex;flex-direction:column;align-items:center;gap:6px;
+  flex:1;
+  min-width:0;          /* 允許 flex 子項縮小 */
+  max-width:200px;      /* 每盤最大 200px，兩盤共 400px+gap */
+  display:flex;flex-direction:column;align-items:center;gap:5px;
 }
 .compass-panel-label{
-  font-size:11px;letter-spacing:.1em;color:var(--text2);
-  text-transform:uppercase;font-weight:600;
+  font-size:10px;letter-spacing:.08em;color:var(--text2);
+  text-transform:uppercase;font-weight:600;white-space:nowrap;
 }
 .compass-panel-info{
-  display:flex;align-items:center;gap:6px;
+  display:flex;align-items:center;gap:5px;
+}
+/* canvas 包裝：寬度跟 panel 一樣，保持正圓 */
+.compass-canvas-wrap{
+  position:relative;
+  width:100%;
+  aspect-ratio:1/1;
+}
+/* canvas 本身 100% 填滿包裝 */
+#deviceCanvas,#jiCanvas{
+  width:100% !important;
+  height:100% !important;
+  border-radius:50%;
+  box-shadow:0 0 20px rgba(144,192,224,.18),0 0 40px rgba(0,0,0,.5);
+  display:block;
 }
 
 /* 偏差提示 */
@@ -280,7 +299,6 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
 }
 .diff-label{font-size:11px;color:var(--muted);letter-spacing:.05em;}
 
-/* ── 校準覆蓋層 ── */
 .calib-overlay{
   position:absolute;inset:0;border-radius:50%;
   background:rgba(8,6,18,0.92);
@@ -289,39 +307,37 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
   backdrop-filter:blur(4px);
   animation:fadeIn .3s ease;
 }
-@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 .calib-inner{
   display:flex;flex-direction:column;align-items:center;
-  gap:10px;padding:20px;text-align:center;
+  gap:6px;padding:12px;text-align:center;
+  width:90%;
 }
-.calib-icon{font-size:32px;animation:spin 4s linear infinite;}
-@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}  }
+.calib-icon{font-size:22px;animation:spin 4s linear infinite;}
 .calib-title{
   font-family:'Ma Shan Zheng',serif;
-  font-size:18px;color:var(--gold);letter-spacing:.2em;
+  font-size:14px;color:var(--gold);letter-spacing:.15em;
 }
-.calib-desc{font-size:12px;color:var(--text2);line-height:1.7;}
+.calib-desc{font-size:10px;color:var(--text2);line-height:1.6;}
 .calib-desc strong{color:var(--gold2);}
 .calib-heading{
-  font-size:28px;font-weight:700;color:var(--teal2);
-  letter-spacing:.05em;min-width:80px;
-  text-shadow:0 0 16px rgba(37,212,172,.5);
+  font-size:22px;font-weight:700;color:var(--teal2);
+  letter-spacing:.05em;
+  text-shadow:0 0 12px rgba(37,212,172,.5);
 }
 .calib-confirm-btn{
-  margin-top:4px;
-  padding:10px 24px;
+  padding:7px 16px;
   background:var(--teal);color:var(--bg);
-  border:none;border-radius:8px;
-  font-family:'Noto Serif TC',serif;font-size:14px;font-weight:700;
-  cursor:pointer;letter-spacing:.1em;
+  border:none;border-radius:7px;
+  font-family:'Noto Serif TC',serif;font-size:12px;font-weight:700;
+  cursor:pointer;letter-spacing:.08em;
   transition:background .2s,transform .1s;
-  box-shadow:0 0 16px rgba(24,176,144,.4);
+  box-shadow:0 0 12px rgba(24,176,144,.4);
 }
 .calib-confirm-btn:hover{background:var(--teal2);transform:scale(1.03);}
 .calib-confirm-btn:active{transform:scale(0.97);}
 .calib-skip-btn{
   background:transparent;border:none;
-  color:var(--muted);font-size:11px;
+  color:var(--muted);font-size:10px;
   cursor:pointer;text-decoration:underline;
   font-family:'Noto Serif TC',serif;
   transition:color .2s;
@@ -345,7 +361,10 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
 }
 .calib-redo-btn:hover{background:var(--teal);color:var(--bg);}
 
-/* 校準成功動畫（羅盤邊框閃爍） */
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+/* 校準成功動畫 */
 @keyframes calibFlash{
   0%  {box-shadow:0 0 0 0 rgba(37,212,172,.8);}
   50% {box-shadow:0 0 0 10px rgba(37,212,172,0);}
