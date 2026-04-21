@@ -1215,26 +1215,27 @@ function drawJiCompass(){
   }
 
   drawDirs(ctx,R,rot);
-  ctx.restore(); // 結束底盤
 
-  // 選中吉方的指示箭頭（固定朝12點方向為目標方位）
+  // 選中吉方的 ★ 光點：在底盤旋轉坐標系內畫，直接用地理角度
   if(jiFangList.length>0){
     const ji=jiFangList[selectedJiIdx];
-    // 在盤面上畫一個指向選中方位的光暈環
-    const a=(ji.deg-90)*Math.PI/180; // 轉成Canvas角度
-    const tx=Math.cos(a)*R*0.62;
-    const ty=Math.sin(a)*R*0.62;
+    // 底盤已 rotate(rot=-π/2)，地理角度 deg*π/180 在此坐標系中
+    // 指向 deg 方向，距圓心 R*0.62 處
+    const a = ji.deg * Math.PI / 180;  // 地理角度，底盤坐標系直接用
+    const tx = Math.sin(a) * R * 0.62; // sin=x軸（東西）
+    const ty = -Math.cos(a) * R * 0.62;// -cos=y軸（南北，向上為負）
     ctx.save();
-    ctx.shadowColor=ji.color;ctx.shadowBlur=16;
-    ctx.beginPath();ctx.arc(tx,ty,R*0.07,0,Math.PI*2);
+    ctx.shadowColor=ji.color;ctx.shadowBlur=Math.round(R*0.1);
+    ctx.beginPath();ctx.arc(tx,ty,R*0.08,0,Math.PI*2);
     ctx.fillStyle=ji.color;ctx.globalAlpha=0.9;ctx.fill();
     ctx.globalAlpha=1;ctx.shadowBlur=0;
-    // 標示「目標」文字
-    ctx.font=`700 ${R*0.065}px 'Noto Serif TC',serif`;
+    ctx.font=`700 ${R*0.07}px 'Noto Serif TC',serif`;
     ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText('★',tx,ty);
     ctx.restore();
   }
+
+  ctx.restore(); // 結束底盤
 
   drawTaiji(ctx,R);
   ctx.restore();
