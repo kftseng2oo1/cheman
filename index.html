@@ -295,78 +295,69 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
 }
 .diff-label{font-size:11px;color:var(--muted);letter-spacing:.05em;}
 
-.calib-overlay{
-  position:absolute;inset:0;border-radius:50%;
-  background:rgba(8,6,18,0.92);
-  display:flex;align-items:center;justify-content:center;
-  z-index:10;
-  backdrop-filter:blur(4px);
-  animation:fadeIn .3s ease;
+/* ── 九宮格點擊互動 ── */
+.cell{cursor:pointer;}
+.cell:hover .cell-tap-hint{opacity:1;}
+.cell-tap-hint{
+  position:absolute;bottom:14px;left:0;right:0;
+  text-align:center;font-size:7px;color:var(--gold);
+  opacity:0;transition:opacity .2s;letter-spacing:.05em;
+  pointer-events:none;
 }
-.calib-inner{
-  display:flex;flex-direction:column;align-items:center;
-  gap:6px;padding:12px;text-align:center;
-  width:90%;
+.cell-selected{
+  background:#1a1600 !important;
+  border:1px solid var(--gold) !important;
+  box-shadow:inset 0 0 12px rgba(200,168,74,.15);
 }
-.calib-icon{font-size:22px;animation:spin 4s linear infinite;}
-.calib-title{
-  font-family:'Ma Shan Zheng',serif;
-  font-size:14px;color:var(--gold);letter-spacing:.15em;
-}
-.calib-desc{font-size:10px;color:var(--text2);line-height:1.6;}
-.calib-desc strong{color:var(--gold2);}
-.calib-heading{
-  font-size:22px;font-weight:700;color:var(--teal2);
-  letter-spacing:.05em;
-  text-shadow:0 0 12px rgba(37,212,172,.5);
-}
-.calib-confirm-btn{
-  padding:7px 16px;
-  background:var(--teal);color:var(--bg);
-  border:none;border-radius:7px;
-  font-family:'Noto Serif TC',serif;font-size:12px;font-weight:700;
-  cursor:pointer;letter-spacing:.08em;
-  transition:background .2s,transform .1s;
-  box-shadow:0 0 12px rgba(24,176,144,.4);
-}
-.calib-confirm-btn:hover{background:var(--teal2);transform:scale(1.03);}
-.calib-confirm-btn:active{transform:scale(0.97);}
-.calib-skip-btn{
-  background:transparent;border:none;
-  color:var(--muted);font-size:10px;
-  cursor:pointer;text-decoration:underline;
-  font-family:'Noto Serif TC',serif;
-  transition:color .2s;
-}
-.calib-skip-btn:hover{color:var(--text2);}
 
-/* 校準狀態列 */
-.calib-bar{
-  display:flex;align-items:center;justify-content:center;gap:10px;
-  background:rgba(24,176,144,.1);
-  border:1px solid rgba(24,176,144,.25);
-  border-radius:8px;padding:7px 14px;
-  font-size:12px;color:var(--teal2);
-  width:100%;
+/* ── 歷史紀錄 ── */
+.hist-btn{
+  margin-left:auto;
+  background:transparent;border:1px solid var(--border2);
+  color:var(--text2);border-radius:5px;
+  padding:3px 9px;font-size:10px;cursor:pointer;
+  font-family:'Noto Serif TC',serif;
+  transition:all .18s;letter-spacing:.05em;
+  opacity:0.7;
 }
-.calib-redo-btn{
-  background:transparent;border:1px solid var(--teal);
-  color:var(--teal);border-radius:5px;padding:2px 8px;
-  font-size:11px;cursor:pointer;font-family:'Noto Serif TC',serif;
-  transition:all .18s;
+.hist-btn:hover{border-color:var(--gold);color:var(--gold);opacity:1;}
+.hist-drawer{
+  border-bottom:1px solid var(--border);
+  background:var(--panel2);
+  max-height:320px;overflow-y:auto;
 }
-.calib-redo-btn:hover{background:var(--teal);color:var(--bg);}
+.hist-drawer::-webkit-scrollbar{width:3px;}
+.hist-drawer::-webkit-scrollbar-thumb{background:var(--border2);}
+.hist-head{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:9px 14px;font-size:11px;color:var(--text2);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;background:var(--panel2);z-index:1;
+}
+.hist-clear-btn{
+  background:transparent;border:none;
+  color:var(--kong-clr);font-size:10px;cursor:pointer;
+  font-family:'Noto Serif TC',serif;
+  transition:opacity .2s;
+}
+.hist-clear-btn:hover{opacity:.7;}
+.hist-panel{padding:8px;}
+.hist-empty{text-align:center;padding:20px;font-size:12px;color:var(--muted);}
+.hist-item{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:8px;padding:10px 12px;margin-bottom:7px;
+  cursor:pointer;transition:border-color .2s;
+}
+.hist-item:hover{border-color:var(--gold);}
+.hist-item-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.hist-dt{font-size:10px;color:var(--muted);}
+.hist-q{font-size:13px;color:var(--text);font-weight:600;margin-bottom:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hist-meta{font-size:10px;color:var(--muted);margin-bottom:2px;}
+.hist-tone{font-size:11px;color:var(--gold);font-style:italic;}
 
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
-
-/* 校準成功動畫 */
-@keyframes calibFlash{
-  0%  {box-shadow:0 0 0 0 rgba(37,212,172,.8);}
-  50% {box-shadow:0 0 0 10px rgba(37,212,172,0);}
-  100%{box-shadow:0 0 0 0 rgba(37,212,172,0);}
-}
-.calib-flash{animation:calibFlash .6s ease 2;}
 
 /* ── 分享按鈕列 ── */
 .share-row{
@@ -387,18 +378,6 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
 
 .hidden{display:none!important;}
 </style>
-
-<!-- PWA Meta — auto-injected by PWA 打包神器 -->
-<meta name="application-name" content="奇門遁甲自動對位">
-<meta name="description" content="">
-<meta name="theme-color" content="#1a73e8">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="奇門遁甲自動對位">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon.svg">
-<script>if('serviceWorker'in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(r){console.log('[SW] registered:',r.scope)}).catch(function(e){console.warn('[SW] failed:',e)});});}</script>
 </head>
 <body>
 <header>
@@ -484,7 +463,17 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
       <div class="ch">
         <span class="ch-icon">🔮</span>
         <span class="ch-title">行動指引卡</span>
+        <button class="hist-btn" id="histBtn" onclick="toggleHist()" title="歷史紀錄">📜 紀錄</button>
         <span class="ch-tag" id="modelTag"></span>
+      </div>
+
+      <!-- 歷史紀錄抽屜 -->
+      <div class="hist-drawer hidden" id="histDrawer">
+        <div class="hist-head">
+          <span>📜 問卦歷史紀錄</span>
+          <button class="hist-clear-btn" onclick="clearHistory()">清除全部</button>
+        </div>
+        <div class="hist-panel" id="histPanel"></div>
       </div>
       <div id="guideSlot">
         <div class="chat-empty">
@@ -524,17 +513,6 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
             <div class="compass-panel-label">📱 裝置方向</div>
             <div class="compass-canvas-wrap">
               <canvas id="deviceCanvas" width="400" height="400"></canvas>
-              <!-- 校準覆蓋層 -->
-              <div id="calibOverlay" class="calib-overlay hidden">
-                <div class="calib-inner">
-                  <div class="calib-icon">🧭</div>
-                  <div class="calib-title">校準</div>
-                  <div class="calib-desc">將裝置對準<strong>正北</strong><br>後按確認</div>
-                  <div class="calib-heading" id="calibHeadingShow">—°</div>
-                  <button class="calib-confirm-btn" onclick="confirmCalibration()">✓ 確認</button>
-                  <button class="calib-skip-btn" onclick="skipCalibration()">略過</button>
-                </div>
-              </div>
             </div>
             <div class="compass-panel-info">
               <span style="font-size:10px;color:var(--muted)">朝向</span>
@@ -554,12 +532,6 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
             </div>
           </div>
 
-        </div>
-
-        <!-- 校準狀態列 -->
-        <div class="calib-bar hidden" id="calibBar">
-          <span id="calibBarText">已校準</span>
-          <button class="calib-redo-btn" onclick="redoCalibration()">重新校準</button>
         </div>
 
         <!-- 偏差提示 -->
@@ -768,20 +740,15 @@ function calcJiFang(R){
 //  指南針狀態
 // ═══════════════════════════════════════
 let compassActive=false;
-let deviceHeading=null;     // 感應器原始讀值（0-360）
-let calibOffset=0;          // 校準偏移量：calibratedHeading = rawHeading - calibOffset
-let isCalibrated=false;     // 是否已完成校準
-let calibPending=false;     // 校準覆蓋層是否顯示中
+let deviceHeading=null;  // 感應器讀值（0=北，順時針）
 let targetDeg=0;
 let jiFangList=[];
 let selectedJiIdx=0;
 let rafId=null;
-let compassGranted=false;
 
-// 取得校準後的朝向（確保 0-360）
+// 感應器原始值直接就是地理方位角，0=北，無需校準
 function getCalibratedHeading(){
-  if(deviceHeading===null) return null;
-  return ((deviceHeading - calibOffset) % 360 + 360) % 360;
+  return deviceHeading;
 }
 
 function setCompassStatus(state,text){
@@ -798,62 +765,15 @@ async function startCompass(){
     try{
       const perm=await DeviceOrientationEvent.requestPermission();
       if(perm!=='granted'){setCompassStatus('error','感應器權限被拒絕');return;}
-      compassGranted=true;
     }catch(e){setCompassStatus('error','權限請求失敗：'+e.message);return;}
-  }else{compassGranted=true;}
-
+  }
   window.addEventListener('deviceorientationabsolute',onOrientation,true);
   window.addEventListener('deviceorientation',onOrientation,true);
   compassActive=true;
-  btn.textContent='🧭 感應器啟動中…';
+  btn.textContent='🧭 感應器追蹤中';
   btn.disabled=true;
-  setCompassStatus('active','感應器已啟動');
-
-  // 稍等感應器穩定後再顯示校準畫面
-  setTimeout(showCalibrationOverlay, 800);
-  rafId=requestAnimationFrame(drawCompass);
-}
-
-function showCalibrationOverlay(){
-  calibPending=true;
-  document.getElementById('calibOverlay').classList.remove('hidden');
-}
-
-function confirmCalibration(){
-  if(deviceHeading===null) return;
-  // 記錄當前讀值作為偏移量（此時裝置對準北方，rawHeading 應為 0°）
-  calibOffset=deviceHeading;
-  isCalibrated=true;
-  calibPending=false;
-  document.getElementById('calibOverlay').classList.add('hidden');
-  // 顯示校準狀態列
-  const bar=document.getElementById('calibBar');
-  bar.classList.remove('hidden');
-  document.getElementById('calibBarText').textContent=
-    `已校準（偏移 ${Math.round(calibOffset)}°）`;
-  // 成功動畫
-  const wrap=document.querySelector('.compass-canvas-wrap');
-  wrap.classList.add('calib-flash');
-  setTimeout(()=>wrap.classList.remove('calib-flash'),1300);
-  setCompassStatus('active','已校準・追蹤中');
-  updateDiffBearing();
-}
-
-function skipCalibration(){
-  calibOffset=0;
-  isCalibrated=true;
-  calibPending=false;
-  document.getElementById('calibOverlay').classList.add('hidden');
-  document.getElementById('calibBar').classList.remove('hidden');
-  document.getElementById('calibBarText').textContent='已略過校準（以感應器原始值為準）';
   setCompassStatus('active','感應器追蹤中');
-}
-
-function redoCalibration(){
-  isCalibrated=false;
-  calibPending=true;
-  document.getElementById('calibOverlay').classList.remove('hidden');
-  setCompassStatus('active','重新校準中…');
+  rafId=requestAnimationFrame(drawCompass);
 }
 
 function onOrientation(e){
@@ -867,19 +787,8 @@ function onOrientation(e){
   }
   if(heading===null) return;
   deviceHeading=heading;
-
-  // 校準覆蓋層：顯示原始讀值（未校準）
-  if(calibPending){
-    document.getElementById('calibHeadingShow').textContent=
-      Math.round(heading)+'°';
-  }
-
-  // 正常追蹤：使用校準後的值
-  const cal=getCalibratedHeading();
-  if(cal!==null){
-    document.getElementById('deviceBearing').textContent=Math.round(cal)+'°';
-    updateDiffBearing();
-  }
+  document.getElementById('deviceBearing').textContent=Math.round(heading)+'°';
+  updateDiffBearing();
 }
 
 function selectJiFang(idx){
@@ -1317,7 +1226,9 @@ function renderBoard(R){
       <span class="ce ${sc}">${e}</span>
       ${p===R.xp?'<span class="bc bc-zf">值符</span>':''}
       ${p===R.zsp?'<span class="bc bc-zs">值使</span>':''}
-      ${R.kongPals.has(p)?'<span class="bc bc-ko">旬空</span>':''}`;
+      ${R.kongPals.has(p)?'<span class="bc bc-ko">旬空</span>':''}
+      <div class="cell-tap-hint">點擊解析</div>`;
+    cell.addEventListener('click',()=>onCellClick(p,{g,s,d,e,R}));
     bd.appendChild(cell);
   });
 }
@@ -1328,7 +1239,6 @@ function renderCompass(R){
   targetDeg=jiFangList[0]?.deg||0;
   document.getElementById('targetBearing').textContent=Math.round(targetDeg)+'°';
 
-  // 吉方清單
   const listEl=document.getElementById('jiList');
   listEl.innerHTML=jiFangList.slice(0,6).map((ji,i)=>`
     <div class="ji-item${i===0?' active':''}" onclick="selectJiFang(${i})">
@@ -1342,12 +1252,302 @@ function renderCompass(R){
 
   document.getElementById('compassCard').classList.remove('hidden');
   document.getElementById('shareRow').classList.remove('hidden');
-
-  // 先讓 DOM 渲染完，再計算尺寸並繪製（用 requestAnimationFrame 確保布局完成）
-  requestAnimationFrame(()=>{
-    resizeCanvases();
-  });
+  requestAnimationFrame(()=>{ resizeCanvases(); });
 }
+async function onCellClick(palace, {g,s,d,e,R}){
+  if(!curBoard) return;
+  // 視覺反饋：高亮選中宮
+  document.querySelectorAll('.cell').forEach(c=>c.classList.remove('cell-selected'));
+  document.querySelector(`.cell[data-p="${palace}"]`)?.classList.add('cell-selected');
+
+  const palDir=PDIR[palace]||'';
+  const marks=[];
+  if(palace===R.xp) marks.push('值符宮');
+  if(palace===R.zsp) marks.push('值使宮');
+  if(R.kongPals.has(palace)) marks.push('旬空');
+  const markStr=marks.length?`【${marks.join('・')}】`:'';
+
+  const q=`請深入解析${palDir}（${palace}宮）${markStr}的組合象義：
+神：${g} ／ 星：${s} ／ 門：${d} ／ 儀：${e}
+針對我的問題「${document.getElementById('userQ').value.trim()}」，這個宮位有什麼具體啟示？`;
+
+  setDis(true);
+  const area=document.getElementById('chatArea');
+  area.classList.remove('hidden');
+  appendMsg('user',`🔍 解析 ${palDir}｜${d}・${s}`);
+  addTyping();
+  try{
+    const r=await callAI(q,false);
+    rmTyping();
+    appendMsg('bot',fmtMD(r));
+    // 解析後生成針對該宮的主動追問
+    genProactiveFollowup(palace,{g,s,d,e});
+  }catch(err){rmTyping();appendMsg('bot','⚠️ '+err.message);}
+  setDis(false);
+}
+
+// ═══════════════════════════════════════
+//  歷史紀錄（localStorage）
+// ═══════════════════════════════════════
+const HIST_KEY='qimen_history';
+const HIST_MAX=30;
+
+function saveHistory(R, question, guideJson){
+  try{
+    const hist=loadHistory();
+    const entry={
+      id: Date.now(),
+      ts: new Date().toISOString(),
+      question,
+      dun:R.dun, ju:R.ju, jieqi:R.jieqi, yuan:R.yuan,
+      dayGZ:R.dayGZ.gz,
+      guide: guideJson,
+    };
+    hist.unshift(entry);
+    if(hist.length>HIST_MAX) hist.length=HIST_MAX;
+    localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+  }catch(e){console.warn('歷史儲存失敗',e);}
+}
+
+function loadHistory(){
+  try{ return JSON.parse(localStorage.getItem(HIST_KEY)||'[]'); }
+  catch(e){ return []; }
+}
+
+function renderHistoryPanel(){
+  const hist=loadHistory();
+  const panel=document.getElementById('histPanel');
+  if(!hist.length){
+    panel.innerHTML='<div class="hist-empty">尚無問卦紀錄</div>';return;
+  }
+  panel.innerHTML=hist.map(h=>{
+    const dt=new Date(h.ts);
+    const dtStr=`${dt.getFullYear()}/${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+    const lv=h.guide?.geju_level||'平';
+    const lvCls=lv==='吉'?'gj-ji':lv==='凶'?'gj-xiong':'gj-ping';
+    return `<div class="hist-item" onclick="loadHistEntry(${h.id})">
+      <div class="hist-item-top">
+        <span class="hist-dt">${dtStr}</span>
+        <span class="gj-tag ${lvCls}" style="font-size:9px">${lv}｜${h.guide?.geju||'—'}</span>
+      </div>
+      <div class="hist-q">${h.question}</div>
+      <div class="hist-meta">${h.dun}${h.ju}局・${h.jieqi}${h.yuan}・${h.dayGZ}</div>
+      <div class="hist-tone">${h.guide?.tone||''}</div>
+    </div>`;
+  }).join('');
+}
+
+function loadHistEntry(id){
+  const hist=loadHistory();
+  const h=hist.find(x=>x.id===id);
+  if(!h||!h.guide) return;
+  // 還原指引卡（不重新排盤，只顯示儲存的結果）
+  const fakeR={dun:h.dun};
+  renderGuideCard(h.guide, fakeR);
+  // 顯示原始問題
+  document.getElementById('chatArea').classList.remove('hidden');
+  document.getElementById('chatArea').innerHTML='';
+  appendMsg('user', h.question);
+  appendMsg('bot', fmtMD(
+    `**${h.guide.tone}**\n\n`+
+    `⏰ ${h.guide.timing}\n🧭 ${h.guide.location}\n`+
+    `🤝 ${h.guide.people}\n✨ ${h.guide.object}\n\n`+
+    `「${h.guide.ai_quote}」`
+  ));
+  // 關閉歷史面板
+  document.getElementById('histDrawer').classList.add('hidden');
+  // 滾動到指引卡
+  document.getElementById('guideSlot').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function clearHistory(){
+  if(!confirm('確定要清除所有問卦紀錄嗎？')) return;
+  localStorage.removeItem(HIST_KEY);
+  renderHistoryPanel();
+}
+
+function toggleHist(){
+  const d=document.getElementById('histDrawer');
+  const isHidden=d.classList.contains('hidden');
+  if(isHidden){renderHistoryPanel();d.classList.remove('hidden');}
+  else d.classList.add('hidden');
+}
+
+// ═══════════════════════════════════════
+//  主動追問生成
+// ═══════════════════════════════════════
+async function genProactiveFollowup(palace, {g,s,d,e}){
+  // 根據問題關鍵詞和宮位象義，生成個人化追問
+  if(!curBoard) return;
+  const q=document.getElementById('userQ').value.trim();
+  const palDir=PDIR[palace];
+
+  // 靜態個人化追問（依門名和問題關鍵詞組合）
+  const doorKeywords={
+    '生門':['創業/求財','主動出擊','人脈擴展'],
+    '開門':['出行計畫','新開始','突破現狀'],
+    '休門':['節奏調整','等待時機','充電恢復'],
+    '景門':['表達策略','文件準備','對外展示'],
+    '傷門':['競爭應對','溝通技巧','避免衝突'],
+    '杜門':['隱忍策略','暗中籌備','資訊保密'],
+    '驚門':['突發應對','風險防範','穩定情緒'],
+    '死門':['結束舊事','清理負擔','重新出發'],
+  };
+  const godKeywords={
+    '值符':['主動掌控','把握先機'],
+    '螣蛇':['防範欺騙','信息核實'],
+    '太陰':['低調運作','暗中行事'],
+    '六合':['合作夥伴','人際整合'],
+    '白虎':['競爭策略','避免衝突'],
+    '玄武':['防小人','背後隱患'],
+    '九地':['穩固根基','長遠布局'],
+    '九天':['大膽行動','飛躍突破'],
+  };
+
+  const doorTips=doorKeywords[d]||['深入分析','具體策略','注意事項'];
+  const godTip=(godKeywords[g]||['能量運用'])[0];
+
+  // 萃取問題主題詞（取前6字）
+  const qShort=q.length>8?q.slice(0,8)+'…':q;
+
+  const chips=[
+    `針對「${qShort}」，${d}在${palDir}代表什麼機會？`,
+    `${g}＋${d}的組合，具體行動建議是？`,
+    `${palDir}的${doorTips[0]}，現在該怎麼做？`,
+    `這個宮位有${godTip}的特質，如何善用？`,
+    `${d}遇到${e}（${SAN_QI.has(e)?'三奇':'六儀'}），有加成效果嗎？`,
+  ];
+
+  document.getElementById('frow').classList.remove('hidden');
+  document.getElementById('fchips').innerHTML=chips.map(t=>
+    `<button class="fc" onclick="sendFT(${JSON.stringify(t)})">${t}</button>`
+  ).join('');
+}
+
+// 初始指引卡後的主動追問（依整體盤局和問題生成）
+function showFollowup(R, question, guideJson){
+  document.getElementById('frow').classList.remove('hidden');
+
+  // 依問題主題、值符星、值使門生成個人化追問
+  const qShort=question.length>8?question.slice(0,8)+'…':question;
+  const zfStar=R.zfs.replace('星','');
+  const zsDir=PDIR[R.zsp];
+  const zsDoor=R.zsd;
+  const geju=guideJson?.geju||'本盤';
+  const tone=guideJson?.tone||'';
+
+  const chips=[
+    `「${geju}」格局下，「${qShort}」最該優先做的一件事是？`,
+    `${zfStar}星在值符宮，對我的${qShort}有什麼具體加持？`,
+    `${zsDir}的${zsDoor}是值使門，實際行動上要注意什麼？`,
+    R.kongZhi.length?`旬空（${R.kongZhi.join('、')}）對「${qShort}」有什麼影響？`:`${tone}——今天最不適合做的事是什麼？`,
+    `從時機上看，「${qShort}」最好在什麼時間段行動？`,
+  ];
+
+  document.getElementById('fchips').innerHTML=chips.map(t=>
+    `<button class="fc" onclick="sendFT(${JSON.stringify(t)})">${t}</button>`
+  ).join('');
+}
+
+async function sendFollowup(){const inp=document.getElementById('cin');const q=inp.value.trim();if(!q)return;inp.value='';await sendFT(q);}
+async function sendFT(q){
+  if(!curBoard)return;setDis(true);
+  const area=document.getElementById('chatArea');area.classList.remove('hidden');
+  appendMsg('user',q);addTyping();
+  try{const r=await callAI(q,false);rmTyping();appendMsg('bot',fmtMD(r));}
+  catch(e){rmTyping();appendMsg('bot','⚠️ '+e.message);}
+  setDis(false);area.scrollTop=area.scrollHeight;
+}
+function setDis(v){document.getElementById('sbtn').disabled=v;document.getElementById('btnGo').disabled=v;}
+
+// ═══════════════════════════════════════
+//  UI Init
+// ═══════════════════════════════════════
+(function init(){
+  const ms=document.getElementById('inMonth');
+  for(let m=1;m<=12;m++){const o=document.createElement('option');o.value=m;o.text=m+'月';ms.appendChild(o);}
+  ms.addEventListener('change',updDays);
+  document.getElementById('inYear').addEventListener('change',updDays);
+  document.getElementById('modelTag').textContent=MODEL;
+  setNow();
+})();
+function updDays(){
+  const y=+document.getElementById('inYear').value||2025;
+  const m=+document.getElementById('inMonth').value||1;
+  const days=new Date(y,m,0).getDate();
+  const ds=document.getElementById('inDay');const prev=+ds.value||1;
+  ds.innerHTML='';
+  for(let d=1;d<=days;d++){const o=document.createElement('option');o.value=d;o.text=d+'日';ds.appendChild(o);}
+  ds.value=Math.min(prev,days);
+}
+function setNow(){
+  const n=new Date();
+  document.getElementById('inYear').value=n.getFullYear();
+  document.getElementById('inMonth').value=n.getMonth()+1;
+  updDays();
+  document.getElementById('inDay').value=n.getDate();
+  const h=n.getHours();
+  document.getElementById('inHour').value=h<1||h>=23?0:Math.floor((h+1)/2);
+}
+function setQ(q){document.getElementById('userQ').value=q;}
+
+// ═══════════════════════════════════════
+//  主程式
+// ═══════════════════════════════════════
+async function doLayout(){
+  const y=+document.getElementById('inYear').value;
+  const m=+document.getElementById('inMonth').value;
+  const d=+document.getElementById('inDay').value;
+  const shi=+document.getElementById('inHour').value;
+  const q=document.getElementById('userQ').value.trim();
+  if(!q){
+    const ta=document.getElementById('userQ');
+    ta.style.borderColor='var(--gold)';ta.focus();
+    setTimeout(()=>ta.style.borderColor='',1800);return;
+  }
+  setDis(true);
+  try{
+    const R=doBoard(y,m,d,shi);curBoard=R;chatHist=[];
+    renderInfo(R);renderBoard(R);
+    document.getElementById('cardInfo').classList.remove('hidden');
+    document.getElementById('cardBoard').classList.remove('hidden');
+    renderCompass(R);
+    document.getElementById('guideSlot').innerHTML=`
+      <div class="chat-empty"><div class="ce-icon" style="animation:db .9s ease-in-out infinite">☯</div>
+      <div class="ce-text">AI 正在解讀盤局…</div></div>`;
+    document.getElementById('chatArea').classList.add('hidden');
+    document.getElementById('chatArea').innerHTML='';
+    document.getElementById('frow').classList.add('hidden');
+    const reply=await callAI(buildUserMsg(R,q),true);
+    const guideJson=parseJSON(reply);
+    renderGuideCard(guideJson,R);
+    showFollowup(R, q, guideJson);
+    // 儲存歷史
+    saveHistory(R, q, guideJson);
+  }catch(e){
+    document.getElementById('guideSlot').innerHTML=`
+      <div class="chat-empty"><div class="ce-text" style="color:var(--red)">⚠️ ${e.message}</div></div>`;
+    console.error(e);
+  }
+  setDis(false);
+}
+
+window.addEventListener('load',()=>{
+  setNow();
+  // 有歷史紀錄時顯示歷史按鈕提示
+  if(loadHistory().length>0){
+    document.getElementById('histBtn').style.opacity='1';
+  }
+});
+window.addEventListener('resize',()=>{
+  if(document.getElementById('compassCard')?.classList.contains('hidden')) return;
+  resizeCanvases();
+});
+window.addEventListener('beforeunload',()=>{
+  window.removeEventListener('deviceorientationabsolute',onOrientation,true);
+  window.removeEventListener('deviceorientation',onOrientation,true);
+  if(rafId)cancelAnimationFrame(rafId);
+});
 
 // ═══════════════════════════════════════
 //  指引卡（v4 完整保留）
