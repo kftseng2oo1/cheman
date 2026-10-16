@@ -88,8 +88,17 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
 .tbar .tp{background:#3fae72}.tbar .tn{background:#c0503c}
 .td{font-size:11px;color:var(--text2);text-align:right;}
 .cell.ysp{box-shadow:inset 0 0 0 2px rgba(80,200,136,.55);}
-.bc-ys{left:3px;top:2px;bottom:auto;color:#7ad8a4;background:rgba(80,200,136,.18);}
+.bc.bc-ys{left:3px;top:2px;bottom:auto;color:#7ad8a4;background:rgba(80,200,136,.18);}
 .cs b{font-weight:600;}
+.setp{margin:2px 0 10px;border:1px solid var(--border2);border-radius:8px;background:var(--panel2);}
+.setp summary{cursor:pointer;padding:7px 10px;font-size:12px;color:var(--text2);list-style:none;}
+.setp summary::-webkit-details-marker{display:none;}
+#setSum{font-size:10px;color:var(--muted);margin-left:6px;}
+.setg{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 10px 10px;}
+.setg label{display:flex;flex-direction:column;gap:3px;font-size:10px;color:var(--muted);}
+.setg label.chk{flex-direction:row;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.setg select,.setg input[type=number]{background:var(--panel);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:5px 6px;font-size:12px;width:100%;font-family:inherit;}
+.wsx{font-size:.62em;opacity:.7;margin-left:1px;vertical-align:super;}
 .field label{display:block;font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;text-transform:uppercase;}
 .field select,.field input[type=number]{width:100%;background:var(--panel2);border:1px solid var(--border2);
   color:var(--text);padding:7px 9px;border-radius:7px;font-family:'Noto Serif TC',serif;font-size:13px;
@@ -424,19 +433,26 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
           <div class="field">
             <label>時辰</label>
             <select id="inHour">
-              <option value="0">子 23–1</option><option value="1">丑 1–3</option>
+              <option value="0">子 0–1（早子）</option><option value="1">丑 1–3</option>
               <option value="2">寅 3–5</option><option value="3">卯 5–7</option>
               <option value="4">辰 7–9</option><option value="5">巳 9–11</option>
               <option value="6">午 11–13</option><option value="7">未 13–15</option>
               <option value="8">申 15–17</option><option value="9">酉 17–19</option>
-              <option value="10">戌 19–21</option><option value="11">亥 21–23</option>
+              <option value="10">戌 19–21</option><option value="11">亥 21–23</option><option value="12">晚子 23–24</option>
             </select>
           </div>
-          <div class="field">
-            <label>置局法</label>
-            <select id="inMethod"><option value="chai">拆補法</option></select>
-          </div>
         </div>
+        <details class="setp" id="setPanel">
+          <summary>⚙ 排盤設定 <span id="setSum"></span></summary>
+          <div class="setg">
+            <label>置局法<select id="sMethod"><option value="chai">拆補法</option><option value="zhirun">置閏法</option></select></label>
+            <label>中五寄宮<select id="sJi"><option value="kun">寄坤二宮</option><option value="genkun">陽遁寄艮、陰遁寄坤</option></select></label>
+            <label>23 點後<select id="sZi"><option value="next">換日（算次日子時）</option><option value="same">晚子時不換日</option></select></label>
+            <label>出生年（年命，選填）<input type="number" id="sBirth" placeholder="西元，如 1975" min="1900" max="2099"></label>
+            <label class="chk"><input type="checkbox" id="sTst"> 「現在」用真太陽時</label>
+            <label>經度<input type="number" id="sLon" step="0.1" min="100" max="140"></label>
+          </div>
+        </details>
         <div class="qtags" id="catRow"></div>
         <div class="qwrap">
           <label>問題類別 → 你的問題</label>
@@ -633,9 +649,17 @@ const DOOR_COLOR={
 };
 
 // ═══════════════════════════════════════
-//  排盤引擎 v6 — 時家轉盤奇門・拆補法
-//  干支、節氣交接時刻由 lunar-javascript 精確計算
+//  排盤引擎 v8 — 時家轉盤奇門
+//  拆補法／置閏法、中五寄宮、晚子時、月令旺衰
+//  干支、節氣由 lunar-javascript 精確計算
 // ═══════════════════════════════════════
+
+// 排盤設定（存在 localStorage）
+const SET_KEY='qimen_settings';
+const SET_DEF={method:'chai',ji:'kun',zi:'next',birth:'',tst:false,lon:121.5};
+let SET={...SET_DEF};
+try{Object.assign(SET,JSON.parse(localStorage.getItem(SET_KEY)||'{}'));}catch(e){}
+function saveSet(){try{localStorage.setItem(SET_KEY,JSON.stringify(SET));}catch(e){}}
 
 // 24 節氣 → [上元, 中元, 下元] 局數
 const JU_TABLE={
@@ -644,7 +668,9 @@ const JU_TABLE={
   夏至:[9,3,6],小暑:[8,2,5],大暑:[7,1,4],立秋:[2,5,8],處暑:[1,4,7],白露:[9,3,6],
   秋分:[7,1,4],寒露:[6,9,3],霜降:[5,8,2],立冬:[6,9,3],小雪:[5,8,2],大雪:[4,7,1],
 };
-const YANG_JQ=new Set(['冬至','小寒','大寒','立春','雨水','驚蟄','春分','清明','穀雨','立夏','小滿','芒種']);
+const JQ24=['冬至','小寒','大寒','立春','雨水','驚蟄','春分','清明','穀雨','立夏','小滿','芒種',
+  '夏至','小暑','大暑','立秋','處暑','白露','秋分','寒露','霜降','立冬','小雪','大雪'];
+const YANG_JQ=new Set(JQ24.slice(0,12));
 const YUAN_N=['上元','中元','下元'];
 const JQ_S2T={'惊':'驚','蛰':'蟄','谷':'穀','满':'滿','种':'種','处':'處'};
 const toTrad=s=>s.replace(/[惊蛰谷满种处]/g,c=>JQ_S2T[c]);
@@ -653,30 +679,58 @@ const toTrad=s=>s.replace(/[惊蛰谷满种处]/g,c=>JQ_S2T[c]);
 const RING=[1,8,3,4,9,2,7,6];
 const RING_STAR={1:'蓬星',8:'任星',3:'沖星',4:'輔星',9:'英星',2:'芮星',7:'柱星',6:'心星'};
 const RING_DOOR={1:'休門',8:'生門',3:'傷門',4:'杜門',9:'景門',2:'死門',7:'驚門',6:'開門'};
-const ringIdx=p=>RING.indexOf(p===5?2:p);      // 中五寄坤
-const jiGong=p=>p===5?2:p;
 const gzIdx=gz=>J60.indexOf(gz);
+const dayNum=(y,m,d)=>Math.floor(Date.UTC(y,m-1,d)/864e5);
 
-// 時辰序（0=子…11=亥）→ 取該時辰中點的時刻
-function shiToHour(shi){return shi===0?0:shi*2;}
+// 時辰序 0=子(早子 0–1)…11=亥，12=晚子(23–24，不換日)
+SHI_N[12]='晚子';
+function shiToHour(shi){return shi===12?23:shi===0?0:shi*2;}
 
 function lunarOf(y,m,d,shi){
   if(typeof Solar==='undefined')throw new Error('曆法模組未載入，請連網後重新整理');
   return Solar.fromYmdHms(y,m,d,shiToHour(shi),30,0).getLunar();
 }
 
-// 拆補法定局：當下節氣（依交節時刻）＋ 符頭地支定元
-function calcJu(lunar){
+// ── 拆補法：當下節氣（依交節時刻）＋ 符頭地支定元
+function calcJuChai(lunar){
   const jieqi=toTrad(lunar.getPrevJieQi(false).getName());
   const dIdx=gzIdx(lunar.getDayInGanZhi());
-  const fuIdx=dIdx-(dIdx%5);                     // 最近的甲日或己日 = 符頭
+  const fuIdx=dIdx-(dIdx%5);
   const z=fuIdx%12;
   const yi=[0,6,3,9].includes(z)?0:[2,8,5,11].includes(z)?1:2;
-  const dun=YANG_JQ.has(jieqi)?'陽遁':'陰遁';
-  return{dun,ju:JU_TABLE[jieqi][yi],jieqi,yuan:YUAN_N[yi],fuTou:J60[fuIdx]};
+  return{jieqi,yi,fuTou:J60[fuIdx],run:false};
 }
 
-// 地盤：戊己庚辛壬癸丁丙乙，陽順陰逆排九宮
+// ── 置閏法：上元符頭（甲子、己卯、甲午、己酉日）每 15 日一節氣，
+//    以冬至、夏至校正：符頭超神 9 日以上時，於芒種／大雪置閏重排一節
+const _solCache={};
+function solstices(y){
+  if(_solCache[y])return _solCache[y];
+  const t=Solar.fromYmd(y,7,1).getLunar().getJieQiTable();
+  const f=(s,n)=>({n,d:dayNum(s.getYear(),s.getMonth(),s.getDay())});
+  return _solCache[y]=[f(t['冬至'],'冬至'),f(t['夏至'],'夏至')];
+}
+function calcJuZhirun(lunar){
+  const so=lunar.getSolar();
+  const D=dayNum(so.getYear(),so.getMonth(),so.getDay());
+  const dIdx=gzIdx(lunar.getDayInGanZhi());
+  const F=D-(dIdx%15);                                   // 本節上元符頭
+  const cand=[];
+  for(const yy of [so.getYear()-1,so.getYear(),so.getYear()+1])
+    for(const s of solstices(yy)){
+      const A=F+15*Math.ceil((s.d-9-F)/15);              // 該至之第一個符頭（超神不逾 9 日）
+      if(A<=F)cand.push({...s,A});
+    }
+  cand.sort((a,b)=>b.A-a.A);
+  const S=cand[0];
+  const k=(F-S.A)/15;
+  const base=JQ24.indexOf(S.n);
+  const run=k>=12;
+  const jieqi=JQ24[(base+(run?11:k))%24];
+  const yi=Math.floor((D-F)/5);
+  return{jieqi,yi,fuTou:J60[dIdx-(dIdx%5)],run};
+}
+
 function epFn(ju,dun){
   const ep={};
   for(let i=0;i<9;i++){const idx=dun==='陽遁'?(ju-1+i)%9:((ju-1-i)%9+9)%9;ep[P9[idx]]=STEMS9[i];}
@@ -689,75 +743,111 @@ function getXun(hIdx){
   return{xunYi:YI[xs/10],xunName:J60[xs]+'旬',kongZhi:ki.map(i=>DI_ZHI[i])};
 }
 
+// 月令旺衰
+const ZHI_WX={寅:'木',卯:'木',巳:'火',午:'火',申:'金',酉:'金',亥:'水',子:'水',辰:'土',戌:'土',丑:'土',未:'土'};
+const STEM_WX={甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
+const DOOR_WX={休門:'水',生門:'土',傷門:'木',杜門:'木',景門:'火',死門:'土',驚門:'金',開門:'金'};
+const STAR_WX={蓬星:'水',任星:'土',沖星:'木',輔星:'木',英星:'火',芮星:'土',柱星:'金',心星:'金',禽星:'土'};
+const WX_KE={木:'土',土:'水',水:'火',火:'金',金:'木'};
+const WX_SHENG={木:'火',火:'土',土:'金',金:'水',水:'木'};
+function wxState(x,ling){
+  if(!x||!ling)return'';
+  if(x===ling)return'旺';if(WX_SHENG[ling]===x)return'相';if(WX_SHENG[x]===ling)return'休';
+  if(WX_KE[x]===ling)return'囚';return'死';
+}
+
 function doBoard(y,m,d,shi){
   const lunar=lunarOf(y,m,d,shi);
   const dGz=lunar.getDayInGanZhi(), hGz=lunar.getTimeInGanZhi();
   const dIdx=gzIdx(dGz), hi=gzIdx(hGz);
-  const{dun,ju,jieqi,yuan,fuTou}=calcJu(lunar);
+  const J=SET.method==='zhirun'?calcJuZhirun(lunar):calcJuChai(lunar);
+  const{jieqi,yi,fuTou,run}=J;
+  const dun=YANG_JQ.has(jieqi)?'陽遁':'陰遁';
+  const ju=JU_TABLE[jieqi][yi],yuan=YUAN_N[yi];
+  // 中五寄宮：寄坤，或陽遁寄艮、陰遁寄坤
+  const JG=SET.ji==='genkun'&&dun==='陽遁'?8:2;
+  const jiGong=p=>p===5?JG:p;
+  const ringIdx=p=>RING.indexOf(jiGong(p));
+
   const ep=epFn(ju,dun);
   const{xunYi,xunName,kongZhi}=getXun(hi);
   const kongPals=new Set(kongZhi.map(z=>ZTP[z]).filter(Boolean));
   const stemPal=s=>+Object.entries(ep).find(([,v])=>v===s)[0];
 
-  // 值符、值使：旬首儀所在地盤宮的原星、原門
   const xp=stemPal(xunYi);
   const zfs=xp===5?'禽星':RING_STAR[xp];
   const zsd=RING_DOOR[jiGong(xp)];
 
-  // 值符星 → 時干所在地盤宮（時干為甲則用旬首儀）
   const hgan=hGz[0];
   const zfp=jiGong(stemPal(hgan==='甲'?xunYi:hgan));
-  const starShift=ringIdx(zfp)-ringIdx(xp);
+  const starShift=((ringIdx(zfp)-ringIdx(xp))%8+8)%8;
   const hp={},hs={};
   RING.forEach((p,i)=>{
-    const to=RING[((i+starShift)%8+8)%8];
-    hp[to]=RING_STAR[p]+(p===2?'·禽':'');
-    hs[to]=ep[p]+(p===2?ep[5]:'');               // 天盤干（芮帶中五之干）
+    const to=RING[(i+starShift)%8];
+    hp[to]=RING_STAR[p]+(p===JG?'·禽':'');
+    hs[to]=ep[p]+(p===JG?ep[5]:'');
   });
   hp[5]='—';hs[5]='';
 
-  // 值使門 → 從旬首宮依時辰數沿九宮數序走（陽順陰逆），落中五寄坤
   const steps=hi%10;
   let zsp=dun==='陽遁'?((xp-1+steps)%9)+1:(((xp-1-steps)%9+9)%9)+1;
   zsp=jiGong(zsp);
-  const doorShift=ringIdx(zsp)-ringIdx(xp);
+  const doorShift=((ringIdx(zsp)-ringIdx(xp))%8+8)%8;
   const hmp={};
-  RING.forEach((p,i)=>{hmp[RING[((i+doorShift)%8+8)%8]]=RING_DOOR[p];});
+  RING.forEach((p,i)=>{hmp[RING[(i+doorShift)%8]]=RING_DOOR[p];});
   hmp[5]='—';
 
-  // 八神：值符神隨值符星，陽遁順時針、陰遁逆時針
   const gp={};const g0=RING.indexOf(zfp);
   for(let i=0;i<8;i++){const k=dun==='陽遁'?g0+i:g0-i;gp[RING[(k%8+8)%8]]=GODS[i];}
   gp[5]='—';
 
-  return{dun,ju,jieqi,yuan,fuTou,ep,hp,hs,hmp,gp,
+  const mz=lunar.getMonthZhiExact();
+  return{dun,ju,jieqi,yuan,fuTou,run,method:SET.method,JG,ep,hp,hs,hmp,gp,
     dayGZ:{gz:dGz,gan:dGz[0],zhi:dGz[1],idx:dIdx},
     hgan,hzhi:hGz[1],hi,
     xp,zfp,xunYi,xunName,kongZhi,kongPals,zfs,zsd,zsp,
-    fuyin:starShift%8===0,fanyin:((starShift%8)+8)%8===4};
+    ling:{zhi:mz,wx:ZHI_WX[mz]},
+    fuyin:starShift===0,fanyin:starShift===4,
+    dfuyin:doorShift===0,dfanyin:doorShift===4,
+    date:{y,m,d,shi}};
 }
 
 
 // ═══════════════════════════════════════
-//  用神分析・格局規則・擇時（v7）
+//  用神分析・格局規則・擇時・應期（v8）
 //  吉凶判定與解讀全部由程式依規則計算
 // ═══════════════════════════════════════
-const STEM_WX={甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
-const DOOR_WX={休門:'水',生門:'土',傷門:'木',杜門:'木',景門:'火',死門:'土',驚門:'金',開門:'金'};
-const WX_KE={木:'土',土:'水',水:'火',火:'金',金:'木'};
-const WX_SHENG={木:'火',火:'土',土:'金',金:'水',水:'木'};
 const DOOR_SC={開門:2,休門:2,生門:2,景門:1,杜門:0,傷門:-1,驚門:-1,死門:-2};
 const STAR_SC={輔星:2,禽星:2,心星:2,沖星:1,任星:1,柱星:-1,英星:-1,蓬星:-2,芮星:-2};
 const GOD_SC={值符:1,九天:1,九地:1,太陰:1,六合:1,螣蛇:-1,白虎:-1,玄武:-1};
-// 天盤干＋地盤干 組合格局
-const GE_COMBO={
-  戊丙:['青龍返首',2],丙戊:['飛鳥跌穴',2],乙辛:['青龍逃走',-2],辛乙:['白虎猖狂',-2],
-  丙庚:['熒入太白',-1],庚丙:['太白入熒',-2],庚癸:['大格',-2],庚壬:['小格',-1],
-  庚己:['刑格',-2],庚戊:['伏宮格',-2],戊庚:['飛宮格',-2],丁癸:['朱雀投江',-2],癸丁:['螣蛇夭矯',-2],
-};
-const XING_PAL={戊:3,己:2,庚:8,辛:9,壬:4,癸:4};   // 六儀擊刑
-const MU_PAL={乙:2,丙:6,丁:8};                    // 三奇入墓
-const HORSE={申:8,子:8,辰:8,寅:2,午:2,戌:2,巳:6,酉:6,丑:6,亥:4,卯:4,未:4}; // 時支→驛馬宮
+const ST_ADJ={旺:1,相:.5,休:0,囚:-.5,死:-1};   // 吉者旺更吉、凶者旺更凶
+
+// 十干克應：天盤干＋地盤干，共 81 組 [名稱, 分數('門'=依八門吉凶), 斷語]
+const KEYING_SRC=`
+戊戊|伏吟|-1|凡事閉塞，宜守舊|戊乙|青龍和會|門|門吉事吉，門凶事凶|戊丙|青龍返首|2|大吉，動作大利|戊丁|青龍耀明|1|宜謁貴求名|戊己|貴人入獄|-1|公私皆不利|戊庚|值符飛宮|-2|吉事不吉，凶事更凶|戊辛|青龍折足|-1|失財，防足疾|戊壬|青龍入天牢|-1|陰陽事皆不吉|戊癸|青龍華蓋|門|門吉招福，門凶多亂
+乙戊|利陰害陽|門|門凶事必凶|乙乙|日奇伏吟|-0.5|不宜謁貴，宜安分守身|乙丙|奇儀順遂|1|遷官進職|乙丁|奇儀相佐|1|利文書考試|乙己|日奇入霧|-1|被土暗昧，門凶必凶|乙庚|日奇被刑|-1|爭訟財產，夫妻懷私|乙辛|青龍逃走|-2|人亡財破|乙壬|日奇入地|-1|尊卑悖亂，官訟是非|乙癸|華蓋逢星|0|宜隱匿避災，不利求進
+丙戊|飛鳥跌穴|2|大吉，謀為皆成|丙乙|日月並行|1|公謀私為皆吉|丙丙|月奇悖師|-1|文書逼迫，破耗遺失|丙丁|星奇朱雀|1|貴人文書吉利|丙己|火悖入刑|-1|刑杖之事，文書不行|丙庚|熒入太白|-1|門戶破敗，盜賊耗失|丙辛|謀事就成|1|謀事可成，病人不凶|丙壬|火入天羅|-1|為客不利，是非頗多|丙癸|華蓋悖師|-1|陰人害事，災禍頻生
+丁戊|青龍轉光|1|官人升遷，常人威昌|丁乙|人遁吉格|1|婚姻財帛有喜|丁丙|星隨月轉|0|貴人高升，常人樂極生悲|丁丁|奇入太陰|1|文書即至，喜事遂心|丁己|火入勾陳|-1|奸私仇冤，事因女人|丁庚|年月日時格|-1|文書阻隔，行人必歸|丁辛|朱雀入獄|-1|罪人釋囚，官人失位|丁壬|五神互合|1|貴人恩詔，訟獄公平|丁癸|朱雀投江|-2|文書口舌，音信沉溺
+己戊|犬遇青龍|門|門吉謀望遂意，門凶枉費心機|己乙|墓神不明|-1|宜遁跡隱形|己丙|火悖地戶|-1|冤冤相害|己丁|朱雀入墓|-0.5|詞訟先曲後直|己己|地戶逢鬼|-2|百事不遂|己庚|利格反名|-1|詞訟先動者不利|己辛|遊魂入墓|-1|易有陰祟之事|己壬|地網高張|-1|奸情傷害|己癸|地刑玄武|-2|疾病垂危，囚獄詞訟
+庚戊|天乙伏宮|-2|百事不可謀，大凶|庚乙|太白逢星|-1|退吉進凶|庚丙|太白入熒|-2|賊必來，為主破財|庚丁|亭亭之格|-1|因私情起官司|庚己|官符刑格|-2|主官司口舌|庚庚|太白同宮|-2|官災橫禍，兄弟相爭|庚辛|白虎干格|-2|遠行車折馬傷|庚壬|小格|-1|遠行迷路，音信難通|庚癸|大格|-2|行人不至，官事不止
+辛戊|困龍被傷|-1|官司破財，宜屈抑守分|辛乙|白虎猖狂|-2|家敗人亡，出行有驚|辛丙|干合悖師|門|門吉事吉，門凶事凶|辛丁|獄神得奇|1|經商獲利，囚人逢赦|辛己|入獄自刑|-1|奴僕背主，訴訟難伸|辛庚|白虎出力|-2|刀刃相接，主客相殘|辛辛|伏吟天庭|-1|公廢私就，訟獄自羅|辛壬|凶蛇入獄|-1|兩男爭女，訟獄不息|辛癸|天牢華蓋|-1|日月失明，誤入天網
+壬戊|小蛇化龍|1|男人發達，女產嬰童|壬乙|小蛇得勢|1|女人柔順，男人通達|壬丙|水蛇入火|-1|官災刑禁|壬丁|干合蛇刑|-0.5|文書牽連，貴人匆匆|壬己|反吟蛇刑|-1|官司敗訴|壬庚|太白擒蛇|0|刑獄公平|壬辛|螣蛇相纏|-1|縱得吉門亦不能安|壬壬|蛇入地羅|-1|外人纏繞，內事索索|壬癸|幼女姦淫|-1|家有醜聲
+癸戊|天乙會合|1|財喜婚姻吉|癸乙|華蓋逢星|0.5|貴人祿位，常人平安|癸丙|華蓋悖師|-1|貴賤逢之皆不利|癸丁|螣蛇夭矯|-2|文書官司，火焚難逃|癸己|華蓋地戶|-1|音信皆阻|癸庚|太白入網|-1|暴力爭訟，自罹罪責|癸辛|網蓋天牢|-2|占病占訟大凶|癸壬|復見螣蛇|-1|嫁娶重婚|癸癸|天網四張|-2|行人失伴，病訟皆傷`;
+const KEYING={},GE_NOTE={};
+KEYING_SRC.trim().split('\n').forEach(line=>{
+  const a=line.split('|');
+  for(let i=0;i<a.length;i+=4){KEYING[a[i]]={n:a[i+1],v:a[i+2]==='門'?'門':+a[i+2],note:a[i+3]};GE_NOTE[a[i+1]]=a[i+3];}
+});
+Object.assign(GE_NOTE,{天遁:'百事大吉，宜祈福求官',地遁:'宜安營修造、藏匿',人遁:'宜求賢、和談、婚姻',
+  神遁:'宜祭祀、攻虛',風遁:'宜借勢而行、出征順風',玉女守門:'宜宴會、婚姻、和合之事',
+  門伏吟:'八門不動，事情停滯',門反吟:'八門反位，事多反覆'});
+
+const XING_PAL={戊:3,己:2,庚:8,辛:9,壬:4,癸:4};                // 六儀擊刑
+const MU_PAL={乙:2,丙:6,丁:8,戊:6,己:6,庚:8,辛:8,壬:4,癸:4};    // 十干入墓（三奇依古法，六儀依五行墓庫）
+const PAL_ZHI={1:['子'],8:['丑','寅'],3:['卯'],4:['辰','巳'],9:['午'],2:['未','申'],7:['酉'],6:['戌','亥']};
+const CHONG=z=>DI_ZHI[(DI_ZHI.indexOf(z)+6)%12];
+const MU_ZHI={2:'未',6:'戌',8:'丑',4:'辰'};
+const HORSE={申:8,子:8,辰:8,寅:2,午:2,戌:2,巳:6,酉:6,丑:6,亥:4,卯:4,未:4};
 
 // 問題類別與用神（w 為權重；負權重 = 對方／病症，越旺越不利）
 const QCATS={
@@ -777,9 +867,8 @@ function stemHeavenPal(R,st){
   for(const p of [1,2,3,4,6,7,8,9])if((R.hs[p]||'').includes(st))return p;
   return null;
 }
-function stemOfGan(R,gan,isDay){       // 甲遁於旬首儀
-  if(gan!=='甲')return gan;
-  return isDay?getXun(R.dayGZ.idx).xunYi:R.xunYi;
+function stemOfGan(R,gan,xunYiOf){       // 甲遁於所屬旬的旬首儀
+  return gan==='甲'?xunYiOf:gan;
 }
 function locateYS(R,y){
   const find=(o,v)=>{const k=Object.keys(o).find(p=>p!=='5'&&o[p]&&o[p].split('·')[0]===v);return k?+k:null;};
@@ -791,77 +880,143 @@ function locateYS(R,y){
   return null;
 }
 
-// 單宮評分：門、星、神、格局、擊刑、入墓、門迫、旬空
+// 單宮評分
 function evalPalace(R,p){
   const it=[];let sc=0;
-  const add=(label,v,kind)=>{it.push({label,v,kind:kind||(v>0?'ji':v<0?'xiong':'ping')});sc+=v;};
+  const add=(label,v,kind)=>{v=Math.round(v*10)/10;it.push({label,v,kind:kind||(v>0?'ji':v<0?'xiong':'ping')});sc+=v;};
   const door=R.hmp[p],star=(R.hp[p]||'').split('·')[0],god=R.gp[p],hs=(R.hs[p]||'')[0],es=R.ep[p];
-  if(door in DOOR_SC)add(door,DOOR_SC[door]);
-  if(star in STAR_SC)add(star,STAR_SC[star]);
+  const ling=R.ling?.wx;
+  // 八門、九星：基本吉凶 × 月令旺衰
+  const dst=wxState(DOOR_WX[door],ling),sst=wxState(STAR_WX[star],ling);
+  if(door in DOOR_SC){const b=DOOR_SC[door];add(door+(dst||''),b+Math.sign(b)*(ST_ADJ[dst]||0));}
+  if(star in STAR_SC){const b=STAR_SC[star];add(star+(sst||''),b+Math.sign(b)*(ST_ADJ[sst]||0)*.5);}
   if(god in GOD_SC)add(god,GOD_SC[god]);
-  const ge=GE_COMBO[hs+es];if(ge)add(ge[0],ge[1]);
+  // 十干克應
+  const k=KEYING[hs+es];
+  if(k){const v=k.v==='門'?Math.sign(DOOR_SC[door]||0):k.v;add(k.n,v,v===0?'info':undefined);}
+  // 九遁與吉格
+  if(hs==='丙'&&es==='丁'&&door==='生門')add('天遁',2);
+  if(hs==='乙'&&es==='己'&&door==='開門')add('地遁',2);
+  if(hs==='丁'&&door==='休門'&&god==='太陰')add('人遁',2);
+  if(hs==='丙'&&door==='生門'&&god==='九天')add('神遁',2);
+  if(hs==='乙'&&p===4&&['開門','休門','生門'].includes(door))add('風遁',1);
+  if(p===R.zsp&&es==='丁')add('玉女守門',1);
   if(SAN_QI.has(hs)&&['開門','休門','生門'].includes(door))add('奇門相合',1);
   if(XING_PAL[hs]===p)add(hs+'擊刑',-1.5);
-  if(MU_PAL[hs]===p)add(hs+'奇入墓',-1);
-  if(DOOR_WX[door]&&WX_KE[DOOR_WX[door]]===PAL_WX[p])add('門迫',-1);
+  if(MU_PAL[hs]===p)add(hs+'入墓',-1);
+  // 門與宮生剋
+  const dw=DOOR_WX[door],pw=PAL_WX[p],db=DOOR_SC[door]||0;
+  if(dw&&WX_KE[dw]===pw)add(db>0?'吉門被迫':db<0?'凶門迫宮':'門迫',db===0?-.5:-1);
+  else if(dw&&WX_KE[pw]===dw){if(db>0)add('吉門受制',-.5);else if(db<0)add('凶門受制',.5);}
+  else if(dw&&WX_SHENG[pw]===dw&&db>0)add('宮生吉門',.5);
   if(R.kongPals.has(p))add('旬空',-2);
   if(HORSE[R.hzhi]===p)add('驛馬',0,'info');
-  return{p,score:sc,items:it,door,star:R.hp[p],god,hs:R.hs[p],es};
+  return{p,score:Math.round(sc*10)/10,items:it,door,star:R.hp[p],god,hs:R.hs[p],es,dst,sst};
 }
 
-function palRelation(a,b){        // a 宮對 b 宮（五行）
+function palRelation(a,b){
   const x=PAL_WX[a],y=PAL_WX[b];
   if(a===b)return'同宮';if(WX_SHENG[x]===y)return'生';if(WX_KE[x]===y)return'剋';
   if(WX_SHENG[y]===x)return'被生';if(WX_KE[y]===x)return'被剋';return'比和';
 }
+function birthGZ(){
+  const y=parseInt(SET.birth,10);
+  if(!(y>1900&&y<2100))return null;
+  const i=((y-4)%60+60)%60;return{gz:J60[i],idx:i,gan:J60[i][0]};
+}
 
 function analyze(R,cat){
   const C=QCATS[cat]||QCATS.綜合;
-  const dStem=stemOfGan(R,R.dayGZ.gan,true),hStem=stemOfGan(R,R.hgan,false);
+  const dStem=stemOfGan(R,R.dayGZ.gan,getXun(R.dayGZ.idx).xunYi),hStem=stemOfGan(R,R.hgan,R.xunYi);
   const dPal=stemHeavenPal(R,dStem),hPal=stemHeavenPal(R,hStem);
-  const list=[];
-  const self={n:'求測人（日干'+R.dayGZ.gan+'）',p:dPal,w:cat==='綜合'?1:.4};
+  const by=birthGZ();
+  const list=[],extra=[];
+  let self;
+  if(by){
+    const yStem=stemOfGan(R,by.gan,getXun(by.idx).xunYi);
+    self={n:`求測人（年命${by.gz}）`,p:stemHeavenPal(R,yStem),w:cat==='綜合'?1:.4};
+    extra.push({n:'日干'+R.dayGZ.gan,p:dPal,w:.2});
+  }else self={n:'求測人（日干'+R.dayGZ.gan+'）',p:dPal,w:cat==='綜合'?1:.4};
   const thing={n:'所問之事（時干'+R.hgan+'）',p:hPal,w:cat==='綜合'?1:.4};
-  C.ys.forEach(y=>list.push({n:y.n,p:locateYS(R,y),w:y.w??1,key:y.door||y.god||y.star||y.stem||'驛馬'}));
+  C.ys.forEach(y=>list.push({n:y.n,p:locateYS(R,y),w:y.w??1,key:y.door||y.god||y.star||y.stem||'驛馬',stem:y.stem}));
   if(cat==='綜合')list.push({n:'值符（大局）',p:R.zfp,w:.6,key:'值符'});
-  [self,thing,...list].forEach(o=>{if(o.p)o.ev=evalPalace(R,o.p);});
-  const all=[self,thing,...list].filter(o=>o.ev);
+  const all=[self,thing,...extra,...list];
+  all.forEach(o=>{if(o.p)o.ev=evalPalace(R,o.p);});
   let num=0,den=0;
-  all.forEach(o=>{num+=o.w*o.ev.score;den+=Math.abs(o.w);});
+  all.filter(o=>o.ev).forEach(o=>{num+=o.w*o.ev.score;den+=Math.abs(o.w);});
   let score=den?num/den:0;
   const flags=[];
-  // 用神（主）與求測人宮位的生剋
   const main=list.find(o=>o.ev&&o.w>0)||thing;
-  let rel=null;
-  if(main?.p&&dPal){
-    rel=palRelation(main.p,dPal);
+  if(main?.p&&self.p){
+    const rel=palRelation(main.p,self.p);
     const RV={同宮:.8,生:.8,被剋:.4,比和:.2,被生:-.2,剋:-.6};
     const txt={同宮:'用神與求測人同宮，事與人相合',生:'用神宮生求測人宮，事來助我',被剋:'求測人宮剋用神宮，我能掌控',
       比和:'用神與求測人比和，平順',被生:'求測人宮生用神宮，需付出較多',剋:'用神宮剋求測人宮，事來壓我'}[rel];
     flags.push({label:txt,v:RV[rel]});score+=RV[rel];
   }
-  if(R.fuyin){flags.push({label:'伏吟：事情遲滯，宜守不宜動',v:-.5});score-=.5;}
-  if(R.fanyin){flags.push({label:'反吟：反覆變動，宜快不宜久',v:-.5});score-=.5;}
+  if(R.fuyin){flags.push({label:'星伏吟：事情遲滯，宜守不宜動',v:-.5});score-=.5;}
+  if(R.fanyin){flags.push({label:'星反吟：反覆變動，宜快不宜久',v:-.5});score-=.5;}
+  if(R.dfuyin&&!R.fuyin){flags.push({label:'門伏吟：八門不動，人事停滯',v:-.3});score-=.3;}
+  if(R.dfanyin&&!R.fanyin){flags.push({label:'門反吟：八門反位，事多反覆',v:-.3});score-=.3;}
   const dg=R.dayGZ.gan,hg=R.hgan,ti=TIAN_GAN.indexOf.bind(TIAN_GAN);
   if(WX_KE[STEM_WX[hg]]===STEM_WX[dg]&&ti(hg)%2===ti(dg)%2){flags.push({label:'五不遇時：時干剋日干，諸事不宜',v:-1});score-=1;}
   const verdict=score>=1.5?'吉':score>=.4?'小吉':score>-.4?'平':score>-1.5?'小凶':'凶';
-  return{cat,score:Math.round(score*10)/10,verdict,self,thing,list,flags,
-    mainPal:main?.p||null,mainName:main?.n||''};
+  return{cat,score:Math.round(score*10)/10,verdict,self,thing,extra,list,flags,
+    mainPal:main?.p||null,mainName:main?.n||'',mainStem:main?.stem||null};
 }
 
-// 擇時：從起盤時辰起往後掃描 n 個時辰
-function scanTimes(y,m,d,shi,cat,n=12){
-  const out=[];const base=new Date(y,m-1,d);
+// 時辰序列：從 (y,m,d,shi) 起往後 n 個時辰（晚子之後接次日丑時）
+function shiSeq(y,m,d,shi,n){
+  const out=[];let dt=new Date(y,m-1,d),s=shi;
   for(let k=0;k<n;k++){
-    let s=shi+k,dd=new Date(base);
-    dd.setDate(dd.getDate()+Math.floor(s/12));s%=12;
-    const Y=dd.getFullYear(),M=dd.getMonth()+1,D=dd.getDate();
+    out.push({y:dt.getFullYear(),m:dt.getMonth()+1,d:dt.getDate(),shi:s});
+    if(s===12){dt.setDate(dt.getDate()+1);s=1;}
+    else if(s===11){dt.setDate(dt.getDate()+1);s=0;}
+    else s++;
+  }
+  return out;
+}
+function scanTimes(y,m,d,shi,cat,n=12){
+  const out=[];
+  for(const t of shiSeq(y,m,d,shi,n)){
     try{
-      const R=doBoard(Y,M,D,s);const A=analyze(R,cat);
-      out.push({y:Y,m:M,d:D,shi:s,label:`${M}/${D} ${SHI_N[s]}時`,score:A.score,verdict:A.verdict,
+      const R=doBoard(t.y,t.m,t.d,t.shi);const A=analyze(R,cat);
+      out.push({...t,label:`${t.m}/${t.d} ${SHI_N[t.shi]}時`,score:A.score,verdict:A.verdict,zsp:R.zsp,
         pal:A.mainPal,dir:A.mainPal?PDIR[A.mainPal]:'—',door:A.mainPal?R.hmp[A.mainPal]:'—',kong:A.mainPal?R.kongPals.has(A.mainPal):false});
     }catch(e){}
   }
+  return out;
+}
+
+// ── 應期：近應看時辰，遠應看日
+function nextDayWith(R,zhis,maxDays=30){
+  const{y,m,d}=R.date;
+  for(let k=1;k<=maxDays;k++){
+    const z=DI_ZHI[(R.dayGZ.idx+k)%12];
+    if(zhis.includes(z)){const dt=new Date(y,m-1,d+k);return`${dt.getMonth()+1}/${dt.getDate()}（${J60[(R.dayGZ.idx+k)%60]}日）`;}
+  }
+  return null;
+}
+function yingQi(R,A,times){
+  const out=[];const p=A.mainPal;
+  if(!p)return out;
+  const ev=[...A.list,A.thing].find(o=>o.p===p)?.ev;
+  if(R.kongPals.has(p)){
+    const fill=nextDayWith(R,R.kongZhi);
+    if(fill)out.push({t:`用神旬空，待填實：${fill}`,k:'空'});
+  }
+  if(ev&&ev.items.some(i=>/入墓$/.test(i.label))&&MU_ZHI[p]){
+    const c=nextDayWith(R,[CHONG(MU_ZHI[p])]);
+    if(c)out.push({t:`用神入墓，待沖墓（${CHONG(MU_ZHI[p])}日）：${c}`,k:'墓'});
+  }
+  if(HORSE[R.hzhi]===p)out.push({t:'用神逢驛馬，事主速動，近日即應',k:'馬'});
+  const hit=times.slice(1).find(t=>t.zsp===p);
+  if(hit)out.push({t:`值使門臨用神宮：${hit.label}（近應）`,k:'使'});
+  const zhis=PAL_ZHI[p]||[];
+  const d=nextDayWith(R,zhis);
+  if(d)out.push({t:`用神宮支（${zhis.join('、')}）：${d}`,k:'支'});
+  if(R.fuyin)out.push({t:'星伏吟：應期偏慢，需耐心等候',k:'緩'});
+  if(R.fanyin)out.push({t:'星反吟：應期快但易反覆',k:'快'});
   return out;
 }
 
@@ -1356,7 +1511,8 @@ function renderInfo(R){
   const g=document.getElementById('igrid');
   const chips=[
     ['日柱',R.dayGZ.gz],['時柱',R.hgan+R.hzhi],
-    ['節氣',R.jieqi],['元',R.yuan],
+    ['節氣',R.jieqi+(R.run?'（閏）':'')],['元',R.yuan],
+    ['置局',R.method==='zhirun'?'置閏法':'拆補法'],['月令',R.ling.zhi+'月・'+R.ling.wx+'旺'],
     ['陰陽',R.dun,R.dun==='陽遁'?'cv-yang':'cv-yin'],
     ['局數',R.ju+' 局'],['旬',R.xunName],['旬首儀',R.xunYi],
     ['值符星',R.zfs],['值使門',R.zsd],
@@ -1380,8 +1536,8 @@ function renderBoard(R){
     cell.innerHTML=`
       <span class="pn">${p}</span><span class="pd">${PDIR[p]||''}</span>
       <span class="cg">${g}</span><div class="dv"></div>
-      <span class="cs">${s}${h?` <b class="${SAN_QI.has(h[0])?'eq':'ey'}">${h}</b>`:''}</span>
-      <span class="cd">${d}</span><div class="dv"></div>
+      <span class="cs">${s}<sup class="wsx">${wxState(STAR_WX[s.split('·')[0]],R.ling.wx)}</sup>${h?` <b class="${SAN_QI.has(h[0])?'eq':'ey'}">${h}</b>`:''}</span>
+      <span class="cd">${d}<sup class="wsx">${wxState(DOOR_WX[d],R.ling.wx)}</sup></span><div class="dv"></div>
       <span class="ce ${sc}">${e}</span>
       ${p===R.zfp?'<span class="bc bc-zf">值符</span>':''}
       ${p===R.zsp?'<span class="bc bc-zs">值使</span>':''}
@@ -1455,9 +1611,10 @@ function renderYS(A){
   document.getElementById('ysBody').innerHTML=`
     <div class="ys-head"><span class="vd ${VD_CLS[A.verdict]}">${A.verdict}</span>
       <span class="ys-total">${QCATS[A.cat].icon} ${A.cat}・綜合分 ${A.score>0?'+':''}${A.score}</span></div>
-    ${[...A.list,A.self,A.thing].map(ysRow).join('')}
+    ${[...A.list,A.self,A.thing,...(A.extra||[])].map(ysRow).join('')}
     ${A.flags.length?`<div class="ys-flags">${A.flags.map(f=>`<div class="yf ${f.v>0?'pos':f.v<0?'neg':''}">${f.v>0?'▲':f.v<0?'▼':'●'} ${f.label}</div>`).join('')}</div>`:''}
-    <div class="ys-note">評分依門、星、神、天地盤干格局、擊刑、入墓、門迫、旬空計算；點列可看該宮解析。</div>`;
+    ${(()=>{const yq=yingQi(curBoard,A,curTimes);return yq.length?`<div class="ys-flags"><div class="ys-name" style="margin-bottom:4px">⏱ 應期</div>${yq.map(q=>`<div class="yf">● ${q.t}</div>`).join('')}</div>`:'';})()}
+    <div class="ys-note">評分依八門九星（含月令${curBoard?.ling?.zhi||''}月${curBoard?.ling?.wx||''}旺衰）、八神、十干克應、九遁、擊刑、入墓、門宮生剋、旬空計算；點列可看該宮解析。</div>`;
 }
 function bestTimes(list){        // 用神旬空的時段不列入推薦
   return[...list].filter(t=>!t.kong&&t.score>0).sort((a,b)=>b.score-a.score).slice(0,3);
@@ -1594,6 +1751,7 @@ function setDis(v){document.getElementById('btnGo').disabled=v;}
   ms.addEventListener('change',updDays);
   document.getElementById('inYear').addEventListener('change',updDays);
   renderCats();
+  initSettings();
   document.getElementById('userQ').value=QCATS[QCAT].q;
   setNow();
 })();
@@ -1606,15 +1764,36 @@ function updDays(){
   for(let d=1;d<=days;d++){const o=document.createElement('option');o.value=d;o.text=d+'日';ds.appendChild(o);}
   ds.value=Math.min(prev,days);
 }
+// 均時差（分鐘）
+function eqOfTime(dt){
+  const N=Math.floor((dt-new Date(dt.getFullYear(),0,0))/864e5);
+  const B=2*Math.PI*(N-81)/364;
+  return 9.87*Math.sin(2*B)-7.53*Math.cos(B)-1.5*Math.sin(B);
+}
+function initSettings(){
+  const bind=(id,key,isChk)=>{
+    const el=document.getElementById(id);
+    if(isChk)el.checked=!!SET[key];else el.value=SET[key];
+    el.addEventListener('change',()=>{SET[key]=isChk?el.checked:(el.type==='number'&&key==='lon'?+el.value:el.value);saveSet();updSetSum();});
+  };
+  bind('sMethod','method');bind('sJi','ji');bind('sZi','zi');bind('sBirth','birth');bind('sTst','tst',true);bind('sLon','lon');
+  updSetSum();
+}
+function updSetSum(){
+  document.getElementById('setSum').textContent=[SET.method==='zhirun'?'置閏':'拆補',SET.ji==='kun'?'寄坤':'艮坤',
+    SET.zi==='same'?'晚子不換日':'',SET.birth?'年命'+SET.birth:'',SET.tst?'真太陽時':''].filter(Boolean).join('・');
+}
 function setNow(){
-  const n=new Date();
-  if(n.getHours()>=23)n.setDate(n.getDate()+1);   // 23 點後為次日子時
+  let n=new Date();
+  if(SET.tst)n=new Date(n.getTime()+((+SET.lon||120)-120)*4*60000+eqOfTime(n)*60000);
+  const late=n.getHours()>=23;
+  if(late&&SET.zi!=='same')n.setDate(n.getDate()+1);   // 23 點後為次日子時
   document.getElementById('inYear').value=n.getFullYear();
   document.getElementById('inMonth').value=n.getMonth()+1;
   updDays();
   document.getElementById('inDay').value=n.getDate();
   const h=n.getHours();
-  document.getElementById('inHour').value=h<1||h>=23?0:Math.floor((h+1)/2);
+  document.getElementById('inHour').value=late?(SET.zi==='same'?12:0):h<1?0:Math.floor((h+1)/2);
 }
 function setQ(q){document.getElementById('userQ').value=q;}
 
@@ -1686,16 +1865,15 @@ const GOD_MEAN={值符:'找有權位的貴人出面',螣蛇:'消息多變，口�
   九地:'找穩重資深的人，宜守宜藏',九天:'主動出擊，向外拓展'};
 const WX_COLOR_N={木:'綠、青色',火:'紅、紫色',土:'黃、咖啡色',金:'白色、金屬飾品',水:'黑、深藍色'};
 const TONE={吉:'時機成熟，放手去做',小吉:'可以進行，留意細節',平:'穩紮穩打，按部就班',小凶:'阻力偏多，先守後攻',凶:'時機未到，宜緩宜守'};
-const GE_NOTE={青龍返首:'大吉，事有轉機',飛鳥跌穴:'大吉，一擊即中',青龍逃走:'破財、人離',白虎猖狂:'衝突、損傷',
-  熒入太白:'賊必去',太白入熒:'賊必來，防損失',大格:'行人不歸、事難成',小格:'阻滯',刑格:'官非、傷損',
-  伏宮格:'主客皆不利',飛宮格:'易變動',朱雀投江:'文書口舌',螣蛇夭矯:'虛驚怪異'};
 
 function mainEval(A){return [...A.list,A.thing].find(o=>o.p===A.mainPal)?.ev||null;}
 
 function localGuide(R,A,times){
   const ev=mainEval(A);
-  const ge=[...A.list,A.self,A.thing].flatMap(o=>o.ev?o.ev.items:[]).find(i=>GE_NOTE[i.label]);
+  const ge=(ev?ev.items:[]).filter(i=>GE_NOTE[i.label]&&Math.abs(i.v)>=1)   // 以用神宮的格局為主
+    .sort((a,b)=>Math.abs(b.v)-Math.abs(a.v))[0];
   const fl=A.flags.find(f=>/伏吟|反吟|五不遇時/.test(f.label));
+  const yq=yingQi(R,A,times);
   const geju=ge?ge.label:fl?fl.label.split('：')[0]:'普通盤';
   const lv=/吉/.test(A.verdict)?'吉':/凶/.test(A.verdict)?'凶':'平';
   const best=bestTimes(times);
@@ -1716,6 +1894,7 @@ function localGuide(R,A,times){
   const pos=ev?ev.items.filter(i=>i.v>0).map(i=>i.label).join('、'):'';
   const neg=ev?ev.items.filter(i=>i.v<0).map(i=>i.label).join('、'):'';
   const summary=[pos&&`助力：${pos}`,neg&&`牽制：${neg}`,...A.flags.map(f=>f.label)].filter(Boolean).join('；')||'盤局平穩';
+  if(yq.length)timing+=`<br>應期：${yq.slice(0,2).map(q=>q.t).join('；')}`;
   return{geju,geju_level:A.verdict,note:GE_NOTE[geju]||(fl?fl.label.split('：')[1]:''),tone:TONE[A.verdict],timing,location,people,object,ai_quote:summary};
 }
 
@@ -1726,10 +1905,10 @@ function explainPalace(p){
   const star=(ev.star||'').split('·')[0];
   const lines=[
     `<b>${PDIR[p]}（${p} 宮）</b>${roles.length?`　🎯 ${roles.join('、')}`:''}`,
-    ev.door&&DOOR_MEAN[ev.door]?`🚪 ${ev.door}：${DOOR_MEAN[ev.door]}`:'',
-    STAR_MEAN[star]?`⭐ ${ev.star}：${STAR_MEAN[star]}`:'',
+    ev.door&&DOOR_MEAN[ev.door]?`🚪 ${ev.door}${ev.dst?'（'+ev.dst+'）':''}：${DOOR_MEAN[ev.door]}`:'',
+    STAR_MEAN[star]?`⭐ ${ev.star}${ev.sst?'（'+ev.sst+'）':''}：${STAR_MEAN[star]}`:'',
     GOD_MEAN[ev.god]?`🛡 ${ev.god}：${GOD_MEAN[ev.god]}`:'',
-    ev.hs?`☯ 天盤 ${ev.hs} 加 地盤 ${ev.es}${(()=>{const g=GE_COMBO[ev.hs[0]+ev.es];return g?`：${g[0]}，${GE_NOTE[g[0]]}`:'';})()}`:'',
+    ev.hs?`☯ 天盤 ${ev.hs} 加 地盤 ${ev.es}${(()=>{const g=KEYING[ev.hs[0]+ev.es];return g?`：${g.n}，${g.note}`:'';})()}`:'',
     ev.items.length?`評分 ${ev.score>0?'+':''}${ev.score}：`+ev.items.map(i=>i.label+(i.v?`(${i.v>0?'+':''}${i.v})`:'')).join('、'):'',
   ].filter(Boolean);
   const area=document.getElementById('chatArea');area.classList.remove('hidden');
