@@ -500,13 +500,12 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
   <!-- ═══ 右欄 ═══ -->
   <div class="col-r">
 
-    <!-- AI 指引卡 -->
+    <!-- 行動指引卡 -->
     <div class="card" style="display:flex;flex-direction:column;">
       <div class="ch">
         <span class="ch-icon">🔮</span>
         <span class="ch-title">行動指引卡</span>
         <button class="hist-btn" id="histBtn" onclick="toggleHist()" title="歷史紀錄">📜 紀錄</button>
-        <span class="ch-tag" id="modelTag"></span>
       </div>
 
       <!-- 歷史紀錄抽屜 -->
@@ -520,17 +519,10 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
       <div id="guideSlot">
         <div class="chat-empty">
           <div class="ce-icon">☯</div>
-          <div class="ce-text">輸入你的問題<br>按下「起盤解析」<br>AI 將為你生成專屬行動指引</div>
+          <div class="ce-text">選擇問題類別<br>按下「起盤解析」<br>即依盤局生成行動指引</div>
         </div>
       </div>
       <div class="chat-area hidden" id="chatArea"></div>
-      <div class="frow hidden" id="frow">
-        <div class="fchips" id="fchips"></div>
-        <div class="cinrow">
-          <input class="cin" id="cin" placeholder="繼續追問…" onkeydown="if(event.key==='Enter')sendFollowup()">
-          <button class="sbtn" id="sbtn" onclick="sendFollowup()">➤</button>
-        </div>
-      </div>
     </div>
 
     <!-- 吉方指南針 -->
@@ -610,9 +602,6 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
 // ═══════════════════════════════════════
 //  CONFIG
 // ═══════════════════════════════════════
-const WORKER_URL='https://arcar.kftseng2oo1.workers.dev';
-const MODEL='claude-opus-5-5';
-const MODEL_FALLBACK='claude-opus-4-5';
 
 // ═══════════════════════════════════════
 //  常數（完整保留 v4 邏輯）
@@ -763,7 +752,7 @@ function doBoard(y,m,d,shi){
 
 // ═══════════════════════════════════════
 //  用神分析・格局規則・擇時（v7）
-//  吉凶判定由程式依規則計算，AI 只負責翻譯成白話
+//  吉凶判定與解讀全部由程式依規則計算
 // ═══════════════════════════════════════
 const STEM_WX={甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
 const DOOR_WX={休門:'水',生門:'土',傷門:'木',杜門:'木',景門:'火',死門:'土',驚門:'金',開門:'金'};
@@ -1434,36 +1423,11 @@ function renderCompassList(){
       <div style="font-size:11px;color:var(--muted)">${ji.deg}°</div>
     </div>`).join('');
 }
-async function onCellClick(palace, {g,s,d,e,h,R}){
+function onCellClick(palace){
   if(!curBoard) return;
-  // 視覺反饋：高亮選中宮
   document.querySelectorAll('.cell').forEach(c=>c.classList.remove('cell-selected'));
   document.querySelector(`.cell[data-p="${palace}"]`)?.classList.add('cell-selected');
-
-  const palDir=PDIR[palace]||'';
-  const marks=[];
-  if(palace===R.zfp) marks.push('值符宮');
-  if(palace===R.zsp) marks.push('值使宮');
-  if(R.kongPals.has(palace)) marks.push('旬空');
-  const markStr=marks.length?`【${marks.join('・')}】`:'';
-
-  const q=`請深入解析${palDir}（${palace}宮）${markStr}的組合象義：
-神：${g} ／ 星：${s} ／ 門：${d} ／ 天盤干：${h||'—'} ／ 地盤干：${e}
-針對我的問題「${document.getElementById('userQ').value.trim()}」，這個宮位有什麼具體啟示？`;
-
-  setDis(true);
-  const area=document.getElementById('chatArea');
-  area.classList.remove('hidden');
-  appendMsg('user',`🔍 解析 ${palDir}｜${d}・${s}`);
-  addTyping();
-  try{
-    const r=await callAI(q,false);
-    rmTyping();
-    appendMsg('bot',fmtMD(r));
-    // 解析後生成針對該宮的主動追問
-    genProactiveFollowup(palace,{g,s,d,e});
-  }catch(err){rmTyping();appendMsg('bot','⚠️ '+err.message);}
-  setDis(false);
+  explainPalace(palace);
 }
 
 
@@ -1579,7 +1543,7 @@ function renderHistoryPanel(){
     const dt=new Date(h.ts);
     const dtStr=`${dt.getFullYear()}/${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
     const lv=h.guide?.geju_level||'平';
-    const lvCls=lv==='吉'?'gj-ji':lv==='凶'?'gj-xiong':'gj-ping';
+    const lvCls=/吉/.test(lv)?'gj-ji':/凶/.test(lv)?'gj-xiong':'gj-ping';
     return `<div class="hist-item" onclick="loadHistEntry(${h.id})">
       <div class="hist-item-top">
         <span class="hist-dt">${dtStr}</span>
@@ -1628,92 +1592,7 @@ function toggleHist(){
   else d.classList.add('hidden');
 }
 
-// ═══════════════════════════════════════
-//  主動追問生成
-// ═══════════════════════════════════════
-async function genProactiveFollowup(palace, {g,s,d,e}){
-  // 根據問題關鍵詞和宮位象義，生成個人化追問
-  if(!curBoard) return;
-  const q=document.getElementById('userQ').value.trim();
-  const palDir=PDIR[palace];
-
-  // 靜態個人化追問（依門名和問題關鍵詞組合）
-  const doorKeywords={
-    '生門':['創業/求財','主動出擊','人脈擴展'],
-    '開門':['出行計畫','新開始','突破現狀'],
-    '休門':['節奏調整','等待時機','充電恢復'],
-    '景門':['表達策略','文件準備','對外展示'],
-    '傷門':['競爭應對','溝通技巧','避免衝突'],
-    '杜門':['隱忍策略','暗中籌備','資訊保密'],
-    '驚門':['突發應對','風險防範','穩定情緒'],
-    '死門':['結束舊事','清理負擔','重新出發'],
-  };
-  const godKeywords={
-    '值符':['主動掌控','把握先機'],
-    '螣蛇':['防範欺騙','信息核實'],
-    '太陰':['低調運作','暗中行事'],
-    '六合':['合作夥伴','人際整合'],
-    '白虎':['競爭策略','避免衝突'],
-    '玄武':['防小人','背後隱患'],
-    '九地':['穩固根基','長遠布局'],
-    '九天':['大膽行動','飛躍突破'],
-  };
-
-  const doorTips=doorKeywords[d]||['深入分析','具體策略','注意事項'];
-  const godTip=(godKeywords[g]||['能量運用'])[0];
-
-  // 萃取問題主題詞（取前6字）
-  const qShort=q.length>8?q.slice(0,8)+'…':q;
-
-  const chips=[
-    `針對「${qShort}」，${d}在${palDir}代表什麼機會？`,
-    `${g}＋${d}的組合，具體行動建議是？`,
-    `${palDir}的${doorTips[0]}，現在該怎麼做？`,
-    `這個宮位有${godTip}的特質，如何善用？`,
-    `${d}遇到${e}（${SAN_QI.has(e)?'三奇':'六儀'}），有加成效果嗎？`,
-  ];
-
-  document.getElementById('frow').classList.remove('hidden');
-  document.getElementById('fchips').innerHTML=chips.map(t=>
-    `<button class="fc" onclick="sendFT(${JSON.stringify(t)})">${t}</button>`
-  ).join('');
-}
-
-// 初始指引卡後的主動追問（依整體盤局和問題生成）
-function showFollowup(R, question, guideJson){
-  document.getElementById('frow').classList.remove('hidden');
-
-  // 依問題主題、值符星、值使門生成個人化追問
-  const qShort=question.length>8?question.slice(0,8)+'…':question;
-  const zfStar=R.zfs.replace('星','');
-  const zsDir=PDIR[R.zsp];
-  const zsDoor=R.zsd;
-  const geju=guideJson?.geju||'本盤';
-  const tone=guideJson?.tone||'';
-
-  const chips=[
-    `「${geju}」格局下，「${qShort}」最該優先做的一件事是？`,
-    `${zfStar}星在值符宮，對我的${qShort}有什麼具體加持？`,
-    `${zsDir}的${zsDoor}是值使門，實際行動上要注意什麼？`,
-    R.kongZhi.length?`旬空（${R.kongZhi.join('、')}）對「${qShort}」有什麼影響？`:`${tone}——今天最不適合做的事是什麼？`,
-    `從時機上看，「${qShort}」最好在什麼時間段行動？`,
-  ];
-
-  document.getElementById('fchips').innerHTML=chips.map(t=>
-    `<button class="fc" onclick="sendFT(${JSON.stringify(t)})">${t}</button>`
-  ).join('');
-}
-
-async function sendFollowup(){const inp=document.getElementById('cin');const q=inp.value.trim();if(!q)return;inp.value='';await sendFT(q);}
-async function sendFT(q){
-  if(!curBoard)return;setDis(true);
-  const area=document.getElementById('chatArea');area.classList.remove('hidden');
-  appendMsg('user',q);addTyping();
-  try{const r=await callAI(q,false);rmTyping();appendMsg('bot',fmtMD(r));}
-  catch(e){rmTyping();appendMsg('bot','⚠️ '+e.message);}
-  setDis(false);area.scrollTop=area.scrollHeight;
-}
-function setDis(v){document.getElementById('sbtn').disabled=v;document.getElementById('btnGo').disabled=v;}
+function setDis(v){document.getElementById('btnGo').disabled=v;}
 
 // ═══════════════════════════════════════
 //  UI Init
@@ -1723,7 +1602,6 @@ function setDis(v){document.getElementById('sbtn').disabled=v;document.getElemen
   for(let m=1;m<=12;m++){const o=document.createElement('option');o.value=m;o.text=m+'月';ms.appendChild(o);}
   ms.addEventListener('change',updDays);
   document.getElementById('inYear').addEventListener('change',updDays);
-  document.getElementById('modelTag').textContent=MODEL;
   renderCats();
   document.getElementById('userQ').value=QCATS[QCAT].q;
   setNow();
@@ -1752,7 +1630,7 @@ function setQ(q){document.getElementById('userQ').value=q;}
 // ═══════════════════════════════════════
 //  主程式
 // ═══════════════════════════════════════
-async function doLayout(){
+function doLayout(){
   const y=+document.getElementById('inYear').value;
   const m=+document.getElementById('inMonth').value;
   const d=+document.getElementById('inDay').value;
@@ -1765,23 +1643,17 @@ async function doLayout(){
   }
   setDis(true);
   try{
-    const R=doBoard(y,m,d,shi);curBoard=R;chatHist=[];
+    const R=doBoard(y,m,d,shi);curBoard=R;
     curAnalysis=analyze(R,QCAT);
     curTimes=scanTimes(y,m,d,shi,QCAT,12);
     renderInfo(R);renderYS(curAnalysis);renderTimes(curTimes);renderBoard(R);
     document.getElementById('cardInfo').classList.remove('hidden');
     document.getElementById('cardBoard').classList.remove('hidden');
     renderCompass(R);preferYSDirection(curAnalysis);
-    document.getElementById('guideSlot').innerHTML=`
-      <div class="chat-empty"><div class="ce-icon" style="animation:db .9s ease-in-out infinite">☯</div>
-      <div class="ce-text">AI 正在解讀盤局…</div></div>`;
     document.getElementById('chatArea').classList.add('hidden');
     document.getElementById('chatArea').innerHTML='';
-    document.getElementById('frow').classList.add('hidden');
-    const reply=await callAI(buildUserMsg(R,q),true);
-    const guideJson=parseJSON(reply);
+    const guideJson=localGuide(R,curAnalysis,curTimes);
     renderGuideCard(guideJson,R);
-    showFollowup(R, q, guideJson);
     // 儲存歷史
     saveHistory(R, q, guideJson);
   }catch(e){
@@ -1810,16 +1682,81 @@ window.addEventListener('beforeunload',()=>{
 });
 
 // ═══════════════════════════════════════
-//  指引卡（v4 完整保留）
+//  規則解讀（取代 AI，全部在本機計算）
+// ═══════════════════════════════════════
+let curBoard=null;
+const DOOR_MEAN={休門:'休養、求人、和談、宜靜',生門:'生財、置產、開創、謀利',傷門:'競爭、討債、捕獵，易有損傷',
+  杜門:'隱藏、躲避、保密，事多阻塞',景門:'文書、考試、宣傳、表現',死門:'終結、停滯、弔喪，不宜動',
+  驚門:'驚恐、口舌、官訟，宜防變',開門:'開業、求職、出行、見貴'};
+const STAR_MEAN={蓬星:'膽大冒險，防盜失',任星:'穩重踏實，利守成',沖星:'行動快、性急',輔星:'文教、貴人扶持',
+  英星:'名聲、光彩，易急躁',芮星:'問題暴露、疾病',柱星:'破壞、口舌是非',心星:'謀略、醫藥、管理',禽星:'中正、統籌'};
+const GOD_MEAN={值符:'找有權位的貴人出面',螣蛇:'消息多變，口說無憑，重要事要落在紙上',太陰:'私下低調溝通，暗中佈局',
+  六合:'適合合作、居中牽線、談和',白虎:'避免正面衝突，防意外',玄武:'防小人、看緊財物與文件',
+  九地:'找穩重資深的人，宜守宜藏',九天:'主動出擊，向外拓展'};
+const WX_COLOR_N={木:'綠、青色',火:'紅、紫色',土:'黃、咖啡色',金:'白色、金屬飾品',水:'黑、深藍色'};
+const TONE={吉:'時機成熟，放手去做',小吉:'可以進行，留意細節',平:'穩紮穩打，按部就班',小凶:'阻力偏多，先守後攻',凶:'時機未到，宜緩宜守'};
+const GE_NOTE={青龍返首:'大吉，事有轉機',飛鳥跌穴:'大吉，一擊即中',青龍逃走:'破財、人離',白虎猖狂:'衝突、損傷',
+  熒入太白:'賊必去',太白入熒:'賊必來，防損失',大格:'行人不歸、事難成',小格:'阻滯',刑格:'官非、傷損',
+  伏宮格:'主客皆不利',飛宮格:'易變動',朱雀投江:'文書口舌',螣蛇夭矯:'虛驚怪異'};
+
+function mainEval(A){return [...A.list,A.thing].find(o=>o.p===A.mainPal)?.ev||null;}
+
+function localGuide(R,A,times){
+  const ev=mainEval(A);
+  const ge=[...A.list,A.self,A.thing].flatMap(o=>o.ev?o.ev.items:[]).find(i=>GE_NOTE[i.label]);
+  const fl=A.flags.find(f=>/伏吟|反吟|五不遇時/.test(f.label));
+  const geju=ge?ge.label:fl?fl.label.split('：')[0]:'普通盤';
+  const lv=/吉/.test(A.verdict)?'吉':/凶/.test(A.verdict)?'凶':'平';
+  const best=bestTimes(times);
+  const bt=best.filter(t=>t!==times[0]).map(t=>`${t.label}（${t.dir}）`).join('、');
+  let timing;
+  if(lv==='吉')timing=`本時辰（${times[0]?.label}）即可行動。`+(bt?`其他好時段：${bt}。`:'');
+  else timing=bt?`本時辰不宜，建議改在 ${bt}。`:'未來 12 時辰沒有明顯吉時，建議改日再起盤。';
+  let location;
+  const kong=A.mainPal&&R.kongPals.has(A.mainPal);
+  if(ev&&ev.score>0&&!kong)location=`往${PDIR[A.mainPal]}（${A.mainName}所在，${ev.door}）。`;
+  else{
+    const alt=calcJiFang(R).find(j=>j.jiRank>=0&&!j.isKong);
+    location=(A.mainPal?`${A.mainName}在${PDIR[A.mainPal]}${kong?'但旬空':'但力弱'}，`:'')+
+      (alt?`改往${PDIR[alt.pal]}（${alt.door}）。`:'方位皆不理想，宜靜守。');
+  }
+  const people=ev?(GOD_MEAN[ev.god]||'以誠相待'):'以誠相待';
+  const object=A.mainPal?`${WX_COLOR_N[PAL_WX[A.mainPal]]}（用神宮屬${PAL_WX[A.mainPal]}）`:'素色為宜';
+  const pos=ev?ev.items.filter(i=>i.v>0).map(i=>i.label).join('、'):'';
+  const neg=ev?ev.items.filter(i=>i.v<0).map(i=>i.label).join('、'):'';
+  const summary=[pos&&`助力：${pos}`,neg&&`牽制：${neg}`,...A.flags.map(f=>f.label)].filter(Boolean).join('；')||'盤局平穩';
+  return{geju,geju_level:A.verdict,note:GE_NOTE[geju]||(fl?fl.label.split('：')[1]:''),tone:TONE[A.verdict],timing,location,people,object,ai_quote:summary};
+}
+
+function explainPalace(p){
+  const R=curBoard;if(!R)return;
+  const ev=evalPalace(R,p);
+  const roles=curAnalysis?[...curAnalysis.list,curAnalysis.self,curAnalysis.thing].filter(o=>o.p===p).map(o=>o.n):[];
+  const star=(ev.star||'').split('·')[0];
+  const lines=[
+    `<b>${PDIR[p]}（${p} 宮）</b>${roles.length?`　🎯 ${roles.join('、')}`:''}`,
+    ev.door&&DOOR_MEAN[ev.door]?`🚪 ${ev.door}：${DOOR_MEAN[ev.door]}`:'',
+    STAR_MEAN[star]?`⭐ ${ev.star}：${STAR_MEAN[star]}`:'',
+    GOD_MEAN[ev.god]?`🛡 ${ev.god}：${GOD_MEAN[ev.god]}`:'',
+    ev.hs?`☯ 天盤 ${ev.hs} 加 地盤 ${ev.es}${(()=>{const g=GE_COMBO[ev.hs[0]+ev.es];return g?`：${g[0]}，${GE_NOTE[g[0]]}`:'';})()}`:'',
+    ev.items.length?`評分 ${ev.score>0?'+':''}${ev.score}：`+ev.items.map(i=>i.label+(i.v?`(${i.v>0?'+':''}${i.v})`:'')).join('、'):'',
+  ].filter(Boolean);
+  const area=document.getElementById('chatArea');area.classList.remove('hidden');
+  area.innerHTML='';appendMsg('bot',lines.join('<br>'));
+  area.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ═══════════════════════════════════════
+//  指引卡
 // ═══════════════════════════════════════
 const GEJU_DB={'青龍返首':{lv:'吉',icon:'🐉',note:'突破困境'},'飛鳥跌穴':{lv:'吉',icon:'🦅',note:'精準落點'},
-  '虎猖狂':{lv:'凶',icon:'🐅',note:'小心衝突'},'天網四張':{lv:'凶',icon:'🕸',note:'多重阻礙'},
-  '五不遇時':{lv:'凶',icon:'⚠',note:'時機未到'},'伏吟':{lv:'凶',icon:'😶',note:'原地踏步'},
+  '白虎猖狂':{lv:'凶',icon:'🐅',note:'小心衝突'},'青龍逃走':{lv:'凶',icon:'🐉',note:'防破財人離'},'大格':{lv:'凶',icon:'⛔',note:'事難成'},'刑格':{lv:'凶',icon:'⚔',note:'防官非'},'伏宮格':{lv:'凶',icon:'🧱',note:'主客不利'},'飛宮格':{lv:'凶',icon:'🌀',note:'易變動'},'五不遇時':{lv:'凶',icon:'⚠',note:'時機未到'},'天網四張':{lv:'凶',icon:'🕸',note:'多重阻礙'},
+  '伏吟':{lv:'凶',icon:'😶',note:'原地踏步'},
   '反吟':{lv:'凶',icon:'🔄',note:'方向需調整'},'普通盤':{lv:'平',icon:'☯',note:'穩紮穩打'}};
 
 function renderGuideCard(json,R){
   const lv=json.geju_level||'平';
-  const lvTag=lv==='吉'?'gj-ji':lv==='凶'?'gj-xiong':'gj-ping';
+  const lvTag=/吉/.test(lv)?'gj-ji':/凶/.test(lv)?'gj-xiong':'gj-ping';
   const gjInfo=GEJU_DB[json.geju]||{lv,icon:'☯',note:''};
   document.getElementById('guideSlot').innerHTML=`
   <div class="guide-card">
@@ -1828,7 +1765,7 @@ function renderGuideCard(json,R){
       <div>
         <span class="gj-tag ${lvTag}">${lv}｜${json.geju}</span>
         <div class="gc-tone">${json.tone}</div>
-        <div class="gc-format">${gjInfo.note||''}</div>
+        <div class="gc-format">${json.note??gjInfo.note??''}</div>
       </div>
     </div>
     <div class="gc-body">
@@ -1849,106 +1786,16 @@ function renderGuideCard(json,R){
         <div class="gc-val">${json.object}</div>
       </div>
     </div>
-    <div class="gc-quote">「 ${json.ai_quote} 」</div>
+    <div class="gc-quote">${json.ai_quote}</div>
   </div>`;
 }
 
-// ═══════════════════════════════════════
-//  AI
-// ═══════════════════════════════════════
-let chatHist=[];let curBoard=null;
-
-const SYSTEM_PROMPT=`# Role
-你是一位精通「現代行為科學」與「奇門遁甲」的戰略決策顧問。你的任務是將排盤結果轉化為使用者一看就懂的「行動指引卡」。
-
-# 翻譯邏輯（Mapping Logic）
-- 生門→主動出擊創造機會 | 休門→充電等待 | 開門→勇敢開創 | 死門→終結重啟
-- 景門→表達展示 | 傷門→行動但防衝突 | 杜門→謀定後動 | 驚門→留意變數
-- 值符→掌握主動 | 螣蛇→防信息失真 | 太陰→低調佈局
-- 六合→借助合作 | 白虎→避免正面衝突 | 玄武→留意背後隱患
-- 九地→打好基礎 | 九天→大膽突破
-- 三奇（丁丙乙）→特助降臨 | 旬空→該方位力量缺位
-
-# 判讀規則（最重要）
-- 盤局 JSON 內的 analysis 是程式依傳統規則算出的結論：verdict（吉凶）、用神落宮與評分、格局、生剋。
-- 你的吉凶定調必須與 analysis.verdict 一致，不得自行翻案；geju 優先採用 analysis 中出現的格局名稱，沒有就寫「普通盤」。
-- 說理要引用具體依據（例如「生門落東北但門迫」），不要空泛。
-- timing 必須引用 analysis.best_times 中的具體時段；location 以用神方位（analysis.main_direction）為主，用神旬空或為負分時改建議次佳吉方。
-
-# 負面格局轉化原則
-絕對禁止使用恐嚇性語言。死門=終結重啟；凶神=提高警覺；旬空=低調換方向。
-
-# Output Format（嚴格輸出 JSON，不得有其他文字）
-{"geju":"格局名稱","geju_level":"吉/凶/平","tone":"10字以內能量定調",
-"timing":"【時】具體建議","location":"【地】方位建議",
-"people":"【人】人際建議","object":"【物】穿搭建議","ai_quote":"戰略金句"}`;
-
-function analysisPayload(){
-  const A=curAnalysis;if(!A)return null;
-  const one=o=>o.p?{role:o.n,palace:PDIR[o.p],score:o.ev.score,
-    factors:o.ev.items.map(i=>i.label+(i.v?`(${i.v>0?'+':''}${i.v})`:'')).join('、')}:{role:o.n,palace:'盤中未見'};
-  return{category:A.cat,verdict:A.verdict,score:A.score,
-    main_direction:A.mainPal?PDIR[A.mainPal]:null,
-    yongshen:A.list.map(one),self:one(A.self),matter:one(A.thing),
-    relations_and_flags:A.flags.map(f=>f.label),
-    best_times:bestTimes(curTimes)
-      .map(t=>`${t.label}（${t.verdict}，用神在${t.dir}）`)};
-}
-function buildUserMsg(R,q){
-  const jiDir=Object.entries(R.hmp)
-    .filter(([,d])=>JI_DOORS.includes(d))
-    .map(([p,d])=>`${d}/${PDIR[p]}`).join('、');
-  const qiPals=Object.entries(R.ep).filter(([,s])=>SAN_QI.has(s)).map(([p,s])=>`${s}在${PDIR[p]}`);
-  const payload={dun:R.dun,ju:R.ju+'局',jieqi:R.jieqi,yuan:R.yuan,
-    zhifu:{palace:PDIR[R.zfp],star:R.zfs,god:R.gp[R.zfp]},
-    zhishi:{palace:PDIR[R.zsp],door:R.zsd,star:R.hp[R.zsp],god:R.gp[R.zsp]},
-    ji_fang:jiDir||'平均分佈',san_qi:qiPals.length?qiPals.join('、'):'無',
-    xun_kong:R.kongZhi.join('、'),
-    day_pillar:R.dayGZ.gz,hour_pillar:R.hgan+R.hzhi,fu_yin:R.fuyin,fan_yin:R.fanyin,
-    nine_palaces:BOARD_LO.map(p=>({palace:PDIR[p],god:R.gp[p],star:R.hp[p],door:R.hmp[p],heaven:R.hs[p],earth:R.ep[p]})),
-    analysis:analysisPayload(),
-    user_question:q};
-  return `以下是奇門遁甲盤局（JSON），請生成行動指引卡：\n\n${JSON.stringify(payload,null,2)}`;
-}
-async function callAI(msg,first){
-  chatHist.push({role:'user',content:msg});
-  const sys=first?SYSTEM_PROMPT:`你是奇門遁甲戰略顧問，用溫暖現代語言回覆追問，150-250字，繁體中文，不重新輸出JSON。`;
-  const resp=await fetch(WORKER_URL,{method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({model:MODEL,max_tokens:1000,system:sys,messages:chatHist})});
-  let data;
-  if(!resp.ok){
-    // 新模型未被 Worker 接受時，退回舊模型重試一次
-    if((resp.status===400||resp.status===404)&&MODEL!==MODEL_FALLBACK){
-      const r2=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({model:MODEL_FALLBACK,max_tokens:1000,system:sys,messages:chatHist})});
-      if(!r2.ok){chatHist.pop();throw new Error(`API ${r2.status}`);}
-      data=await r2.json();
-    }else{chatHist.pop();throw new Error(`API ${resp.status}`);}
-  }else data=await resp.json();
-  const text=data.content?.[0]?.text||'';
-  chatHist.push({role:'assistant',content:text});
-  return text;
-}
-function parseJSON(text){
-  const s=text.indexOf('{'),e=text.lastIndexOf('}');
-  if(s>=0&&e>s){try{return JSON.parse(text.slice(s,e+1));}catch(err){}}
-  return{geju:'平穩局勢',geju_level:'平',tone:'穩健前行',timing:text,
-    location:'正前方',people:'保持誠信',object:'素色穿搭',ai_quote:'每一步都算數。'};
-}
 function appendMsg(role,html){
   const area=document.getElementById('chatArea');
   const div=document.createElement('div');div.className=`msg ${role}`;
   div.innerHTML=`<div class="av">${role==='user'?'🙋':'🔮'}</div><div class="bubble">${html}</div>`;
   area.appendChild(div);area.scrollTop=area.scrollHeight;
 }
-function addTyping(){
-  const area=document.getElementById('chatArea');
-  const d=document.createElement('div');d.className='msg bot';d.id='tdot';
-  d.innerHTML=`<div class="av">🔮</div><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
-  area.appendChild(d);area.scrollTop=area.scrollHeight;
-}
-function rmTyping(){document.getElementById('tdot')?.remove();}
 function fmtMD(t){
   return t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
     .replace(/`(.+?)`/g,'<em>$1</em>').replace(/\n/g,'<br>');
