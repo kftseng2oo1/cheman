@@ -57,6 +57,38 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
 /* ── Form ── */
 .fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(68px,1fr));gap:8px;margin-bottom:10px;}
 .wrap>*{min-width:0;}
+.qtag.cat.on{border-color:var(--gold);color:var(--bg);background:var(--gold);}
+.vd{display:inline-block;font-size:13px;font-weight:700;padding:2px 12px;border-radius:14px;}
+.vd.sm{font-size:10px;padding:1px 7px;min-width:34px;text-align:center;}
+.vd-ji{background:#1d6b3f;color:#d8ffe6}.vd-ji2{background:#20473a;color:#9fe8c0}
+.vd-ping{background:#33334d;color:#c8c8e0}.vd-xi2{background:#5a2c22;color:#f0b8a8}.vd-xi{background:#7a1f1f;color:#ffd0d0}
+.ys-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.ys-total{font-size:12px;color:var(--text2);}
+.ys-row{padding:8px 0;border-top:1px solid var(--border);cursor:pointer;}
+.ys-name{font-size:11px;color:var(--gold);letter-spacing:.05em;}
+.ys-neg{font-size:9px;color:var(--muted);margin-left:6px;}
+.ys-body{font-size:13px;margin-top:2px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.ys-miss{color:var(--muted);}
+.ys-sc{margin-left:auto;font-weight:700;font-size:12px;color:var(--text2);}
+.ys-sc.pos{color:#50c888}.ys-sc.neg{color:#e07060}
+.ys-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;}
+.yc{font-size:10px;padding:1px 6px;border-radius:9px;border:1px solid var(--border2);color:var(--text2);}
+.yc i{font-style:normal;margin-left:3px;opacity:.75;}
+.yc-ji{border-color:#2f7a52;color:#7ad8a4}.yc-xiong{border-color:#7a3a30;color:#e89a88}.yc-info{border-color:#3a5a8a;color:#8ab4e8}
+.ys-flags{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
+.yf{font-size:12px;color:var(--text2);margin:3px 0;}.yf.pos{color:#7ad8a4}.yf.neg{color:#e89a88}
+.ys-note{font-size:10px;color:var(--muted);margin-top:8px;line-height:1.6;}
+.tr{display:grid;grid-template-columns:92px 1fr 44px 52px;align-items:center;gap:6px;padding:6px 4px;border-radius:6px;cursor:pointer;font-size:12px;}
+.tr:hover{background:var(--panel2);}
+.tr.now{background:rgba(200,168,74,.07);cursor:default;}
+.tr.best .tl::before{content:'★ ';color:var(--gold);}
+.tl em{font-style:normal;font-size:9px;color:var(--gold);margin-left:4px;}
+.tbar{position:relative;height:6px;background:var(--panel2);border-radius:3px;}
+.tbar span{position:absolute;top:0;height:6px;border-radius:3px;}
+.tbar .tp{background:#3fae72}.tbar .tn{background:#c0503c}
+.td{font-size:11px;color:var(--text2);text-align:right;}
+.cell.ysp{box-shadow:inset 0 0 0 2px rgba(80,200,136,.55);}
+.bc-ys{left:3px;top:2px;bottom:auto;color:#7ad8a4;background:rgba(80,200,136,.18);}
 .cs b{font-weight:600;}
 .field label{display:block;font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;text-transform:uppercase;}
 .field select,.field input[type=number]{width:100%;background:var(--panel2);border:1px solid var(--border2);
@@ -414,21 +446,15 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
           </div>
           <div class="field">
             <label>置局法</label>
-            <select id="inMethod"><option value="chai">拆補法</option><option value="zhirun">置閏法</option></select>
+            <select id="inMethod"><option value="chai">拆補法</option></select>
           </div>
         </div>
+        <div class="qtags" id="catRow"></div>
         <div class="qwrap">
-          <label>你的問題</label>
+          <label>問題類別 → 你的問題</label>
           <textarea id="userQ" placeholder="例如：我正在考慮換工作，這個時機合適嗎？"></textarea>
         </div>
-        <div class="qtags">
-          <button class="qtag" onclick="setQ('近期事業發展方向如何？')">事業</button>
-          <button class="qtag" onclick="setQ('感情與婚姻方面有什麼建議？')">感情</button>
-          <button class="qtag" onclick="setQ('財運與投資時機的建議？')">財運</button>
-          <button class="qtag" onclick="setQ('健康方面需要注意什麼？')">健康</button>
-          <button class="qtag" onclick="setQ('近期做這個決定是否合適？')">決策</button>
-          <button class="qtag" onclick="setQ('如何趨吉避凶，把握當前機運？')">趨吉</button>
-        </div>
+        
         <div class="brow">
           <button class="btn now" onclick="setNow()">⏱ 現在</button>
           <button class="btn primary" id="btnGo" onclick="doLayout()">☯ 起盤解析</button>
@@ -440,6 +466,18 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
     <div class="card hidden" id="cardInfo" style="margin-top:13px;">
       <div class="ch"><span class="ch-icon">📊</span><span class="ch-title">盤局資訊</span></div>
       <div class="cb"><div class="igrid" id="igrid"></div></div>
+    </div>
+
+    <!-- 用神分析 -->
+    <div class="card hidden" id="cardYS" style="margin-top:13px;">
+      <div class="ch"><span class="ch-icon">🎯</span><span class="ch-title">用神分析</span></div>
+      <div class="cb" id="ysBody"></div>
+    </div>
+
+    <!-- 擇時 -->
+    <div class="card hidden" id="cardTime" style="margin-top:13px;">
+      <div class="ch"><span class="ch-icon">⏳</span><span class="ch-title">擇時建議・未來 12 時辰</span></div>
+      <div class="cb" id="timeBody"></div>
     </div>
 
     <!-- 九宮盤面 -->
@@ -720,6 +758,134 @@ function doBoard(y,m,d,shi){
     hgan,hzhi:hGz[1],hi,
     xp,zfp,xunYi,xunName,kongZhi,kongPals,zfs,zsd,zsp,
     fuyin:starShift%8===0,fanyin:((starShift%8)+8)%8===4};
+}
+
+
+// ═══════════════════════════════════════
+//  用神分析・格局規則・擇時（v7）
+//  吉凶判定由程式依規則計算，AI 只負責翻譯成白話
+// ═══════════════════════════════════════
+const STEM_WX={甲:'木',乙:'木',丙:'火',丁:'火',戊:'土',己:'土',庚:'金',辛:'金',壬:'水',癸:'水'};
+const DOOR_WX={休門:'水',生門:'土',傷門:'木',杜門:'木',景門:'火',死門:'土',驚門:'金',開門:'金'};
+const WX_KE={木:'土',土:'水',水:'火',火:'金',金:'木'};
+const WX_SHENG={木:'火',火:'土',土:'金',金:'水',水:'木'};
+const DOOR_SC={開門:2,休門:2,生門:2,景門:1,杜門:0,傷門:-1,驚門:-1,死門:-2};
+const STAR_SC={輔星:2,禽星:2,心星:2,沖星:1,任星:1,柱星:-1,英星:-1,蓬星:-2,芮星:-2};
+const GOD_SC={值符:1,九天:1,九地:1,太陰:1,六合:1,螣蛇:-1,白虎:-1,玄武:-1};
+// 天盤干＋地盤干 組合格局
+const GE_COMBO={
+  戊丙:['青龍返首',2],丙戊:['飛鳥跌穴',2],乙辛:['青龍逃走',-2],辛乙:['白虎猖狂',-2],
+  丙庚:['熒入太白',-1],庚丙:['太白入熒',-2],庚癸:['大格',-2],庚壬:['小格',-1],
+  庚己:['刑格',-2],庚戊:['伏宮格',-2],戊庚:['飛宮格',-2],丁癸:['朱雀投江',-2],癸丁:['螣蛇夭矯',-2],
+};
+const XING_PAL={戊:3,己:2,庚:8,辛:9,壬:4,癸:4};   // 六儀擊刑
+const MU_PAL={乙:2,丙:6,丁:8};                    // 三奇入墓
+const HORSE={申:8,子:8,辰:8,寅:2,午:2,戌:2,巳:6,酉:6,丑:6,亥:4,卯:4,未:4}; // 時支→驛馬宮
+
+// 問題類別與用神（w 為權重；負權重 = 對方／病症，越旺越不利）
+const QCATS={
+  綜合:{icon:'☯',q:'如何趨吉避凶，把握當前機運？',ys:[]},
+  事業:{icon:'💼',q:'近期事業發展方向如何？',ys:[{door:'開門',n:'事業'},{god:'值符',n:'上司貴人'}]},
+  求財:{icon:'💰',q:'財運與投資時機如何？',ys:[{door:'生門',n:'財源'},{stem:'戊',n:'資本'}]},
+  感情:{icon:'💞',q:'這段感情的發展如何？',ys:[{god:'六合',n:'姻緣'},{stem:'乙',n:'女方',w:.7},{stem:'庚',n:'男方',w:.7}]},
+  考試:{icon:'📝',q:'這次考試或面試結果如何？',ys:[{door:'景門',n:'考場文書'},{stem:'丁',n:'成績'},{star:'輔星',n:'學業',w:.7}]},
+  健康:{icon:'🩺',q:'健康方面需要注意什麼？',ys:[{star:'心星',n:'醫生'},{stem:'乙',n:'藥物',w:.7},{star:'芮星',n:'病症',w:-.5}]},
+  出行:{icon:'🧳',q:'這趟出行順利嗎？',ys:[{door:'開門',n:'出行'},{horse:1,n:'驛馬',w:.7}]},
+  官司:{icon:'⚖️',q:'這件紛爭或官司的走向？',ys:[{door:'驚門',n:'官訟',w:.5},{god:'值符',n:'法官'},{stem:'庚',n:'對手',w:-.7}]},
+  合作:{icon:'🤝',q:'這次合作或求人辦事順利嗎？',ys:[{god:'六合',n:'合作'},{door:'休門',n:'人和'}]},
+};
+let QCAT='綜合';
+
+function stemHeavenPal(R,st){
+  for(const p of [1,2,3,4,6,7,8,9])if((R.hs[p]||'').includes(st))return p;
+  return null;
+}
+function stemOfGan(R,gan,isDay){       // 甲遁於旬首儀
+  if(gan!=='甲')return gan;
+  return isDay?getXun(R.dayGZ.idx).xunYi:R.xunYi;
+}
+function locateYS(R,y){
+  const find=(o,v)=>{const k=Object.keys(o).find(p=>p!=='5'&&o[p]&&o[p].split('·')[0]===v);return k?+k:null;};
+  if(y.door)return find(R.hmp,y.door);
+  if(y.god)return find(R.gp,y.god);
+  if(y.star)return y.star==='禽星'?stemHeavenPal(R,R.ep[5]):find(R.hp,y.star);
+  if(y.stem)return stemHeavenPal(R,y.stem);
+  if(y.horse)return HORSE[R.hzhi];
+  return null;
+}
+
+// 單宮評分：門、星、神、格局、擊刑、入墓、門迫、旬空
+function evalPalace(R,p){
+  const it=[];let sc=0;
+  const add=(label,v,kind)=>{it.push({label,v,kind:kind||(v>0?'ji':v<0?'xiong':'ping')});sc+=v;};
+  const door=R.hmp[p],star=(R.hp[p]||'').split('·')[0],god=R.gp[p],hs=(R.hs[p]||'')[0],es=R.ep[p];
+  if(door in DOOR_SC)add(door,DOOR_SC[door]);
+  if(star in STAR_SC)add(star,STAR_SC[star]);
+  if(god in GOD_SC)add(god,GOD_SC[god]);
+  const ge=GE_COMBO[hs+es];if(ge)add(ge[0],ge[1]);
+  if(SAN_QI.has(hs)&&['開門','休門','生門'].includes(door))add('奇門相合',1);
+  if(XING_PAL[hs]===p)add(hs+'擊刑',-1.5);
+  if(MU_PAL[hs]===p)add(hs+'奇入墓',-1);
+  if(DOOR_WX[door]&&WX_KE[DOOR_WX[door]]===PAL_WX[p])add('門迫',-1);
+  if(R.kongPals.has(p))add('旬空',-2);
+  if(HORSE[R.hzhi]===p)add('驛馬',0,'info');
+  return{p,score:sc,items:it,door,star:R.hp[p],god,hs:R.hs[p],es};
+}
+
+function palRelation(a,b){        // a 宮對 b 宮（五行）
+  const x=PAL_WX[a],y=PAL_WX[b];
+  if(a===b)return'同宮';if(WX_SHENG[x]===y)return'生';if(WX_KE[x]===y)return'剋';
+  if(WX_SHENG[y]===x)return'被生';if(WX_KE[y]===x)return'被剋';return'比和';
+}
+
+function analyze(R,cat){
+  const C=QCATS[cat]||QCATS.綜合;
+  const dStem=stemOfGan(R,R.dayGZ.gan,true),hStem=stemOfGan(R,R.hgan,false);
+  const dPal=stemHeavenPal(R,dStem),hPal=stemHeavenPal(R,hStem);
+  const list=[];
+  const self={n:'求測人（日干'+R.dayGZ.gan+'）',p:dPal,w:cat==='綜合'?1:.4};
+  const thing={n:'所問之事（時干'+R.hgan+'）',p:hPal,w:cat==='綜合'?1:.4};
+  C.ys.forEach(y=>list.push({n:y.n,p:locateYS(R,y),w:y.w??1,key:y.door||y.god||y.star||y.stem||'驛馬'}));
+  if(cat==='綜合')list.push({n:'值符（大局）',p:R.zfp,w:.6,key:'值符'});
+  [self,thing,...list].forEach(o=>{if(o.p)o.ev=evalPalace(R,o.p);});
+  const all=[self,thing,...list].filter(o=>o.ev);
+  let num=0,den=0;
+  all.forEach(o=>{num+=o.w*o.ev.score;den+=Math.abs(o.w);});
+  let score=den?num/den:0;
+  const flags=[];
+  // 用神（主）與求測人宮位的生剋
+  const main=list.find(o=>o.ev&&o.w>0)||thing;
+  let rel=null;
+  if(main?.p&&dPal){
+    rel=palRelation(main.p,dPal);
+    const RV={同宮:.8,生:.8,被剋:.4,比和:.2,被生:-.2,剋:-.6};
+    const txt={同宮:'用神與求測人同宮，事與人相合',生:'用神宮生求測人宮，事來助我',被剋:'求測人宮剋用神宮，我能掌控',
+      比和:'用神與求測人比和，平順',被生:'求測人宮生用神宮，需付出較多',剋:'用神宮剋求測人宮，事來壓我'}[rel];
+    flags.push({label:txt,v:RV[rel]});score+=RV[rel];
+  }
+  if(R.fuyin){flags.push({label:'伏吟：事情遲滯，宜守不宜動',v:-.5});score-=.5;}
+  if(R.fanyin){flags.push({label:'反吟：反覆變動，宜快不宜久',v:-.5});score-=.5;}
+  const dg=R.dayGZ.gan,hg=R.hgan,ti=TIAN_GAN.indexOf.bind(TIAN_GAN);
+  if(WX_KE[STEM_WX[hg]]===STEM_WX[dg]&&ti(hg)%2===ti(dg)%2){flags.push({label:'五不遇時：時干剋日干，諸事不宜',v:-1});score-=1;}
+  const verdict=score>=1.5?'吉':score>=.4?'小吉':score>-.4?'平':score>-1.5?'小凶':'凶';
+  return{cat,score:Math.round(score*10)/10,verdict,self,thing,list,flags,
+    mainPal:main?.p||null,mainName:main?.n||''};
+}
+
+// 擇時：從起盤時辰起往後掃描 n 個時辰
+function scanTimes(y,m,d,shi,cat,n=12){
+  const out=[];const base=new Date(y,m-1,d);
+  for(let k=0;k<n;k++){
+    let s=shi+k,dd=new Date(base);
+    dd.setDate(dd.getDate()+Math.floor(s/12));s%=12;
+    const Y=dd.getFullYear(),M=dd.getMonth()+1,D=dd.getDate();
+    try{
+      const R=doBoard(Y,M,D,s);const A=analyze(R,cat);
+      out.push({y:Y,m:M,d:D,shi:s,label:`${M}/${D} ${SHI_N[s]}時`,score:A.score,verdict:A.verdict,
+        pal:A.mainPal,dir:A.mainPal?PDIR[A.mainPal]:'—',door:A.mainPal?R.hmp[A.mainPal]:'—',kong:A.mainPal?R.kongPals.has(A.mainPal):false});
+    }catch(e){}
+  }
+  return out;
 }
 
 // ═══════════════════════════════════════
@@ -1227,6 +1393,8 @@ function renderBoard(R){
     const cell=document.createElement('div');cell.className='cell';cell.setAttribute('data-p',p);
     if(p===R.zfp)cell.classList.add('zf');if(p===R.zsp)cell.classList.add('zs');
     if(R.kongPals.has(p))cell.classList.add('kong');
+    const ysHere=curAnalysis?[...curAnalysis.list].filter(o=>o.p===p&&o.w>0):[];
+    if(ysHere.length)cell.classList.add('ysp');
     const g=R.gp[p]||'—',s=R.hp[p]||'—',d=R.hmp[p]||'—',e=R.ep[p]||'—',h=R.hs[p]||'';
     const sc=SAN_QI.has(e)?'eq':'ey';
     cell.innerHTML=`
@@ -1238,6 +1406,7 @@ function renderBoard(R){
       ${p===R.zfp?'<span class="bc bc-zf">值符</span>':''}
       ${p===R.zsp?'<span class="bc bc-zs">值使</span>':''}
       ${R.kongPals.has(p)?'<span class="bc bc-ko">旬空</span>':''}
+      ${ysHere.length?`<span class="bc bc-ys">${ysHere.map(o=>o.n).join('・')}</span>`:''}
       <div class="cell-tap-hint">點擊解析</div>`;
     cell.addEventListener('click',()=>onCellClick(p,{g,s,d,e,h,R}));
     bd.appendChild(cell);
@@ -1249,21 +1418,21 @@ function renderCompass(R){
   selectedJiIdx=0;
   targetDeg=jiFangList[0]?.deg||0;
   document.getElementById('targetBearing').textContent=Math.round(targetDeg)+'°';
-
-  const listEl=document.getElementById('jiList');
-  listEl.innerHTML=jiFangList.slice(0,6).map((ji,i)=>`
-    <div class="ji-item${i===0?' active':''}" onclick="selectJiFang(${i})">
+  renderCompassList();
+  document.getElementById('compassCard').classList.remove('hidden');
+  document.getElementById('shareRow').classList.remove('hidden');
+  requestAnimationFrame(()=>{ resizeCanvases(); });
+}
+function renderCompassList(){
+  document.getElementById('jiList').innerHTML=jiFangList.slice(0,6).map((ji,i)=>`
+    <div class="ji-item${i===selectedJiIdx?' active':''}" onclick="selectJiFang(${i})">
       <div class="ji-dot" style="background:${ji.color};color:${ji.color}">　</div>
       <div class="ji-info">
-        <div class="ji-dir">${PDIR[ji.pal]}${ji.isKong?' ⚠️':''}</div>
+        <div class="ji-dir">${PDIR[ji.pal]}${ji.isKong?' ⚠️':''}${curAnalysis?.mainPal===ji.pal?' 🎯':''}</div>
         <div class="ji-door">${ji.door}${ji.isKong?' (旬空)':''}</div>
       </div>
       <div style="font-size:11px;color:var(--muted)">${ji.deg}°</div>
     </div>`).join('');
-
-  document.getElementById('compassCard').classList.remove('hidden');
-  document.getElementById('shareRow').classList.remove('hidden');
-  requestAnimationFrame(()=>{ resizeCanvases(); });
 }
 async function onCellClick(palace, {g,s,d,e,h,R}){
   if(!curBoard) return;
@@ -1297,6 +1466,80 @@ async function onCellClick(palace, {g,s,d,e,h,R}){
   setDis(false);
 }
 
+
+// ═══════════════════════════════════════
+//  用神／擇時 UI（v7）
+// ═══════════════════════════════════════
+let curAnalysis=null,curTimes=[];
+const VD_CLS={吉:'vd-ji',小吉:'vd-ji2',平:'vd-ping',小凶:'vd-xi2',凶:'vd-xi'};
+
+function renderCats(){
+  document.getElementById('catRow').innerHTML=Object.entries(QCATS).map(([k,c])=>
+    `<button class="qtag cat${k===QCAT?' on':''}" onclick="pickCat('${k}')">${c.icon} ${k}</button>`).join('');
+}
+function pickCat(k){
+  const ta=document.getElementById('userQ');
+  const prevQ=QCATS[QCAT]?.q;
+  QCAT=k;renderCats();
+  if(!ta.value.trim()||ta.value.trim()===prevQ)ta.value=QCATS[k].q;
+}
+
+function ysRow(o){
+  if(!o.p)return`<div class="ys-row"><div class="ys-name">${o.n}</div><div class="ys-body ys-miss">盤中未見</div></div>`;
+  const e=o.ev;
+  const chips=e.items.map(i=>`<span class="yc yc-${i.kind}">${i.label}${i.v?`<i>${i.v>0?'+':''}${i.v}</i>`:''}</span>`).join('');
+  const neg=o.w<0;
+  return`<div class="ys-row" onclick="document.querySelector('.cell[data-p=&quot;${o.p}&quot;]')?.click()">
+    <div class="ys-name">${o.n}${neg?'<span class="ys-neg">越旺越不利</span>':''}</div>
+    <div class="ys-body"><b>${PDIR[o.p]}</b>・${e.god}・${e.star}・${e.door}・${e.hs||''}/${e.es}
+      <span class="ys-sc ${e.score>0?'pos':e.score<0?'neg':''}">${e.score>0?'+':''}${e.score}</span></div>
+    <div class="ys-chips">${chips}</div></div>`;
+}
+function renderYS(A){
+  const c=document.getElementById('cardYS');c.classList.remove('hidden');
+  document.getElementById('ysBody').innerHTML=`
+    <div class="ys-head"><span class="vd ${VD_CLS[A.verdict]}">${A.verdict}</span>
+      <span class="ys-total">${QCATS[A.cat].icon} ${A.cat}・綜合分 ${A.score>0?'+':''}${A.score}</span></div>
+    ${[...A.list,A.self,A.thing].map(ysRow).join('')}
+    ${A.flags.length?`<div class="ys-flags">${A.flags.map(f=>`<div class="yf ${f.v>0?'pos':f.v<0?'neg':''}">${f.v>0?'▲':f.v<0?'▼':'●'} ${f.label}</div>`).join('')}</div>`:''}
+    <div class="ys-note">評分依門、星、神、天地盤干格局、擊刑、入墓、門迫、旬空計算；點列可看該宮解析。</div>`;
+}
+function bestTimes(list){        // 用神旬空的時段不列入推薦
+  return[...list].filter(t=>!t.kong&&t.score>0).sort((a,b)=>b.score-a.score).slice(0,3);
+}
+function renderTimes(list,cur){
+  const c=document.getElementById('cardTime');c.classList.remove('hidden');
+  const top=bestTimes(list).map(t=>t.label);
+  const mx=Math.max(2,...list.map(t=>Math.abs(t.score)));
+  document.getElementById('timeBody').innerHTML=list.map((t,i)=>{
+    const w=Math.round(Math.abs(t.score)/mx*50);
+    return`<div class="tr${i===0?' now':''}${top.includes(t.label)?' best':''}" onclick="pickTime(${i})">
+      <span class="tl">${t.label}${i===0?'<em>本盤</em>':''}</span>
+      <span class="tbar"><span class="${t.score>=0?'tp':'tn'}" style="width:${w}%;${t.score>=0?'left':'right'}:50%"></span></span>
+      <span class="vd sm ${VD_CLS[t.verdict]}">${t.verdict}</span>
+      <span class="td">${t.dir.slice(1)||t.dir}${t.kong?'⚠':''}</span></div>`;}).join('')+
+    `<div class="ys-note">★ 為最佳三個時段；方位為該時段用神所在方向。點選即以該時辰重新起盤。</div>`;
+}
+function pickTime(i){
+  const t=curTimes[i];if(!t||i===0)return;
+  document.getElementById('inYear').value=t.y;
+  document.getElementById('inMonth').value=t.m;updDays();
+  document.getElementById('inDay').value=t.d;
+  document.getElementById('inHour').value=t.shi;
+  window.scrollTo({top:0,behavior:'smooth'});
+  doLayout();
+}
+function preferYSDirection(A){
+  if(!A.mainPal)return;
+  const ev=[...A.list,A.thing].find(o=>o.p===A.mainPal)?.ev;
+  if(!ev||ev.score<=0||curBoard?.kongPals.has(A.mainPal))return;
+  const i=jiFangList.findIndex(j=>j.pal===A.mainPal);
+  if(i>0){                                   // 用神方位為正分時置頂
+    const [it]=jiFangList.splice(i,1);jiFangList.unshift(it);
+    renderCompassList();selectJiFang(0);
+  }
+}
+
 // ═══════════════════════════════════════
 //  歷史紀錄（localStorage）
 // ═══════════════════════════════════════
@@ -1312,6 +1555,7 @@ function saveHistory(R, question, guideJson){
       question,
       dun:R.dun, ju:R.ju, jieqi:R.jieqi, yuan:R.yuan,
       dayGZ:R.dayGZ.gz,
+      cat:curAnalysis?.cat, verdict:curAnalysis?.verdict, score:curAnalysis?.score,
       guide: guideJson,
     };
     hist.unshift(entry);
@@ -1480,6 +1724,8 @@ function setDis(v){document.getElementById('sbtn').disabled=v;document.getElemen
   ms.addEventListener('change',updDays);
   document.getElementById('inYear').addEventListener('change',updDays);
   document.getElementById('modelTag').textContent=MODEL;
+  renderCats();
+  document.getElementById('userQ').value=QCATS[QCAT].q;
   setNow();
 })();
 function updDays(){
@@ -1520,10 +1766,12 @@ async function doLayout(){
   setDis(true);
   try{
     const R=doBoard(y,m,d,shi);curBoard=R;chatHist=[];
-    renderInfo(R);renderBoard(R);
+    curAnalysis=analyze(R,QCAT);
+    curTimes=scanTimes(y,m,d,shi,QCAT,12);
+    renderInfo(R);renderYS(curAnalysis);renderTimes(curTimes);renderBoard(R);
     document.getElementById('cardInfo').classList.remove('hidden');
     document.getElementById('cardBoard').classList.remove('hidden');
-    renderCompass(R);
+    renderCompass(R);preferYSDirection(curAnalysis);
     document.getElementById('guideSlot').innerHTML=`
       <div class="chat-empty"><div class="ce-icon" style="animation:db .9s ease-in-out infinite">☯</div>
       <div class="ce-text">AI 正在解讀盤局…</div></div>`;
@@ -1621,6 +1869,12 @@ const SYSTEM_PROMPT=`# Role
 - 九地→打好基礎 | 九天→大膽突破
 - 三奇（丁丙乙）→特助降臨 | 旬空→該方位力量缺位
 
+# 判讀規則（最重要）
+- 盤局 JSON 內的 analysis 是程式依傳統規則算出的結論：verdict（吉凶）、用神落宮與評分、格局、生剋。
+- 你的吉凶定調必須與 analysis.verdict 一致，不得自行翻案；geju 優先採用 analysis 中出現的格局名稱，沒有就寫「普通盤」。
+- 說理要引用具體依據（例如「生門落東北但門迫」），不要空泛。
+- timing 必須引用 analysis.best_times 中的具體時段；location 以用神方位（analysis.main_direction）為主，用神旬空或為負分時改建議次佳吉方。
+
 # 負面格局轉化原則
 絕對禁止使用恐嚇性語言。死門=終結重啟；凶神=提高警覺；旬空=低調換方向。
 
@@ -1629,6 +1883,17 @@ const SYSTEM_PROMPT=`# Role
 "timing":"【時】具體建議","location":"【地】方位建議",
 "people":"【人】人際建議","object":"【物】穿搭建議","ai_quote":"戰略金句"}`;
 
+function analysisPayload(){
+  const A=curAnalysis;if(!A)return null;
+  const one=o=>o.p?{role:o.n,palace:PDIR[o.p],score:o.ev.score,
+    factors:o.ev.items.map(i=>i.label+(i.v?`(${i.v>0?'+':''}${i.v})`:'')).join('、')}:{role:o.n,palace:'盤中未見'};
+  return{category:A.cat,verdict:A.verdict,score:A.score,
+    main_direction:A.mainPal?PDIR[A.mainPal]:null,
+    yongshen:A.list.map(one),self:one(A.self),matter:one(A.thing),
+    relations_and_flags:A.flags.map(f=>f.label),
+    best_times:bestTimes(curTimes)
+      .map(t=>`${t.label}（${t.verdict}，用神在${t.dir}）`)};
+}
 function buildUserMsg(R,q){
   const jiDir=Object.entries(R.hmp)
     .filter(([,d])=>JI_DOORS.includes(d))
@@ -1641,6 +1906,7 @@ function buildUserMsg(R,q){
     xun_kong:R.kongZhi.join('、'),
     day_pillar:R.dayGZ.gz,hour_pillar:R.hgan+R.hzhi,fu_yin:R.fuyin,fan_yin:R.fanyin,
     nine_palaces:BOARD_LO.map(p=>({palace:PDIR[p],god:R.gp[p],star:R.hp[p],door:R.hmp[p],heaven:R.hs[p],earth:R.ep[p]})),
+    analysis:analysisPayload(),
     user_question:q};
   return `以下是奇門遁甲盤局（JSON），請生成行動指引卡：\n\n${JSON.stringify(payload,null,2)}`;
 }
