@@ -316,6 +316,8 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
   color:var(--gold);filter:drop-shadow(0 0 6px rgba(200,168,74,.5));
 }
 .diff-label{font-size:11px;color:var(--muted);letter-spacing:.05em;}
+.diff-hint.in-range{border-color:#3fae72;box-shadow:0 0 12px rgba(63,174,114,.35);}
+.diff-hint.in-range #diffBearing{color:#7ad8a4;}
 
 /* ── 九宮格點擊互動 ── */
 .cell{cursor:pointer;}
@@ -558,7 +560,7 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
         <div class="diff-hint" id="diffHint">
           <div class="diff-arrow" id="diffArrow">↑</div>
           <div>
-            <div class="diff-label">對準吉方還需轉</div>
+            <div class="diff-label" id="diffLabel">對準吉方還需轉</div>
             <div class="bearing-val" id="diffBearing" style="font-size:20px">—°</div>
           </div>
         </div>
@@ -893,15 +895,28 @@ function calcJiFang(R){
 //  指南針狀態
 // ═══════════════════════════════════════
 let compassActive=false;
-let deviceHeading=null;  // 感應器讀值（0=北，順時針）
+let rawHeading=null;      // 感應器原始方位（0=北，順時針）
+let deviceHeading=null;   // 平滑後方位
+let headingAcc=null;      // iOS 精度（度），-1 = 未校準
+let lastSensorTs=0;
 let targetDeg=0;
 let jiFangList=[];
 let selectedJiIdx=0;
 let rafId=null;
+let lastInRange=false;
+// 磁偏角：台灣約 -4.6°（磁北偏西）。0 = 與傳統羅盤一樣用磁北
+const DECLINATION=0;
 
-// 感應器原始值直接就是地理方位角，0=北，無需校準
+// 24 山：每山 15°，子山正北
+const SHAN24=['子','癸','丑','艮','寅','甲','卯','乙','辰','巽','巳','丙','午','丁','未','坤','申','庚','酉','辛','戌','乾','亥','壬'];
+const PAL_BY_OCT=[1,8,3,4,9,2,7,6];   // 北起順時針每 45° 一宮
+const norm360=d=>((d%360)+360)%360;
+const angDiff=(a,b)=>((a-b+540)%360)-180;       // a 相對 b 的最短角差
+const shanOf=h=>SHAN24[Math.floor(norm360(h+7.5)/15)];
+const palOf=h=>PAL_BY_OCT[Math.floor(norm360(h+22.5)/45)];
+
 function getCalibratedHeading(){
-  return deviceHeading;
+  return deviceHeading===null?null:norm360(deviceHeading+DECLINATION);
 }
 
 function setCompassStatus(state,text){
@@ -909,6 +924,22 @@ function setCompassStatus(state,text){
   const txt=document.getElementById('statusText');
   dot.className='status-dot'+(state==='active'?' active':state==='error'?' error':'');
   txt.textContent=text;
+}
+
+// 由 alpha/beta/gamma（W3C Z-X'-Y''）算方位：
+//   手機平放／微傾 → 用手機頂端所指方向；手機直立 → 改用背面鏡頭所指方向
+//   （單純 360-alpha 在手機傾斜時會偏很多）
+function headingFromEuler(alpha,beta,gamma){
+  const d=Math.PI/180,x=beta*d,y=gamma*d,z=alpha*d;
+  const cX=Math.cos(x),cY=Math.cos(y),cZ=Math.cos(z),sX=Math.sin(x),sY=Math.sin(y),sZ=Math.sin(z);
+  let E,N;
+  if(Math.abs(cX)>=0.5){E=-cX*sZ;N=cZ*cX;}                       // 裝置 Y 軸（頂端）
+  else{E=-cZ*sY-sZ*sX*cY;N=-sZ*sY+cZ*sX*cY;}                      // 裝置 -Z 軸（背面）
+  return norm360(Math.atan2(E,N)/d);
+}
+function screenAngle(){
+  const a=screen.orientation&&typeof screen.orientation.angle==='number'?screen.orientation.angle:(window.orientation||0);
+  return +a||0;
 }
 
 async function startCompass(){
@@ -920,28 +951,35 @@ async function startCompass(){
       if(perm!=='granted'){setCompassStatus('error','感應器權限被拒絕');return;}
     }catch(e){setCompassStatus('error','權限請求失敗：'+e.message);return;}
   }
-  window.addEventListener('deviceorientationabsolute',onOrientation,true);
-  window.addEventListener('deviceorientation',onOrientation,true);
+  // Android Chrome：只用絕對方位事件；一般 deviceorientation 的 alpha 是相對值，會亂跳
+  if('ondeviceorientationabsolute' in window)
+    window.addEventListener('deviceorientationabsolute',onOrientation,true);
+  else
+    window.addEventListener('deviceorientation',onOrientation,true);
   compassActive=true;
   btn.textContent='🧭 感應器追蹤中';
   btn.disabled=true;
-  setCompassStatus('active','感應器追蹤中');
+  setCompassStatus('active','等待感應器資料…');
+  const t0=Date.now();
+  setTimeout(()=>{if(lastSensorTs<t0)setCompassStatus('error','收不到方位資料（裝置不支援）');},2500);
   rafId=requestAnimationFrame(drawCompass);
 }
 
 function onOrientation(e){
-  let heading=null;
-  if(e.webkitCompassHeading!==undefined&&e.webkitCompassHeading!==null){
-    heading=e.webkitCompassHeading;
-  }else if(e.absolute&&e.alpha!==null){
-    heading=(360-e.alpha)%360;
-  }else if(e.alpha!==null){
-    heading=(360-e.alpha)%360;
-  }
-  if(heading===null) return;
-  deviceHeading=heading;
-  document.getElementById('deviceBearing').textContent=Math.round(heading)+'°';
-  updateDiffBearing();
+  let h=null;
+  if(typeof e.webkitCompassHeading==='number'&&!isNaN(e.webkitCompassHeading)){
+    h=e.webkitCompassHeading;                         // iOS：已是磁北方位
+    headingAcc=typeof e.webkitCompassAccuracy==='number'?e.webkitCompassAccuracy:null;
+  }else if((e.type==='deviceorientationabsolute'||e.absolute===true)&&e.alpha!==null){
+    h=headingFromEuler(e.alpha,e.beta||0,e.gamma||0);
+    headingAcc=null;
+  }else return;                                       // 相對方位，不可用
+  rawHeading=norm360(h+screenAngle());
+  if(deviceHeading===null)deviceHeading=rawHeading;
+  lastSensorTs=Date.now();
+  if(headingAcc!==null&&(headingAcc<0||headingAcc>25))
+    setCompassStatus('error',`精度不足（±${headingAcc<0?'?':Math.round(headingAcc)}°），請將手機畫 8 字校準`);
+  else setCompassStatus('active','感應器追蹤中'+(headingAcc!==null?`（±${Math.round(headingAcc)}°）`:''));
 }
 
 function selectJiFang(idx){
@@ -953,14 +991,6 @@ function selectJiFang(idx){
   document.querySelectorAll('.ji-item').forEach((el,i)=>{
     el.classList.toggle('active',i===idx);
   });
-}
-function updateDiffBearing(){
-  const cal=getCalibratedHeading();
-  if(cal===null) return;
-  let diff=targetDeg-cal;
-  diff=((diff+180)%360+360)%360-180;
-  document.getElementById('diffBearing').textContent=
-    (diff>=0?'+':'')+Math.round(diff)+'°';
 }
 
 // ═══════════════════════════════════════
@@ -1155,9 +1185,23 @@ function drawTaiji(ctx, R){
   ctx.beginPath();ctx.arc(0,tR/2,tR/6,0,Math.PI*2);ctx.fillStyle='rgba(20,14,32,0.95)';ctx.fill();
 }
 
+// ── 座標約定（兩個盤共用）──
+//   地理角 g（0=北、順時針）。底盤 ctx.rotate(dialRot) 之後：
+//   點位 = (sin g·r, −cos g·r)；扇形 arc 角 = (g−90)°；文字用 rotate(g)+translate(0,−r)
+const G2ARC=g=>(g-90)*Math.PI/180;
+function sectorPath(ctx,g,half,r1,r2){
+  ctx.beginPath();ctx.arc(0,0,r2,G2ARC(g-half),G2ARC(g+half));ctx.arc(0,0,r1,G2ARC(g+half),G2ARC(g-half),true);ctx.closePath();
+}
+function drawPalaceLines(ctx,R,r1){
+  for(let k=0;k<8;k++){                       // 宮界在 22.5° + 45°k
+    const a=(22.5+45*k)*Math.PI/180;
+    ctx.save();ctx.rotate(a);ctx.beginPath();ctx.moveTo(0,-r1);ctx.lineTo(0,-R*0.87);
+    ctx.strokeStyle='rgba(200,168,74,0.25)';ctx.lineWidth=0.8;ctx.stroke();ctx.restore();
+  }
+}
+
 // ════════════════════════════════════════
-//  裝置羅盤（隨裝置旋轉，北固定朝上）
-//  只顯示方位，不顯示吉凶門
+//  裝置羅盤：盤面隨手機轉，畫面正上方 = 手機朝向
 // ════════════════════════════════════════
 function drawDeviceCompass(){
   const canvas=document.getElementById('deviceCanvas');
@@ -1165,62 +1209,51 @@ function drawDeviceCompass(){
   const ctx=canvas.getContext('2d');
   const W=canvas.width,CX=W/2,R=W/2-4;
   ctx.clearRect(0,0,W,W);
-
   ctx.save();ctx.translate(CX,CX);
   drawBg(ctx,R);
 
-  // 底盤旋轉：北朝上
-  // rot = -π/2（讓Canvas 0°/右 → 0°/上）再 + calHeading（裝置補償）
   const cal=getCalibratedHeading();
-  const rot=-Math.PI/2+(cal!==null?cal*Math.PI/180:0);
+  const rot=cal!==null?-cal*Math.PI/180:0;
   ctx.save();ctx.rotate(rot);
-
-  // 五行底色扇形
   const wx=[
-    {deg:180,span:72,c:'rgba(232,80,48,0.15)'},
-    {deg:90, span:72,c:'rgba(56,184,72,0.15)'},
-    {deg:0,  span:72,c:'rgba(48,96,224,0.15)'},
-    {deg:270,span:72,c:'rgba(144,192,224,0.15)'},
-    {deg:45, span:36,c:'rgba(200,152,32,0.12)'},
-    {deg:135,span:36,c:'rgba(200,152,32,0.12)'},
-    {deg:225,span:36,c:'rgba(200,152,32,0.12)'},
-    {deg:315,span:36,c:'rgba(200,152,32,0.12)'},
+    {deg:180,span:72,c:'rgba(232,80,48,0.15)'},{deg:90,span:72,c:'rgba(56,184,72,0.15)'},
+    {deg:0,span:72,c:'rgba(48,96,224,0.15)'},{deg:270,span:72,c:'rgba(144,192,224,0.15)'},
+    {deg:45,span:18,c:'rgba(200,152,32,0.12)'},{deg:135,span:18,c:'rgba(200,152,32,0.12)'},
+    {deg:225,span:18,c:'rgba(200,152,32,0.12)'},{deg:315,span:18,c:'rgba(200,152,32,0.12)'},
   ];
-  for(const s of wx){
-    const a1=s.deg*Math.PI/180-s.span/2*Math.PI/180;
-    const a2=s.deg*Math.PI/180+s.span/2*Math.PI/180;
-    ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,R*0.86,a1,a2);ctx.closePath();
-    ctx.fillStyle=s.c;ctx.fill();
+  for(const s of wx){sectorPath(ctx,s.deg,s.span/2,0,R*0.86);ctx.fillStyle=s.c;ctx.fill();}
+  // 目標吉方扇形（整宮 45°）
+  const ji=jiFangList[selectedJiIdx];
+  if(ji){
+    sectorPath(ctx,ji.deg,22.5,R*0.20,R*0.86);
+    ctx.globalAlpha=0.35;ctx.fillStyle=ji.color;ctx.fill();
+    ctx.globalAlpha=0.9;ctx.strokeStyle=ji.color;ctx.lineWidth=2;ctx.stroke();ctx.globalAlpha=1;
   }
+  drawPalaceLines(ctx,R,R*0.20);
   drawTicks(ctx,R);
   drawRings(ctx,R);
   drawDirs(ctx,R,rot);
-  ctx.restore(); // 結束底盤旋轉
+  ctx.restore();
 
-  // 固定正北三角指標（紅色，始終指向畫面正上方）
+  // 固定指標：手機朝向（畫面正上方）
   ctx.save();
   ctx.shadowColor='#e85030';ctx.shadowBlur=12;
-  ctx.beginPath();
-  ctx.moveTo(0,-R*0.92);ctx.lineTo(-5,-R*0.80);ctx.lineTo(5,-R*0.80);ctx.closePath();
+  ctx.beginPath();ctx.moveTo(0,-R*0.97);ctx.lineTo(-R*0.06,-R*0.80);ctx.lineTo(R*0.06,-R*0.80);ctx.closePath();
   ctx.fillStyle='#e85030';ctx.fill();
   ctx.shadowBlur=0;ctx.restore();
 
   drawTaiji(ctx,R);
-
-  // 無感應器提示
-  if(!compassActive){
+  if(!compassActive||cal===null){
     ctx.font=`${R*0.09}px 'Noto Serif TC',serif`;
     ctx.fillStyle='rgba(160,152,124,0.6)';
     ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('開啟感應器',0,-R*0.02);
+    ctx.fillText(compassActive?'等待資料':'開啟感應器',0,R*0.30);
   }
-
   ctx.restore();
 }
 
 // ════════════════════════════════════════
-//  吉方羅盤（固定不動，坎北永遠在12點）
-//  顯示各宮位的門，選中吉方高亮
+//  吉方羅盤：固定坎北在上，紅線 = 目前手機朝向
 // ════════════════════════════════════════
 function drawJiCompass(){
   const canvas=document.getElementById('jiCanvas');
@@ -1228,120 +1261,92 @@ function drawJiCompass(){
   const ctx=canvas.getContext('2d');
   const W=canvas.width,CX=W/2,R=W/2-4;
   ctx.clearRect(0,0,W,W);
-
   ctx.save();ctx.translate(CX,CX);
   drawBg(ctx,R);
+  const rot=0;
 
-  // 固定底盤：坎北在12點（rot = -π/2 只做Canvas坐標修正，不旋轉）
-  const rot=-Math.PI/2;
-  ctx.save();ctx.rotate(rot);
-
-  // 吉門扇形（整個扇形區塊）
-  // arc() 的角度不受 ctx.rotate() 影響，必須手動加上 rot(-π/2) 偏移
-  // 地理角度 deg → arc 角度 = rot + deg*π/180 = -π/2 + deg*π/180 = (deg-90)*π/180
-  for(const ji of jiFangList){
-    const arcCenter = (ji.deg - 90) * Math.PI / 180;
-    const a1 = arcCenter - 18 * Math.PI / 180;
-    const a2 = arcCenter + 18 * Math.PI / 180;
-    const isSelected=(jiFangList.indexOf(ji)===selectedJiIdx);
-    ctx.beginPath();ctx.arc(0,0,R*0.86,a1,a2);ctx.arc(0,0,R*0.38,a2,a1,true);ctx.closePath();
+  jiFangList.forEach((ji,i)=>{
+    const sel=i===selectedJiIdx;
+    sectorPath(ctx,ji.deg,22.5,R*0.38,R*0.86);
     let alpha=ji.jiRank>=0?(0.22-ji.jiRank*0.04):0.08;
-    if(ji.isKong) alpha=0.06;
-    if(isSelected) alpha=Math.min(alpha*2.5,0.55);
-    ctx.globalAlpha=alpha;
-    ctx.fillStyle=ji.color;ctx.fill();
-    ctx.globalAlpha=1;
-    if(isSelected){
-      ctx.beginPath();ctx.arc(0,0,R*0.86,a1,a2);ctx.arc(0,0,R*0.38,a2,a1,true);ctx.closePath();
-      ctx.strokeStyle=ji.color;ctx.lineWidth=2;
-      ctx.globalAlpha=0.7;ctx.stroke();ctx.globalAlpha=1;
-    }
-  }
-
-  // 分隔線（每45度，同樣需要 rot 偏移）
-  for(let deg=0;deg<360;deg+=45){
-    const a=(deg-90)*Math.PI/180;
-    ctx.save();ctx.rotate(a);
-    ctx.beginPath();ctx.moveTo(0,-R*0.38);ctx.lineTo(0,-R*0.87);
-    ctx.strokeStyle='rgba(200,168,74,0.25)';ctx.lineWidth=0.8;ctx.stroke();
-    ctx.restore();
-  }
-
+    if(ji.isKong)alpha=0.06;
+    if(sel)alpha=Math.min(alpha*2.5,0.55);
+    ctx.globalAlpha=alpha;ctx.fillStyle=ji.color;ctx.fill();ctx.globalAlpha=1;
+    if(sel){ctx.strokeStyle=ji.color;ctx.lineWidth=2;ctx.globalAlpha=0.8;ctx.stroke();ctx.globalAlpha=1;}
+  });
+  drawPalaceLines(ctx,R,R*0.38);
   drawTicks(ctx,R);
   drawRings(ctx,R);
 
-  // 門名標籤（中環）
-  // ctx.rotate(a) 後 translate(0,-tr) 是相對旋轉座標的 -Y 方向，等同於 arc 角度
-  // 所以同樣要用 (deg-90)*π/180
-  for(const ji of jiFangList){
-    const a=(ji.deg-90)*Math.PI/180;
-    const tr=R*0.62;
-    ctx.save();ctx.rotate(a);ctx.translate(0,-tr);
-    ctx.rotate(-a-rot);
-    const isSelected=(jiFangList.indexOf(ji)===selectedJiIdx);
+  jiFangList.forEach((ji,i)=>{
+    const a=ji.deg*Math.PI/180,sel=i===selectedJiIdx;
+    ctx.save();ctx.rotate(a);ctx.translate(0,-R*0.62);ctx.rotate(-a-rot);
     ctx.font=`700 ${R*0.076}px 'Noto Serif TC',serif`;
     ctx.fillStyle=ji.isKong?'rgba(160,80,80,0.75)':ji.color;
-    ctx.globalAlpha=isSelected?1:0.75;
-    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.globalAlpha=sel?1:0.75;ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText(ji.door.replace('門',''),0,-R*0.035);
-    if(ji.isKong){
-      ctx.font=`${R*0.055}px serif`;ctx.fillStyle='rgba(176,48,48,0.9)';
-      ctx.fillText('空',0,R*0.065);
-    }
+    if(ji.isKong){ctx.font=`${R*0.055}px serif`;ctx.fillStyle='rgba(176,48,48,0.9)';ctx.fillText('空',0,R*0.065);}
     ctx.globalAlpha=1;ctx.restore();
-  }
-
+  });
   drawDirs(ctx,R,rot);
 
-  // 選中吉方的 ★ 光點：在底盤旋轉坐標系內畫，直接用地理角度
-  if(jiFangList.length>0){
-    const ji=jiFangList[selectedJiIdx];
-    // 底盤已 rotate(rot=-π/2)，地理角度 deg*π/180 在此坐標系中
-    // 指向 deg 方向，距圓心 R*0.62 處
-    const a = ji.deg * Math.PI / 180;  // 地理角度，底盤坐標系直接用
-    const tx = Math.sin(a) * R * 0.62; // sin=x軸（東西）
-    const ty = -Math.cos(a) * R * 0.62;// -cos=y軸（南北，向上為負）
-    ctx.save();
-    ctx.shadowColor=ji.color;ctx.shadowBlur=Math.round(R*0.1);
-    ctx.beginPath();ctx.arc(tx,ty,R*0.08,0,Math.PI*2);
-    ctx.fillStyle=ji.color;ctx.globalAlpha=0.9;ctx.fill();
-    ctx.globalAlpha=1;ctx.shadowBlur=0;
-    ctx.font=`700 ${R*0.07}px 'Noto Serif TC',serif`;
-    ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('★',tx,ty);
+  const ji=jiFangList[selectedJiIdx];
+  if(ji){
+    const a=ji.deg*Math.PI/180,tx=Math.sin(a)*R*0.50,ty=-Math.cos(a)*R*0.50;
+    ctx.save();ctx.shadowColor=ji.color;ctx.shadowBlur=Math.round(R*0.1);
+    ctx.beginPath();ctx.arc(tx,ty,R*0.075,0,Math.PI*2);
+    ctx.fillStyle=ji.color;ctx.globalAlpha=0.9;ctx.fill();ctx.globalAlpha=1;ctx.shadowBlur=0;
+    ctx.font=`700 ${R*0.07}px 'Noto Serif TC',serif`;ctx.fillStyle='#fff';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('★',tx,ty);ctx.restore();
+  }
+  // 目前朝向
+  const cal=getCalibratedHeading();
+  if(cal!==null){
+    const a=cal*Math.PI/180;
+    ctx.save();ctx.rotate(a);
+    ctx.beginPath();ctx.moveTo(0,-R*0.16);ctx.lineTo(0,-R*0.95);
+    ctx.strokeStyle='#e85030';ctx.lineWidth=2;ctx.shadowColor='#e85030';ctx.shadowBlur=8;ctx.stroke();
     ctx.restore();
   }
-
-  ctx.restore(); // 結束底盤
-
   drawTaiji(ctx,R);
   ctx.restore();
 }
 
-// ── 主循環
+// ── 主循環：低通平滑（走最短角度）
 function drawCompass(){
+  if(rawHeading!==null&&deviceHeading!==null)
+    deviceHeading=norm360(deviceHeading+angDiff(rawHeading,deviceHeading)*0.18);
   drawDeviceCompass();
   drawJiCompass();
   updateDiffArrow();
   if(compassActive) rafId=requestAnimationFrame(drawCompass);
 }
 
-// 偏差箭頭提示
+function updateDiffBearing(){updateDiffArrow();}
+
+// 偏差提示：整宮 ±22.5° 都算該方位；正中 ±5° 為「正對」
 function updateDiffArrow(){
   const cal=getCalibratedHeading();
-  if(cal===null||jiFangList.length===0){
-    document.getElementById('diffHint').style.opacity='0.4';
-    return;
-  }
-  let diff=targetDeg-cal;
-  diff=((diff+180)%360+360)%360-180;
+  const hint=document.getElementById('diffHint');
+  if(cal===null||jiFangList.length===0){hint.style.opacity='0.4';return;}
+  const p=palOf(cal);
+  document.getElementById('deviceBearing').textContent=`${Math.round(cal)}° ${shanOf(cal)}山`;
+  const diff=angDiff(targetDeg,cal);
   const arrow=document.getElementById('diffArrow');
-  // 旋轉箭頭指示需要轉的方向與角度
-  const clampedDeg=Math.max(-150,Math.min(150,diff));
-  arrow.style.transform=`rotate(${clampedDeg}deg)`;
-  document.getElementById('diffBearing').textContent=
-    (Math.abs(Math.round(diff))<3?'✓ 已對準':(diff>0?'右轉 ':'左轉 ')+Math.abs(Math.round(diff))+'°');
-  document.getElementById('diffHint').style.opacity='1';
+  arrow.style.transform=`rotate(${Math.max(-150,Math.min(150,diff))}deg)`;
+  const ad=Math.abs(Math.round(diff));
+  const inRange=Math.abs(diff)<=22.5;
+  const ji=jiFangList[selectedJiIdx];
+  let t;
+  if(ad<=5)t='✓ 正對'+PDIR[ji.pal];
+  else if(inRange)t=`✓ 已在${PDIR[ji.pal]}範圍・${diff>0?'右':'左'}轉 ${ad}° 到正中`;
+  else t=`${diff>0?'右轉':'左轉'} ${ad}°`;
+  document.getElementById('diffBearing').textContent=t;
+  document.getElementById('diffLabel').textContent=`目前面向 ${PDIR[p]}・${shanOf(cal)}山・${curBoard?.hmp?.[p]||''}`;
+  hint.style.opacity='1';
+  hint.classList.toggle('in-range',inRange);
+  if(inRange&&!lastInRange&&navigator.vibrate)navigator.vibrate(40);
+  lastInRange=inRange;
 }
 
 // ═══════════════════════════════════════
