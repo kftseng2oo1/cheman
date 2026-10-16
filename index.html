@@ -357,7 +357,7 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
 .hist-drawer{
   border-bottom:1px solid var(--border);
   background:var(--panel2);
-  max-height:320px;overflow-y:auto;
+  max-height:70vh;overflow-y:auto;
 }
 .hist-drawer::-webkit-scrollbar{width:3px;}
 .hist-drawer::-webkit-scrollbar-thumb{background:var(--border2);}
@@ -388,6 +388,39 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .hist-meta{font-size:10px;color:var(--muted);margin-bottom:2px;}
 .hist-tone{font-size:11px;color:var(--gold);font-style:italic;}
+.hb-dot{display:inline-block;min-width:16px;padding:0 4px;border-radius:8px;background:#c0503c;color:#fff;font-size:10px;line-height:16px;text-align:center;margin-left:3px;}
+.htabs,.hacts{display:flex;gap:6px;align-items:center;}
+.htab{background:transparent;border:1px solid transparent;color:var(--muted);border-radius:12px;padding:2px 9px;font-size:11px;cursor:pointer;font-family:inherit;}
+.htab.on{border-color:var(--gold);color:var(--gold);}
+.hist-io{background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:6px;padding:2px 7px;font-size:10px;cursor:pointer;font-family:inherit;}
+.crit{width:100%;margin-top:6px;background:var(--panel2);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit;outline:none;}
+.crit:focus{border-color:var(--gold);}
+.hist-item{cursor:default;}
+.hs{font-size:9px;color:var(--muted);border:1px solid var(--border2);border-radius:9px;padding:0 6px;margin-left:3px;}
+.hs-due{color:#f0c060;border-color:#8a6a20;}.hs-hit{color:#7ad8a4;border-color:#2f7a52;}
+.hs-partial{color:#d8c070;border-color:#7a6a30;}.hs-miss{color:#e89a88;border-color:#7a3a30;}
+.hist-acts{display:flex;gap:6px;margin-top:6px;}
+.hist-acts button,.fbf button{background:var(--panel2);border:1px solid var(--border2);color:var(--text2);border-radius:6px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;}
+.hist-acts .fb{border-color:var(--gold-dim);color:var(--gold);}
+.fbf{margin-top:8px;padding:8px;border:1px dashed var(--border2);border-radius:8px;display:flex;flex-direction:column;gap:7px;}
+.fbf-l{font-size:11px;color:var(--text2);}
+.fbf-row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;}
+.fbf-row label{display:flex;flex-direction:column;font-size:10px;color:var(--muted);gap:3px;}
+.fbf-row label.fbr{flex-direction:row;align-items:center;gap:4px;font-size:12px;color:var(--text);}
+.fbf input[type=date],.fbf select,.fbf #fbNote{background:var(--panel);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:5px 6px;font-size:12px;font-family:inherit;}
+.fbf .fbsave{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:600;}
+.stats{font-size:12px;color:var(--text);}
+.st-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
+.st-kpis div{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;}
+.st-kpis b{display:block;font-size:18px;color:var(--gold);}
+.st-kpis span{font-size:10px;color:var(--muted);}
+.st-h{font-size:11px;color:var(--gold);margin:10px 0 4px;}
+.st-t{width:100%;border-collapse:collapse;font-size:11px;}
+.st-t th{color:var(--muted);font-weight:400;text-align:left;padding:3px 4px;border-bottom:1px solid var(--border);}
+.st-t td{padding:4px;border-bottom:1px solid var(--border);}
+.st-t td.pos{color:#7ad8a4}.st-t td.neg{color:#e89a88}
+.sm-warn{font-size:9px;color:var(--muted);margin-left:4px;}
+.st-note{font-size:10px;color:var(--muted);line-height:1.7;margin-top:4px;}
 
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
@@ -457,6 +490,7 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
         <div class="qwrap">
           <label>問題類別 → 你的問題</label>
           <textarea id="userQ" placeholder="例如：我正在考慮換工作，這個時機合適嗎？"></textarea>
+          <input id="userCrit" class="crit" placeholder="🎯 什麼結果算應驗？（例：週五前拿到 offer）">
         </div>
         
         <div class="brow">
@@ -515,8 +549,13 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
       <!-- 歷史紀錄抽屜 -->
       <div class="hist-drawer hidden" id="histDrawer">
         <div class="hist-head">
-          <span>📜 問卦歷史紀錄</span>
-          <button class="hist-clear-btn" onclick="clearHistory()">清除全部</button>
+          <span class="htabs"><button class="htab on" data-tab="list" onclick="setHistTab('list')">📜 紀錄</button><button class="htab" data-tab="stats" onclick="setHistTab('stats')">📊 統計</button></span>
+          <span class="hacts">
+            <button class="hist-io" onclick="exportHistory()">匯出</button>
+            <button class="hist-io" onclick="document.getElementById('histImport').click()">匯入</button>
+            <input type="file" id="histImport" accept="application/json,.json" hidden onchange="importHistory(this.files[0])">
+            <button class="hist-clear-btn" onclick="clearHistory()">清除</button>
+          </span>
         </div>
         <div class="hist-panel" id="histPanel"></div>
       </div>
@@ -989,11 +1028,14 @@ function scanTimes(y,m,d,shi,cat,n=12){
 }
 
 // ── 應期：近應看時辰，遠應看日
+const isoDate=dt=>`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
 function nextDayWith(R,zhis,maxDays=30){
   const{y,m,d}=R.date;
   for(let k=1;k<=maxDays;k++){
     const z=DI_ZHI[(R.dayGZ.idx+k)%12];
-    if(zhis.includes(z)){const dt=new Date(y,m-1,d+k);return`${dt.getMonth()+1}/${dt.getDate()}（${J60[(R.dayGZ.idx+k)%60]}日）`;}
+    if(zhis.includes(z)){const dt=new Date(y,m-1,d+k);
+      const s=new String(`${dt.getMonth()+1}/${dt.getDate()}（${J60[(R.dayGZ.idx+k)%60]}日）`);
+      s.iso=isoDate(dt);return s;}
   }
   return null;
 }
@@ -1003,18 +1045,18 @@ function yingQi(R,A,times){
   const ev=[...A.list,A.thing].find(o=>o.p===p)?.ev;
   if(R.kongPals.has(p)){
     const fill=nextDayWith(R,R.kongZhi);
-    if(fill)out.push({t:`用神旬空，待填實：${fill}`,k:'空'});
+    if(fill)out.push({t:`用神旬空，待填實：${fill}`,k:'空',iso:fill.iso});
   }
   if(ev&&ev.items.some(i=>/入墓$/.test(i.label))&&MU_ZHI[p]){
     const c=nextDayWith(R,[CHONG(MU_ZHI[p])]);
-    if(c)out.push({t:`用神入墓，待沖墓（${CHONG(MU_ZHI[p])}日）：${c}`,k:'墓'});
+    if(c)out.push({t:`用神入墓，待沖墓（${CHONG(MU_ZHI[p])}日）：${c}`,k:'墓',iso:c.iso});
   }
-  if(HORSE[R.hzhi]===p)out.push({t:'用神逢驛馬，事主速動，近日即應',k:'馬'});
+  if(HORSE[R.hzhi]===p)out.push({t:'用神逢驛馬，事主速動，近日即應',k:'馬',iso:isoDate(new Date(R.date.y,R.date.m-1,R.date.d+1))});
   const hit=times.slice(1).find(t=>t.zsp===p);
-  if(hit)out.push({t:`值使門臨用神宮：${hit.label}（近應）`,k:'使'});
+  if(hit)out.push({t:`值使門臨用神宮：${hit.label}（近應）`,k:'使',iso:isoDate(new Date(hit.y,hit.m-1,hit.d))});
   const zhis=PAL_ZHI[p]||[];
   const d=nextDayWith(R,zhis);
-  if(d)out.push({t:`用神宮支（${zhis.join('、')}）：${d}`,k:'支'});
+  if(d)out.push({t:`用神宮支（${zhis.join('、')}）：${d}`,k:'支',iso:d.iso});
   if(R.fuyin)out.push({t:'星伏吟：應期偏慢，需耐心等候',k:'緩'});
   if(R.fanyin)out.push({t:'星反吟：應期快但易反覆',k:'快'});
   return out;
@@ -1656,87 +1698,212 @@ function preferYSDirection(A){
 //  歷史紀錄（localStorage）
 // ═══════════════════════════════════════
 const HIST_KEY='qimen_history';
-const HIST_MAX=30;
+const HIST_MAX=500;
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const RES_V={hit:1,partial:.5,miss:0};
+const RES_N={hit:'應驗',partial:'部分應驗',miss:'不應'};
+let histTab='list',fbOpen=null;
+
+// 因子名稱正規化：去掉旺相休囚死，方便跨盤統計
+const normFactor=l=>l.replace(/(旺|相|休|囚|死)$/,'');
 
 function saveHistory(R, question, guideJson){
   try{
-    const hist=loadHistory();
+    const A=curAnalysis||{};
+    const main=[...(A.list||[]),A.thing].find(o=>o&&o.p===A.mainPal);
+    const yq=yingQi(R,A,curTimes);
+    const firstYQ=yq.map(q=>q.iso).filter(Boolean).sort()[0];
+    const due=firstYQ||isoDate(new Date(R.date.y,R.date.m-1,R.date.d+7));
     const entry={
-      id: Date.now(),
-      ts: new Date().toISOString(),
-      question,
-      dun:R.dun, ju:R.ju, jieqi:R.jieqi, yuan:R.yuan,
-      dayGZ:R.dayGZ.gz,
-      cat:curAnalysis?.cat, verdict:curAnalysis?.verdict, score:curAnalysis?.score,
-      guide: guideJson,
+      id:Date.now(),ts:new Date().toISOString(),v:2,
+      question,criterion:document.getElementById('userCrit')?.value.trim()||'',
+      at:R.date,set:{...SET},
+      dun:R.dun,ju:R.ju,jieqi:R.jieqi,yuan:R.yuan,dayGZ:R.dayGZ.gz,
+      cat:A.cat,verdict:A.verdict,score:A.score,
+      mainName:A.mainName,mainPal:A.mainPal,
+      factors:[...new Set([...(main?.ev?.items||[]).map(i=>normFactor(i.label)),
+        ...(A.flags||[]).map(f=>f.label.split('：')[0].replace(/，.*/,''))])],
+      best:bestTimes(curTimes).map(t=>t.label),
+      yingqi:yq.map(q=>({t:q.t,iso:q.iso||null})),
+      due,guide:guideJson,outcome:null,
     };
+    const hist=loadHistory();
     hist.unshift(entry);
-    if(hist.length>HIST_MAX) hist.length=HIST_MAX;
-    localStorage.setItem(HIST_KEY, JSON.stringify(hist));
+    if(hist.length>HIST_MAX)hist.length=HIST_MAX;
+    localStorage.setItem(HIST_KEY,JSON.stringify(hist));
+    updHistBadge();
   }catch(e){console.warn('歷史儲存失敗',e);}
 }
-
 function loadHistory(){
-  try{ return JSON.parse(localStorage.getItem(HIST_KEY)||'[]'); }
-  catch(e){ return []; }
+  try{return JSON.parse(localStorage.getItem(HIST_KEY)||'[]');}catch(e){return[];}
+}
+function storeHistory(h){try{localStorage.setItem(HIST_KEY,JSON.stringify(h));}catch(e){alert('儲存失敗：'+e.message);}}
+const todayIso=()=>isoDate(new Date());
+const isPending=h=>!h.outcome&&h.v===2&&h.due&&h.due<=todayIso();
+
+function updHistBadge(){
+  const n=loadHistory().filter(isPending).length;
+  const b=document.getElementById('histBtn');
+  if(b)b.innerHTML=n?`📜 紀錄 <span class="hb-dot">${n}</span>`:'📜 紀錄';
 }
 
 function renderHistoryPanel(){
-  const hist=loadHistory();
+  document.querySelectorAll('.htab').forEach(t=>t.classList.toggle('on',t.dataset.tab===histTab));
   const panel=document.getElementById('histPanel');
-  if(!hist.length){
-    panel.innerHTML='<div class="hist-empty">尚無問卦紀錄</div>';return;
-  }
+  if(histTab==='stats'){panel.innerHTML=renderStats();return;}
+  const hist=loadHistory();
+  if(!hist.length){panel.innerHTML='<div class="hist-empty">尚無問卦紀錄</div>';return;}
   panel.innerHTML=hist.map(h=>{
     const dt=new Date(h.ts);
-    const dtStr=`${dt.getFullYear()}/${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
-    const lv=h.guide?.geju_level||'平';
-    const lvCls=/吉/.test(lv)?'gj-ji':/凶/.test(lv)?'gj-xiong':'gj-ping';
-    return `<div class="hist-item" onclick="loadHistEntry(${h.id})">
+    const dtStr=`${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+    const lv=h.verdict||h.guide?.geju_level||'平';
+    const st=h.outcome?`<span class="hs hs-${h.outcome.res}">${RES_N[h.outcome.res]}</span>`
+      :isPending(h)?'<span class="hs hs-due">⏳ 待回饋</span>'
+      :h.v===2?`<span class="hs">應期 ${h.due?.slice(5).replace('-','/')}</span>`:'';
+    return`<div class="hist-item">
       <div class="hist-item-top">
-        <span class="hist-dt">${dtStr}</span>
-        <span class="gj-tag ${lvCls}" style="font-size:9px">${lv}｜${h.guide?.geju||'—'}</span>
+        <span class="hist-dt">${dtStr}${h.cat?'・'+esc(h.cat):''}</span>
+        <span><span class="vd sm ${VD_CLS[lv]||'vd-ping'}">${esc(lv)}</span> ${st}</span>
       </div>
-      <div class="hist-q">${h.question}</div>
-      <div class="hist-meta">${h.dun}${h.ju}局・${h.jieqi}${h.yuan}・${h.dayGZ}</div>
-      <div class="hist-tone">${h.guide?.tone||''}</div>
+      <div class="hist-q">${esc(h.question)}</div>
+      ${h.criterion?`<div class="hist-meta">🎯 應驗標準：${esc(h.criterion)}</div>`:''}
+      <div class="hist-meta">${esc(h.dun)}${h.ju}局・${esc(h.jieqi)}${esc(h.yuan)}・${esc(h.dayGZ)}${h.mainName?'・用神 '+esc(h.mainName):''}</div>
+      ${h.outcome?.note?`<div class="hist-meta">📝 ${esc(h.outcome.note)}</div>`:''}
+      <div class="hist-acts">
+        <button onclick="loadHistEntry(${h.id})">查看</button>
+        ${h.v===2?`<button class="fb" onclick="openFb(${h.id})">${h.outcome?'修改結果':'填結果'}</button>`:''}
+      </div>
+      ${fbOpen===h.id?fbForm(h):''}
     </div>`;
   }).join('');
 }
 
+function fbForm(h){
+  const o=h.outcome||{};
+  return`<div class="fbf" onclick="event.stopPropagation()">
+    <div class="fbf-l">結果${h.criterion?`（標準：${esc(h.criterion)}）`:''}</div>
+    <div class="fbf-row">${['hit','partial','miss'].map(r=>
+      `<label class="fbr"><input type="radio" name="fbres" value="${r}"${o.res===r?' checked':''}>${RES_N[r]}</label>`).join('')}</div>
+    <div class="fbf-row">
+      <label>實際發生日<input type="date" id="fbDate" value="${o.date||todayIso()}"></label>
+      <label>照建議行動？<select id="fbFol">
+        <option value="na"${o.followed==='na'?' selected':''}>不適用</option>
+        <option value="yes"${o.followed==='yes'?' selected':''}>有</option>
+        <option value="no"${o.followed==='no'?' selected':''}>沒有</option></select></label>
+    </div>
+    <input id="fbNote" placeholder="備註（選填）" value="${esc(o.note||'')}">
+    <div class="fbf-row"><button class="fbsave" onclick="saveFb(${h.id})">儲存</button><button onclick="openFb(null)">取消</button></div>
+  </div>`;
+}
+function openFb(id){fbOpen=id;renderHistoryPanel();}
+function saveFb(id){
+  const r=document.querySelector('input[name=fbres]:checked');
+  if(!r){alert('請選擇結果');return;}
+  const hist=loadHistory();const h=hist.find(x=>x.id===id);if(!h)return;
+  h.outcome={res:r.value,date:document.getElementById('fbDate').value||null,
+    followed:document.getElementById('fbFol').value,note:document.getElementById('fbNote').value.trim(),ts:new Date().toISOString()};
+  storeHistory(hist);fbOpen=null;renderHistoryPanel();updHistBadge();
+}
+
+// ── 統計
+function renderStats(){
+  const all=loadHistory().filter(h=>h.v===2);
+  const done=all.filter(h=>h.outcome);
+  if(done.length<1)return`<div class="hist-empty">已記錄 ${all.length} 筆，尚無回饋結果。<br>填寫結果後這裡會出現命中率統計。</div>`;
+  const val=h=>RES_V[h.outcome.res];
+  const avg=a=>a.length?a.reduce((s,h)=>s+val(h),0)/a.length:null;
+  const pct=x=>x===null?'—':Math.round(x*100)+'%';
+  const base=avg(done);
+  const pos=done.filter(h=>/吉/.test(h.verdict)),neu=done.filter(h=>h.verdict==='平'),neg=done.filter(h=>/凶/.test(h.verdict));
+  const dirN=pos.length+neg.length;
+  const dirOk=pos.filter(h=>val(h)>=.5).length+neg.filter(h=>val(h)<.5).length;
+  const warn=n=>n<20?'<span class="sm-warn">樣本少</span>':'';
+  const row=(label,arr)=>`<tr><td>${label}</td><td>${arr.length}</td><td>${pct(avg(arr))}</td><td>${warn(arr.length)}</td></tr>`;
+  // 因子
+  const fmap={};
+  done.forEach(h=>(h.factors||[]).forEach(f=>{(fmap[f]=fmap[f]||[]).push(h);}));
+  const frows=Object.entries(fmap).filter(([,a])=>a.length>=3)
+    .map(([f,a])=>({f,n:a.length,lift:avg(a)-base,a:avg(a)})).sort((x,y)=>Math.abs(y.lift)-Math.abs(x.lift)).slice(0,15);
+  // 應期
+  const errs=done.filter(h=>h.outcome.res!=='miss'&&h.outcome.date&&h.yingqi?.some(q=>q.iso)).map(h=>{
+    const act=new Date(h.outcome.date);
+    return Math.min(...h.yingqi.filter(q=>q.iso).map(q=>Math.abs((act-new Date(q.iso))/864e5)));
+  });
+  const cats={};done.forEach(h=>{(cats[h.cat||'—']=cats[h.cat||'—']||[]).push(h);});
+  const fol=done.filter(h=>h.outcome.followed==='yes'),nofol=done.filter(h=>h.outcome.followed==='no');
+  return`<div class="stats">
+    <div class="st-kpis">
+      <div><b>${done.length}</b><span>已回饋／${all.length}</span></div>
+      <div><b>${pct(base)}</b><span>整體應驗率</span></div>
+      <div><b>${dirN?pct(dirOk/dirN):'—'}</b><span>吉凶方向命中</span></div>
+    </div>
+    <div class="st-h">判斷等級 vs 實際應驗率</div>
+    <table class="st-t"><tr><th>判斷</th><th>筆數</th><th>應驗率</th><th></th></tr>
+      ${row('判吉／小吉',pos)}${row('判平',neu)}${row('判凶／小凶',neg)}</table>
+    <div class="st-note">判吉的應驗率明顯高於整體（${pct(base)}）、判凶明顯低於整體，才代表判斷有用。</div>
+    <div class="st-h">各因子對應驗率的影響（≥3 筆）</div>
+    ${frows.length?`<table class="st-t"><tr><th>因子</th><th>筆數</th><th>應驗率</th><th>差</th></tr>${frows.map(r=>
+      `<tr><td>${esc(r.f)}</td><td>${r.n}</td><td>${pct(r.a)}</td><td class="${r.lift>0.005?'pos':r.lift<-0.005?'neg':''}">${r.lift>0?'+':''}${Math.round(r.lift*100)}%${warn(r.n)}</td></tr>`).join('')}</table>`
+      :'<div class="st-note">資料還不夠，同一因子累積 3 筆以上才列出。</div>'}
+    <div class="st-h">分類</div>
+    <table class="st-t"><tr><th>類別</th><th>筆數</th><th>應驗率</th><th></th></tr>${Object.entries(cats).map(([c,a])=>row(esc(c),a)).join('')}</table>
+    <div class="st-h">其他</div>
+    <div class="st-note">應期誤差：${errs.length?`平均 ${(errs.reduce((a,b)=>a+b,0)/errs.length).toFixed(1)} 天（${errs.length} 筆）`:'—'}<br>
+    照建議行動：${pct(avg(fol))}（${fol.length} 筆）；沒照：${pct(avg(nofol))}（${nofol.length} 筆）</div>
+    <div class="st-note">統計只供參考，程式不會自動改權重。單一因子至少 20～30 筆才值得據此調整。</div>
+  </div>`;
+}
+
+// ── 匯出／匯入
+function exportHistory(){
+  const blob=new Blob([JSON.stringify({app:'qimen',exported:new Date().toISOString(),settings:SET,history:loadHistory()},null,1)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`qimen_history_${todayIso()}.json`;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+}
+function importHistory(file){
+  if(!file)return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const data=JSON.parse(rd.result);const inc=Array.isArray(data)?data:data.history;
+      if(!Array.isArray(inc))throw new Error('格式不符');
+      const cur=loadHistory();const map=new Map(cur.map(h=>[h.id,h]));
+      let add=0,upd=0;
+      inc.forEach(h=>{if(!h||!h.id)return;
+        const ex=map.get(h.id);
+        if(!ex){map.set(h.id,h);add++;}
+        else if(h.outcome&&(!ex.outcome||(h.outcome.ts||'')>(ex.outcome.ts||''))){ex.outcome=h.outcome;upd++;}});
+      const merged=[...map.values()].sort((a,b)=>b.id-a.id).slice(0,HIST_MAX);
+      storeHistory(merged);renderHistoryPanel();updHistBadge();
+      alert(`匯入完成：新增 ${add} 筆，更新結果 ${upd} 筆`);
+    }catch(e){alert('匯入失敗：'+e.message);}
+  };
+  rd.readAsText(file);
+  document.getElementById('histImport').value='';
+}
+
 function loadHistEntry(id){
-  const hist=loadHistory();
-  const h=hist.find(x=>x.id===id);
-  if(!h||!h.guide) return;
-  // 還原指引卡（不重新排盤，只顯示儲存的結果）
-  const fakeR={dun:h.dun};
-  renderGuideCard(h.guide, fakeR);
-  // 顯示原始問題
+  const h=loadHistory().find(x=>x.id===id);
+  if(!h||!h.guide)return;
+  renderGuideCard(h.guide,{dun:h.dun});
   document.getElementById('chatArea').classList.remove('hidden');
   document.getElementById('chatArea').innerHTML='';
-  appendMsg('user', h.question);
-  appendMsg('bot', fmtMD(
-    `**${h.guide.tone}**\n\n`+
-    `⏰ ${h.guide.timing}\n🧭 ${h.guide.location}\n`+
-    `🤝 ${h.guide.people}\n✨ ${h.guide.object}\n\n`+
-    `「${h.guide.ai_quote}」`
-  ));
-  // 關閉歷史面板
+  appendMsg('user',esc(h.question)+(h.criterion?`<br><small>🎯 ${esc(h.criterion)}</small>`:''));
+  if(h.yingqi?.length)appendMsg('bot','⏱ 應期<br>'+h.yingqi.map(q=>'● '+esc(q.t)).join('<br>'));
   document.getElementById('histDrawer').classList.add('hidden');
-  // 滾動到指引卡
   document.getElementById('guideSlot').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function clearHistory(){
-  if(!confirm('確定要清除所有問卦紀錄嗎？')) return;
+  if(!confirm('確定要清除所有問卦紀錄嗎？建議先匯出備份。'))return;
   localStorage.removeItem(HIST_KEY);
-  renderHistoryPanel();
+  renderHistoryPanel();updHistBadge();
 }
-
+function setHistTab(t){histTab=t;fbOpen=null;renderHistoryPanel();}
 function toggleHist(){
   const d=document.getElementById('histDrawer');
-  const isHidden=d.classList.contains('hidden');
-  if(isHidden){renderHistoryPanel();d.classList.remove('hidden');}
+  if(d.classList.contains('hidden')){renderHistoryPanel();d.classList.remove('hidden');}
   else d.classList.add('hidden');
 }
 
@@ -1836,10 +2003,7 @@ function doLayout(){
 
 window.addEventListener('load',()=>{
   setNow();
-  // 有歷史紀錄時顯示歷史按鈕提示
-  if(loadHistory().length>0){
-    document.getElementById('histBtn').style.opacity='1';
-  }
+  updHistBadge();
 });
 window.addEventListener('resize',()=>{
   if(document.getElementById('compassCard')?.classList.contains('hidden')) return;
