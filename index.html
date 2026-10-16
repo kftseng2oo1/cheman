@@ -55,7 +55,9 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
 .cb{padding:13px 15px;}
 
 /* ── Form ── */
-.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-bottom:10px;}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(68px,1fr));gap:8px;margin-bottom:10px;}
+.wrap>*{min-width:0;}
+.cs b{font-weight:600;}
 .field label{display:block;font-size:10px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;text-transform:uppercase;}
 .field select,.field input[type=number]{width:100%;background:var(--panel2);border:1px solid var(--border2);
   color:var(--text);padding:7px 9px;border-radius:7px;font-family:'Noto Serif TC',serif;font-size:13px;
@@ -565,12 +567,14 @@ h1{font-family:'Ma Shan Zheng',serif;font-size:clamp(20px,5vw,34px);color:var(--
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.7.7/lunar.js" crossorigin="anonymous"></script>
 <script>
 // ═══════════════════════════════════════
 //  CONFIG
 // ═══════════════════════════════════════
 const WORKER_URL='https://arcar.kftseng2oo1.workers.dev';
-const MODEL='claude-opus-4-5';
+const MODEL='claude-opus-5-5';
+const MODEL_FALLBACK='claude-opus-4-5';
 
 // ═══════════════════════════════════════
 //  常數（完整保留 v4 邏輯）
@@ -582,18 +586,13 @@ const PDIR={1:'坎北',2:'坤西南',3:'震東',4:'巽東南',5:'中宮',6:'乾�
 const STEMS9=['戊','己','庚','辛','壬','癸','丁','丙','乙'];
 const SAN_QI=new Set(['丁','丙','乙']);
 const DOOR_BASE={1:'休門',2:'死門',3:'傷門',4:'杜門',9:'景門',7:'驚門',6:'開門',8:'生門'};
-const DOOR_SEQ=['休門','死門','傷門','杜門','景門','驚門','開門','生門'];
-const DOOR_PATH=[1,2,3,4,9,6,7,8];
 const STAR_BASE={1:'蓬星',2:'芮星',3:'沖星',4:'輔星',5:'禽星',6:'心星',7:'柱星',8:'任星',9:'英星'};
-const STAR8=['蓬星','芮星','沖星','輔星','心星','柱星','任星','英星'];
-const SPATH8=[1,2,3,4,6,7,8,9];
 const GODS=['值符','螣蛇','太陰','六合','白虎','玄武','九地','九天'];
 const GPATH=[1,8,3,4,9,2,7,6];
 const P9=[1,2,3,4,5,6,7,8,9];
 const BOARD_LO=[4,9,2,3,5,7,8,1,6];
 const ZTP={子:1,丑:8,寅:8,卯:3,辰:4,巳:4,午:9,未:2,申:2,酉:7,戌:6,亥:6};
 const SHI_N=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-const SHI_S=[0,0,2,2,4,4,6,6,8,8];
 
 // 宮位 → 方位角（正北=0°，順時針）
 // 奇門九宮方位：
@@ -618,32 +617,55 @@ const DOOR_COLOR={
   '死門':'#a03030','驚門':'#a03090','傷門':'#c06020','杜門':'#606090'
 };
 
-const JIEQI=[
-  {name:'小寒',m:1,d:6,yang:true,baseJu:4},{name:'大寒',m:1,d:20,yang:true,baseJu:7},
-  {name:'立春',m:2,d:4,yang:true,baseJu:8},{name:'雨水',m:2,d:19,yang:true,baseJu:5},
-  {name:'驚蟄',m:3,d:6,yang:true,baseJu:2},{name:'春分',m:3,d:21,yang:true,baseJu:3},
-  {name:'清明',m:4,d:5,yang:true,baseJu:6},{name:'穀雨',m:4,d:20,yang:true,baseJu:9},
-  {name:'立夏',m:5,d:6,yang:true,baseJu:7},{name:'小滿',m:5,d:21,yang:true,baseJu:1},
-  {name:'芒種',m:6,d:6,yang:true,baseJu:4},{name:'夏至',m:6,d:21,yang:false,baseJu:9},
-  {name:'小暑',m:7,d:7,yang:false,baseJu:6},{name:'大暑',m:7,d:23,yang:false,baseJu:3},
-  {name:'立秋',m:8,d:7,yang:false,baseJu:2},{name:'處暑',m:8,d:23,yang:false,baseJu:5},
-  {name:'白露',m:9,d:8,yang:false,baseJu:8},{name:'秋分',m:9,d:23,yang:false,baseJu:7},
-  {name:'寒露',m:10,d:8,yang:false,baseJu:4},{name:'霜降',m:10,d:23,yang:false,baseJu:1},
-  {name:'立冬',m:11,d:7,yang:false,baseJu:3},{name:'小雪',m:11,d:22,yang:false,baseJu:9},
-  {name:'大雪',m:12,d:7,yang:false,baseJu:6},{name:'冬至',m:12,d:22,yang:true,baseJu:1},
-];
+// ═══════════════════════════════════════
+//  排盤引擎 v6 — 時家轉盤奇門・拆補法
+//  干支、節氣交接時刻由 lunar-javascript 精確計算
+// ═══════════════════════════════════════
 
-// ═══════════════════════════════════════
-//  排盤邏輯（完整 v4）
-// ═══════════════════════════════════════
-function dayGZ(y,m,d){
-  const diff=Math.round((new Date(y,m-1,d)-new Date(2000,0,1))/86400000);
-  const idx=((40+diff)%60+60)%60;
-  return{gz:J60[idx],gan:TIAN_GAN[idx%10],zhi:DI_ZHI[idx%12],idx};
+// 24 節氣 → [上元, 中元, 下元] 局數
+const JU_TABLE={
+  冬至:[1,7,4],小寒:[2,8,5],大寒:[3,9,6],立春:[8,5,2],雨水:[9,6,3],驚蟄:[1,7,4],
+  春分:[3,9,6],清明:[4,1,7],穀雨:[5,2,8],立夏:[4,1,7],小滿:[5,2,8],芒種:[6,3,9],
+  夏至:[9,3,6],小暑:[8,2,5],大暑:[7,1,4],立秋:[2,5,8],處暑:[1,4,7],白露:[9,3,6],
+  秋分:[7,1,4],寒露:[6,9,3],霜降:[5,8,2],立冬:[6,9,3],小雪:[5,8,2],大雪:[4,7,1],
+};
+const YANG_JQ=new Set(['冬至','小寒','大寒','立春','雨水','驚蟄','春分','清明','穀雨','立夏','小滿','芒種']);
+const YUAN_N=['上元','中元','下元'];
+const JQ_S2T={'惊':'驚','蛰':'蟄','谷':'穀','满':'滿','种':'種','处':'處'};
+const toTrad=s=>s.replace(/[惊蛰谷满种处]/g,c=>JQ_S2T[c]);
+
+// 八宮環形（順時針）：坎→艮→震→巽→離→坤→兌→乾
+const RING=[1,8,3,4,9,2,7,6];
+const RING_STAR={1:'蓬星',8:'任星',3:'沖星',4:'輔星',9:'英星',2:'芮星',7:'柱星',6:'心星'};
+const RING_DOOR={1:'休門',8:'生門',3:'傷門',4:'杜門',9:'景門',2:'死門',7:'驚門',6:'開門'};
+const ringIdx=p=>RING.indexOf(p===5?2:p);      // 中五寄坤
+const jiGong=p=>p===5?2:p;
+const gzIdx=gz=>J60.indexOf(gz);
+
+// 時辰序（0=子…11=亥）→ 取該時辰中點的時刻
+function shiToHour(shi){return shi===0?0:shi*2;}
+
+function lunarOf(y,m,d,shi){
+  if(typeof Solar==='undefined')throw new Error('曆法模組未載入，請連網後重新整理');
+  return Solar.fromYmdHms(y,m,d,shiToHour(shi),30,0).getLunar();
 }
-function hgzIdx(dayIdx,shi){
-  const sg=SHI_S[dayIdx%10];const hg=(sg+shi)%10;const hz=shi%12;
-  for(let i=0;i<60;i++)if(i%10===hg&&i%12===hz)return i;return 0;
+
+// 拆補法定局：當下節氣（依交節時刻）＋ 符頭地支定元
+function calcJu(lunar){
+  const jieqi=toTrad(lunar.getPrevJieQi(false).getName());
+  const dIdx=gzIdx(lunar.getDayInGanZhi());
+  const fuIdx=dIdx-(dIdx%5);                     // 最近的甲日或己日 = 符頭
+  const z=fuIdx%12;
+  const yi=[0,6,3,9].includes(z)?0:[2,8,5,11].includes(z)?1:2;
+  const dun=YANG_JQ.has(jieqi)?'陽遁':'陰遁';
+  return{dun,ju:JU_TABLE[jieqi][yi],jieqi,yuan:YUAN_N[yi],fuTou:J60[fuIdx]};
+}
+
+// 地盤：戊己庚辛壬癸丁丙乙，陽順陰逆排九宮
+function epFn(ju,dun){
+  const ep={};
+  for(let i=0;i<9;i++){const idx=dun==='陽遁'?(ju-1+i)%9:((ju-1-i)%9+9)%9;ep[P9[idx]]=STEMS9[i];}
+  return ep;
 }
 function getXun(hIdx){
   const xs=Math.floor(hIdx/10)*10;
@@ -651,65 +673,53 @@ function getXun(hIdx){
   const ki=[(xs%12+10)%12,(xs%12+11)%12];
   return{xunYi:YI[xs/10],xunName:J60[xs]+'旬',kongZhi:ki.map(i=>DI_ZHI[i])};
 }
-function getJQ(m,d){
-  const cur=m*100+d;let best=null;
-  for(const jq of JIEQI){const v=jq.m*100+jq.d;if(v<=cur&&(!best||v>best.v))best={...jq,v};}
-  return best||JIEQI[JIEQI.length-1];
-}
-function calcJu(y,m,d){
-  const jq=getJQ(m,d);const dun=jq.yang?'陽遁':'陰遁';
-  const diff=Math.round((new Date(y,m-1,d)-new Date(y,jq.m-1,jq.d))/86400000);
-  const yi=Math.min(Math.floor(diff/5),2);
-  const YUAN=['上元','中元','下元'];
-  const ju=jq.yang?((jq.baseJu-1+yi)%9)+1:((jq.baseJu-1-yi+9)%9)+1;
-  return{dun,ju,jieqi:jq.name,yuan:YUAN[yi]};
-}
-function epFn(ju,dun){
-  const ep={};
-  for(let i=0;i<9;i++){const idx=dun==='陽遁'?(ju-1+i)%9:((ju-1-i)%9+9)%9;ep[P9[idx]]=STEMS9[i];}
-  return ep;
-}
-function hpFn(xp,zfs,dun){
-  const hp={};let s2=zfs==='禽星'?'芮星':zfs;
-  const si=STAR8.indexOf(s2);const pi=SPATH8.indexOf(xp===5?2:xp);
-  for(let i=0;i<8;i++){
-    const s=dun==='陽遁'?(si+i)%8:((si-i)%8+8)%8;
-    const p=dun==='陽遁'?(pi+i)%8:((pi-i)%8+8)%8;
-    hp[SPATH8[p]]=STAR8[s];
-  }hp[5]='（禽★2）';return hp;
-}
-function hmpFn(zsp,zsd,dun){
-  const hmp={};const di=DOOR_SEQ.indexOf(zsd);const pi=Math.max(DOOR_PATH.indexOf(zsp),0);
-  for(let i=0;i<8;i++){
-    const d2=dun==='陽遁'?(di+i)%8:((di-i)%8+8)%8;
-    const p2=dun==='陽遁'?(pi+i)%8:((pi-i)%8+8)%8;
-    hmp[DOOR_PATH[p2]]=DOOR_SEQ[d2];
-  }hmp[5]='（無門）';return hmp;
-}
-function gpFn(xp,dun){
-  const gp={};const si=GPATH.indexOf(xp===5?2:xp);
-  for(let i=0;i<8;i++){const p=dun==='陽遁'?(si+i)%8:((si-i)%8+8)%8;gp[GPATH[p]]=GODS[i];}
-  gp[5]='（無神）';return gp;
-}
-function zspalFn(xp,hIdx,dun){
-  const diff=hIdx%10;const ci=P9.indexOf(xp);
-  let ti=dun==='陽遁'?(ci+diff)%9:((ci-diff)%9+9)%9;
-  let p=P9[ti];if(p===5)p=dun==='陽遁'?8:2;return p;
-}
+
 function doBoard(y,m,d,shi){
-  const dgz=dayGZ(y,m,d);const hi=hgzIdx(dgz.idx,shi);
-  const hganIdx=(SHI_S[dgz.idx%10]+shi)%10;
-  const{dun,ju,jieqi,yuan}=calcJu(y,m,d);
+  const lunar=lunarOf(y,m,d,shi);
+  const dGz=lunar.getDayInGanZhi(), hGz=lunar.getTimeInGanZhi();
+  const dIdx=gzIdx(dGz), hi=gzIdx(hGz);
+  const{dun,ju,jieqi,yuan,fuTou}=calcJu(lunar);
   const ep=epFn(ju,dun);
   const{xunYi,xunName,kongZhi}=getXun(hi);
   const kongPals=new Set(kongZhi.map(z=>ZTP[z]).filter(Boolean));
-  let xp=Object.entries(ep).find(([,s])=>s===xunYi)?.[0];xp=xp?+xp:ju;
-  const zfs=STAR_BASE[xp]||'蓬星';const zsd=DOOR_BASE[xp]||'休門';
-  const zsp=zspalFn(xp,hi,dun);
-  const hp=hpFn(xp,zfs,dun);const hmp=hmpFn(zsp,zsd,dun);const gp=gpFn(xp,dun);
-  return{dun,ju,jieqi,yuan,ep,hp,hmp,gp,
-    dayGZ:dgz,hgan:TIAN_GAN[hganIdx],hzhi:DI_ZHI[shi],hi,
-    xp,xunYi,xunName,kongZhi,kongPals,zfs,zsd,zsp};
+  const stemPal=s=>+Object.entries(ep).find(([,v])=>v===s)[0];
+
+  // 值符、值使：旬首儀所在地盤宮的原星、原門
+  const xp=stemPal(xunYi);
+  const zfs=xp===5?'禽星':RING_STAR[xp];
+  const zsd=RING_DOOR[jiGong(xp)];
+
+  // 值符星 → 時干所在地盤宮（時干為甲則用旬首儀）
+  const hgan=hGz[0];
+  const zfp=jiGong(stemPal(hgan==='甲'?xunYi:hgan));
+  const starShift=ringIdx(zfp)-ringIdx(xp);
+  const hp={},hs={};
+  RING.forEach((p,i)=>{
+    const to=RING[((i+starShift)%8+8)%8];
+    hp[to]=RING_STAR[p]+(p===2?'·禽':'');
+    hs[to]=ep[p]+(p===2?ep[5]:'');               // 天盤干（芮帶中五之干）
+  });
+  hp[5]='—';hs[5]='';
+
+  // 值使門 → 從旬首宮依時辰數沿九宮數序走（陽順陰逆），落中五寄坤
+  const steps=hi%10;
+  let zsp=dun==='陽遁'?((xp-1+steps)%9)+1:(((xp-1-steps)%9+9)%9)+1;
+  zsp=jiGong(zsp);
+  const doorShift=ringIdx(zsp)-ringIdx(xp);
+  const hmp={};
+  RING.forEach((p,i)=>{hmp[RING[((i+doorShift)%8+8)%8]]=RING_DOOR[p];});
+  hmp[5]='—';
+
+  // 八神：值符神隨值符星，陽遁順時針、陰遁逆時針
+  const gp={};const g0=RING.indexOf(zfp);
+  for(let i=0;i<8;i++){const k=dun==='陽遁'?g0+i:g0-i;gp[RING[(k%8+8)%8]]=GODS[i];}
+  gp[5]='—';
+
+  return{dun,ju,jieqi,yuan,fuTou,ep,hp,hs,hmp,gp,
+    dayGZ:{gz:dGz,gan:dGz[0],zhi:dGz[1],idx:dIdx},
+    hgan,hzhi:hGz[1],hi,
+    xp,zfp,xunYi,xunName,kongZhi,kongPals,zfs,zsd,zsp,
+    fuyin:starShift%8===0,fanyin:((starShift%8)+8)%8===4};
 }
 
 // ═══════════════════════════════════════
@@ -1199,7 +1209,7 @@ function updateDiffArrow(){
 function renderInfo(R){
   const g=document.getElementById('igrid');
   const chips=[
-    ['日柱',R.dayGZ.gz],['時柱',R.hgan+SHI_N[R.hi%12]],
+    ['日柱',R.dayGZ.gz],['時柱',R.hgan+R.hzhi],
     ['節氣',R.jieqi],['元',R.yuan],
     ['陰陽',R.dun,R.dun==='陽遁'?'cv-yang':'cv-yin'],
     ['局數',R.ju+' 局'],['旬',R.xunName],['旬首儀',R.xunYi],
@@ -1215,22 +1225,21 @@ function renderBoard(R){
   const bd=document.getElementById('board');bd.innerHTML='';
   BOARD_LO.forEach(p=>{
     const cell=document.createElement('div');cell.className='cell';cell.setAttribute('data-p',p);
-    if(p===R.xp)cell.classList.add('zf');if(p===R.zsp)cell.classList.add('zs');
+    if(p===R.zfp)cell.classList.add('zf');if(p===R.zsp)cell.classList.add('zs');
     if(R.kongPals.has(p))cell.classList.add('kong');
-    const g=R.gp[p]||'—',s=R.hp[p]||'—',d=R.hmp[p]||'—',e=R.ep[p]||'—';
+    const g=R.gp[p]||'—',s=R.hp[p]||'—',d=R.hmp[p]||'—',e=R.ep[p]||'—',h=R.hs[p]||'';
     const sc=SAN_QI.has(e)?'eq':'ey';
     cell.innerHTML=`
       <span class="pn">${p}</span><span class="pd">${PDIR[p]||''}</span>
       <span class="cg">${g}</span><div class="dv"></div>
-      <span class="cs">${s==='（禽★2）'?'—':s}</span>
-      ${p===2?'<span class="cn">禽附</span>':''}
+      <span class="cs">${s}${h?` <b class="${SAN_QI.has(h[0])?'eq':'ey'}">${h}</b>`:''}</span>
       <span class="cd">${d}</span><div class="dv"></div>
       <span class="ce ${sc}">${e}</span>
-      ${p===R.xp?'<span class="bc bc-zf">值符</span>':''}
+      ${p===R.zfp?'<span class="bc bc-zf">值符</span>':''}
       ${p===R.zsp?'<span class="bc bc-zs">值使</span>':''}
       ${R.kongPals.has(p)?'<span class="bc bc-ko">旬空</span>':''}
       <div class="cell-tap-hint">點擊解析</div>`;
-    cell.addEventListener('click',()=>onCellClick(p,{g,s,d,e,R}));
+    cell.addEventListener('click',()=>onCellClick(p,{g,s,d,e,h,R}));
     bd.appendChild(cell);
   });
 }
@@ -1256,7 +1265,7 @@ function renderCompass(R){
   document.getElementById('shareRow').classList.remove('hidden');
   requestAnimationFrame(()=>{ resizeCanvases(); });
 }
-async function onCellClick(palace, {g,s,d,e,R}){
+async function onCellClick(palace, {g,s,d,e,h,R}){
   if(!curBoard) return;
   // 視覺反饋：高亮選中宮
   document.querySelectorAll('.cell').forEach(c=>c.classList.remove('cell-selected'));
@@ -1264,13 +1273,13 @@ async function onCellClick(palace, {g,s,d,e,R}){
 
   const palDir=PDIR[palace]||'';
   const marks=[];
-  if(palace===R.xp) marks.push('值符宮');
+  if(palace===R.zfp) marks.push('值符宮');
   if(palace===R.zsp) marks.push('值使宮');
   if(R.kongPals.has(palace)) marks.push('旬空');
   const markStr=marks.length?`【${marks.join('・')}】`:'';
 
   const q=`請深入解析${palDir}（${palace}宮）${markStr}的組合象義：
-神：${g} ／ 星：${s} ／ 門：${d} ／ 儀：${e}
+神：${g} ／ 星：${s} ／ 門：${d} ／ 天盤干：${h||'—'} ／ 地盤干：${e}
 針對我的問題「${document.getElementById('userQ').value.trim()}」，這個宮位有什麼具體啟示？`;
 
   setDis(true);
@@ -1484,6 +1493,7 @@ function updDays(){
 }
 function setNow(){
   const n=new Date();
+  if(n.getHours()>=23)n.setDate(n.getDate()+1);   // 23 點後為次日子時
   document.getElementById('inYear').value=n.getFullYear();
   document.getElementById('inMonth').value=n.getMonth()+1;
   updDays();
@@ -1625,11 +1635,12 @@ function buildUserMsg(R,q){
     .map(([p,d])=>`${d}/${PDIR[p]}`).join('、');
   const qiPals=Object.entries(R.ep).filter(([,s])=>SAN_QI.has(s)).map(([p,s])=>`${s}在${PDIR[p]}`);
   const payload={dun:R.dun,ju:R.ju+'局',jieqi:R.jieqi,yuan:R.yuan,
-    zhifu:{palace:PDIR[R.xp],star:R.zfs,door:DOOR_BASE[R.xp]||'—',god:R.gp[R.xp]},
+    zhifu:{palace:PDIR[R.zfp],star:R.zfs,god:R.gp[R.zfp]},
     zhishi:{palace:PDIR[R.zsp],door:R.zsd,star:R.hp[R.zsp],god:R.gp[R.zsp]},
     ji_fang:jiDir||'平均分佈',san_qi:qiPals.length?qiPals.join('、'):'無',
     xun_kong:R.kongZhi.join('、'),
-    nine_palaces:BOARD_LO.map(p=>({palace:PDIR[p],god:R.gp[p],star:R.hp[p],door:R.hmp[p],earth:R.ep[p]})),
+    day_pillar:R.dayGZ.gz,hour_pillar:R.hgan+R.hzhi,fu_yin:R.fuyin,fan_yin:R.fanyin,
+    nine_palaces:BOARD_LO.map(p=>({palace:PDIR[p],god:R.gp[p],star:R.hp[p],door:R.hmp[p],heaven:R.hs[p],earth:R.ep[p]})),
     user_question:q};
   return `以下是奇門遁甲盤局（JSON），請生成行動指引卡：\n\n${JSON.stringify(payload,null,2)}`;
 }
@@ -1639,8 +1650,16 @@ async function callAI(msg,first){
   const resp=await fetch(WORKER_URL,{method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({model:MODEL,max_tokens:1000,system:sys,messages:chatHist})});
-  if(!resp.ok)throw new Error(`API ${resp.status}`);
-  const data=await resp.json();
+  let data;
+  if(!resp.ok){
+    // 新模型未被 Worker 接受時，退回舊模型重試一次
+    if((resp.status===400||resp.status===404)&&MODEL!==MODEL_FALLBACK){
+      const r2=await fetch(WORKER_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:MODEL_FALLBACK,max_tokens:1000,system:sys,messages:chatHist})});
+      if(!r2.ok){chatHist.pop();throw new Error(`API ${r2.status}`);}
+      data=await r2.json();
+    }else{chatHist.pop();throw new Error(`API ${resp.status}`);}
+  }else data=await resp.json();
   const text=data.content?.[0]?.text||'';
   chatHist.push({role:'assistant',content:text});
   return text;
@@ -1668,105 +1687,6 @@ function fmtMD(t){
   return t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
     .replace(/`(.+?)`/g,'<em>$1</em>').replace(/\n/g,'<br>');
 }
-function showFollowup(){
-  document.getElementById('frow').classList.remove('hidden');
-  const FTOPICS=['這個格局好不好？','吉方如何利用？','要避免哪些事？','最佳行動時機？','旬空的影響？'];
-  document.getElementById('fchips').innerHTML=FTOPICS.map(t=>
-    `<button class="fc" onclick="sendFT('${t}')">${t}</button>`).join('');
-}
-async function sendFollowup(){const inp=document.getElementById('cin');const q=inp.value.trim();if(!q)return;inp.value='';await sendFT(q);}
-async function sendFT(q){
-  if(!curBoard)return;setDis(true);
-  const area=document.getElementById('chatArea');area.classList.remove('hidden');
-  appendMsg('user',q);addTyping();
-  try{const r=await callAI(q,false);rmTyping();appendMsg('bot',fmtMD(r));}
-  catch(e){rmTyping();appendMsg('bot','⚠️ '+e.message);}
-  setDis(false);area.scrollTop=area.scrollHeight;
-}
-function setDis(v){document.getElementById('sbtn').disabled=v;document.getElementById('btnGo').disabled=v;}
-
-// ═══════════════════════════════════════
-//  UI Init
-// ═══════════════════════════════════════
-(function init(){
-  const ms=document.getElementById('inMonth');
-  for(let m=1;m<=12;m++){const o=document.createElement('option');o.value=m;o.text=m+'月';ms.appendChild(o);}
-  ms.addEventListener('change',updDays);
-  document.getElementById('inYear').addEventListener('change',updDays);
-  document.getElementById('modelTag').textContent=MODEL;
-  setNow();
-})();
-function updDays(){
-  const y=+document.getElementById('inYear').value||2025;
-  const m=+document.getElementById('inMonth').value||1;
-  const days=new Date(y,m,0).getDate();
-  const ds=document.getElementById('inDay');const prev=+ds.value||1;
-  ds.innerHTML='';
-  for(let d=1;d<=days;d++){const o=document.createElement('option');o.value=d;o.text=d+'日';ds.appendChild(o);}
-  ds.value=Math.min(prev,days);
-}
-function setNow(){
-  const n=new Date();
-  document.getElementById('inYear').value=n.getFullYear();
-  document.getElementById('inMonth').value=n.getMonth()+1;
-  updDays();
-  document.getElementById('inDay').value=n.getDate();
-  const h=n.getHours();
-  document.getElementById('inHour').value=h<1||h>=23?0:Math.floor((h+1)/2);
-}
-function setQ(q){document.getElementById('userQ').value=q;}
-
-// ═══════════════════════════════════════
-//  主程式
-// ═══════════════════════════════════════
-async function doLayout(){
-  const y=+document.getElementById('inYear').value;
-  const m=+document.getElementById('inMonth').value;
-  const d=+document.getElementById('inDay').value;
-  const shi=+document.getElementById('inHour').value;
-  const q=document.getElementById('userQ').value.trim();
-  if(!q){
-    const ta=document.getElementById('userQ');
-    ta.style.borderColor='var(--gold)';ta.focus();
-    setTimeout(()=>ta.style.borderColor='',1800);return;
-  }
-  setDis(true);
-  try{
-    const R=doBoard(y,m,d,shi);curBoard=R;chatHist=[];
-    renderInfo(R);renderBoard(R);
-    document.getElementById('cardInfo').classList.remove('hidden');
-    document.getElementById('cardBoard').classList.remove('hidden');
-    // 指南針
-    renderCompass(R);
-    // AI 指引卡
-    document.getElementById('guideSlot').innerHTML=`
-      <div class="chat-empty"><div class="ce-icon" style="animation:db .9s ease-in-out infinite">☯</div>
-      <div class="ce-text">AI 正在解讀盤局…</div></div>`;
-    document.getElementById('chatArea').classList.add('hidden');
-    document.getElementById('chatArea').innerHTML='';
-    document.getElementById('frow').classList.add('hidden');
-    const reply=await callAI(buildUserMsg(R,q),true);
-    renderGuideCard(parseJSON(reply),R);
-    showFollowup();
-  }catch(e){
-    document.getElementById('guideSlot').innerHTML=`
-      <div class="chat-empty"><div class="ce-text" style="color:var(--red)">⚠️ ${e.message}</div></div>`;
-    console.error(e);
-  }
-  setDis(false);
-}
-
-window.addEventListener('load',setNow);
-window.addEventListener('resize',()=>{
-  if(document.getElementById('compassCard')?.classList.contains('hidden')) return;
-  resizeCanvases();
-});
-// 頁面關閉時清理
-window.addEventListener('beforeunload',()=>{
-  window.removeEventListener('deviceorientationabsolute',onOrientation,true);
-  window.removeEventListener('deviceorientation',onOrientation,true);
-  if(rafId)cancelAnimationFrame(rafId);
-});
 </script>
 </body>
 </html>
